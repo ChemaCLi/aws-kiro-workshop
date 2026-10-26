@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+/* Estilos base pensados primero para pantalla de teléfono.
+   El contenedor principal ocupa el ancho de la pantalla y se centra en pantallas grandes. */
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  /* Contraste suficiente entre texto y fondo para accesibilidad básica. */
+  background-color: #f8fafc; /* slate-50 */
+  color: #0f172a; /* slate-900 */
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Foco visible para quien usa el teclado. */
+:focus-visible {
+  outline: 2px solid #1d4ed8; /* blue-700 */
+  outline-offset: 2px;
+}

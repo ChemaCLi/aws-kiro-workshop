@@ -1,0 +1,425 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Preparar el proyecto y las herramientas base": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014083
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728018936
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729369796
+      }
+    ],
+    "2.1 Crear `src/tipos.ts` con `TipoDeTarea` y la interfaz `Tarea` (id, descripcion, tipo?, horasEstimadas?, fechaLimite?, duracionRealSegundos, completada).": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014174
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729374380
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729854437
+      }
+    ],
+    "2.2 Crear `src/logica/id.ts` con una función que genere un id único usando `crypto.randomUUID` con respaldo simple si no está disponible.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014199
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729375409
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729855792
+      }
+    ],
+    "3.1 Implementar `src/datos/almacen.ts` con `ResultadoAlmacen<T>`, `ErrorAlmacen`, la interfaz `Almacen` y `crearAlmacenLocalStorage()`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014221
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729860927
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732065233
+      }
+    ],
+    "4.1 Implementar `src/logica/tiempo.ts` con `formatearMmSs(segundos)` y `segundosAMinutos(segundos)`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014241
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729862309
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732066595
+      }
+    ],
+    "5.1 Implementar `src/logica/progreso.ts` con `calcularProgreso(totalTareas, tareasCompletadas)`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014261
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729863702
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732068004
+      }
+    ],
+    "6.1 Implementar `src/logica/validacionTarea.ts` con `validarTarea(datos)` y los tipos `DatosFormularioTarea`, `TareaValida`, `ErroresFormulario`, `ResultadoValidacion`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014292
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729865647
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732069901
+      }
+    ],
+    "7.1 Implementar `src/logica/temporizador.ts` con `FasePomodoro`, `DURACIONES`, `EstadoTemporizador`, `EventoTemporizador`, `ResultadoTransicion`, `estadoInicial()` y `transicion(estado, evento)`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014317
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729867121
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732071401
+      }
+    ],
+    "8. Checkpoint - Verificar la lógica y los datos": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014336
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732087773
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732401461
+      }
+    ],
+    "9.1 Implementar `src/componentes/EstadoCargando.tsx` y `src/componentes/EstadoVacio.tsx`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014354
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732410226
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733156284
+      }
+    ],
+    "9.2 Implementar `src/componentes/MensajeError.tsx` con texto claro de qué ocurrió y, cuando aplica, un botón de acción (reintentar).": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014371
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732412135
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733153634
+      }
+    ],
+    "9.3 Implementar `src/componentes/BarraProgreso.tsx` que muestra el porcentaje de `calcularProgreso`.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014392
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732413384
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733155050
+      }
+    ],
+    "10.1 Implementar `src/componentes/FormularioTarea.tsx` con campos etiquetados (descripción, selector de tipo con los 4 valores, horas estimadas, fecha límite).": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014416
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733161192
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733540553
+      }
+    ],
+    "10.3 Implementar `src/componentes/TarjetaTarea.tsx` que muestra descripción, tipo, horas estimadas, fecha límite y la `Duracion_Real` en minutos; incluye botón para abrir el temporizador y el control \"Completado\" operable con ratón y teclado (Enter/Barra Espaciadora).": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014436
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733164059
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733542815
+      }
+    ],
+    "10.4 Implementar `src/componentes/TemporizadorPomodoro.tsx` que muestra el tiempo restante en `mm:ss`, botones iniciar/pausar y el aviso de fin de fase.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014454
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733165252
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733544111
+      }
+    ],
+    "11.1 Implementar `src/pantallas/PantallaTareas.tsx` con el estado (`estadoCarga`, `tareas`, `mensajeError`, `tareaConTemporizadorAbierto`).": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014471
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733549044
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733696036
+      }
+    ],
+    "11.2 Conectar el registro de tareas en `PantallaTareas`: agregar en memoria (con id de `logica/id.ts`) y guardar con `guardarTareas`; si falla, revertir y mostrar error.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014490
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733701224
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733765322
+      }
+    ],
+    "11.4 Conectar el completar tarea en `PantallaTareas`: marcar `completada`, quitarla de la lista visible, recalcular progreso y guardar; si falla, conservar la tarea y mostrar error.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014507
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733769356
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733832637
+      }
+    ],
+    "11.6 Conectar la acumulación de `Duracion_Real` en `PantallaTareas`: cuando el temporizador entrega `segundosParaDuracionReal`, sumar a la tarea y guardar; si falla, conservar el valor previo y mostrar error.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014525
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733836757
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733905551
+      }
+    ],
+    "11.8 Montar `PantallaTareas` en `App.tsx` y `main.tsx` para arrancar la aplicación.": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014542
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733908976
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733956156
+      }
+    ],
+    "12. Checkpoint final - Verificar la aplicación completa": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792728014562
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733960130
+      },
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792771317964
+      }
+    ],
+    "2. Definir los tipos compartidos y el generador de id": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792729855830
+      }
+    ],
+    "3. Implementar la capa de datos (Almacen sobre localStorage)": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732065270
+      }
+    ],
+    "4. Implementar la lógica de tiempo": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732066630
+      }
+    ],
+    "5. Implementar la lógica de progreso": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732068033
+      }
+    ],
+    "6. Implementar la validación de tareas": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732069931
+      }
+    ],
+    "7. Implementar la máquina de estados del temporizador pomodoro": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792732071430
+      }
+    ],
+    "9. Implementar los componentes de estado e interfaz base": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733156322
+      }
+    ],
+    "10. Implementar el formulario y las tarjetas de tarea": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733544160
+      }
+    ],
+    "11. Implementar y conectar la pantalla principal": [
+      {
+        "executionId": "472a60a6-abe3-4525-8cf4-33d682abaa04",
+        "chatSessionId": "sess_0eb6fdfd-f565-4c83-a5ee-0cd4e2f2da0b",
+        "timestamp": 1792733956198
+      }
+    ]
+  }
+}
