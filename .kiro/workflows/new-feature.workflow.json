@@ -1,0 +1,39 @@
+{
+  "name": "new-feature",
+  "description": "Describe what this workflow does.",
+  "inputs": {
+    "task": "prompt"
+  },
+  "steps": [
+    {
+      "type": "step",
+      "id": "git-conflicts-prevention",
+      "agent": "wf-coder",
+      "prompt": "Verify no pending changes without commits are in the worktree. User should start working with a clean directory. Suggest to stash changes if dirty."
+    },
+    {
+      "type": "step",
+      "id": "prepare-branch",
+      "agent": "wf-coder",
+      "prompt": "Ask the user if there is an existing WorkItem in the board for this task. If not, recommend to create one. Request the ID, then check if the branch name can be inferred from the prompt. If not, ask the user to specify what will be worked, create a feature branch feature/{workitem id}-descriptive-name"
+    },
+    {
+      "type": "step",
+      "id": "spec-check",
+      "agent": "wf-coder",
+      "prompt": "Verify the user defined a good spec large enough. If it is too large (more than one goal), suggest to divide into separated specs"
+    },
+    {
+      "type": "step",
+      "id": "development",
+      "agent": "wf-coder",
+      "prompt": "Perform the changes defined in the spec or the prompt task by task"
+    },
+    {
+      "type": "step",
+      "id": "development",
+      "agent": "wf-coder",
+      "prompt": "Perform the changes defined in the spec or the prompt task by task"
+    }
+  ]
+}
