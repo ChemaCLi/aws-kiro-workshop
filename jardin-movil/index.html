@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Jardín · tareas, foco y bosque</title>
+  <meta name="description" content="Tareas con pomodoro que hacen crecer un jardín 3D." />
+  <meta name="theme-color" content="#fbf6ea" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Jardín" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+
+  <!-- Tailwind por CDN: sin Node, sin build -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#fbf6ea',
+            paper: '#fffdf7',
+            ink: '#23312b',
+            moss: '#2f6f4e',
+            leaf: '#4f9d69',
+            line: '#eadfc6',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Tone.js por CDN: genera la música lofi de fondo. Si no carga, la app sigue igual. -->
+  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js" defer></script>
+
+  <!-- Three.js por CDN con import map; se importa de forma dinámica en src/three/ -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <style>
+    :root { --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px); }
+    * { -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+    body {
+      background: #e8dfc8;
+      color: #23312b;
+      font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+      -webkit-user-select: none; user-select: none;
+    }
+    input { -webkit-user-select: text; user-select: text; font-size: 16px; }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    [hidden] { display: none !important; }
+
+    /* Marco de teléfono: en pantallas anchas la app se ve como un móvil centrado */
+    app-shell {
+      position: relative; display: flex; flex-direction: column; box-sizing: border-box;
+      width: 100%; height: 100vh; height: 100dvh; max-width: 430px; margin: 0 auto;
+      background: #fbf6ea; overflow: hidden;
+    }
+    @media (min-width: 640px) {
+      body { display: flex; align-items: center; justify-content: center; background: radial-gradient(900px 500px at 20% 0%, #f3ead2, transparent 60%), #dcd1b3; }
+      app-shell { height: min(calc(100dvh - 32px), 880px); border-radius: 44px; border: 9px solid #1d2723; box-shadow: 0 30px 80px -20px rgba(35,49,43,.45); }
+    }
+
+    .view { position: absolute; inset: 0; display: block; }
+    .scroll { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .scroll::-webkit-scrollbar { display: none; }
+    .pad-top { padding-top: calc(var(--safe-t) + 22px); }
+
+    .press { transition: transform .12s ease, background-color .2s ease, opacity .2s ease; }
+    .press:active { transform: scale(.95); }
+    .press:disabled { opacity: .4; pointer-events: none; }
+
+    .view-in { animation: view-in .28s ease both; }
+    .pop { animation: pop-in .35s cubic-bezier(.2,.9,.3,1.2) both; }
+    @keyframes view-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes pop-in { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+    @keyframes toast-in { from { transform: translateY(-14px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+    .garden-sky { background: linear-gradient(180deg, #a9d8ef 0%, #d4ecee 38%, #f1f1dc 72%, #fbf6ea 100%); }
+
+    /* Chips de tipo */
+    .chip { border: 1.5px solid #eadfc6; background: #fffdf7; transition: background-color .15s, color .15s, border-color .15s, transform .12s; }
+    .chip:active { transform: scale(.95); }
+    .chip[data-on="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+
+    /* Switch */
+    .switch { position: relative; width: 48px; height: 28px; border-radius: 999px; background: #d9d2bd; transition: background-color .2s; flex-shrink: 0; }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+    .switch[aria-checked="true"] { background: #2f6f4e; }
+    .switch[aria-checked="true"]::after { transform: translateX(20px); }
+    .switch:disabled { opacity: .4; }
+
+    /* Fila deslizable */
+    .swipe { position: relative; border-radius: 18px; }
+    .swipe-bg { position: absolute; inset: 0; border-radius: 18px; background: #e5604f; color: #fff; display: flex; align-items: center; justify-content: flex-end; padding-right: 22px; opacity: 0; }
+    .swipe-fg { position: relative; touch-action: pan-y; }
+
+    /* Bottom sheet */
+    .sheet-root { position: absolute; inset: 0; z-index: 50; display: flex; align-items: flex-end; }
+    .sheet-backdrop { position: absolute; inset: 0; background: rgba(20,30,25,.45); animation: fade .2s ease both; transition: opacity .2s; }
+    .sheet { position: relative; width: 100%; max-height: 88%; overflow-y: auto; background: #fffdf7; border-radius: 28px 28px 0 0; padding: 0 20px calc(22px + var(--safe-b)); animation: sheet-up .3s cubic-bezier(.2,.9,.3,1) both; box-shadow: 0 -10px 40px rgba(0,0,0,.15); }
+    .sheet-handle { display: flex; justify-content: center; padding: 10px 0 12px; touch-action: none; cursor: grab; }
+    .sheet-handle span { width: 40px; height: 5px; border-radius: 99px; background: #d9d2bd; }
+
+    #toasts { position: absolute; z-index: 60; left: 12px; right: 12px; top: calc(var(--safe-t) + 12px); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #23312b; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: toast-in .25s ease both; }
+  </style>
+</head>
+<body>
+  <app-shell></app-shell>
+  <noscript>Esta app necesita JavaScript.</noscript>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

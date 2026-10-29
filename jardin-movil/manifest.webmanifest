@@ -1,0 +1,12 @@
+{
+  "name": "Jardín de Tareas",
+  "short_name": "Jardín",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf6ea",
+  "theme_color": "#fbf6ea",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
