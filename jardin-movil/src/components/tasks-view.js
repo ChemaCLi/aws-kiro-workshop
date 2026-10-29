@@ -51,7 +51,7 @@ class TasksView extends StoreView {
       </div>` : '';
 
     this.innerHTML = `
-      <div class="scroll absolute inset-0 pb-32">
+      <div class="scroll page absolute inset-0 pb-32">
         <header class="pad-top px-5">
           <p class="text-sm font-semibold text-moss/70">${today}</p>
           <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Mis tareas</h1>
@@ -76,7 +76,7 @@ class TasksView extends StoreView {
         ${pending.length ? '<p class="mt-6 text-center text-xs text-ink/40">Desliza a la izquierda para eliminar</p>' : ''}
       </div>
       <button data-act="add" aria-label="Nueva tarea"
-        class="press absolute bottom-5 right-5 grid h-14 w-14 place-items-center rounded-full bg-moss text-white shadow-lg shadow-moss/30">
+        class="fab press grid h-14 w-14 place-items-center rounded-full bg-moss text-white shadow-lg shadow-moss/30">
         ${icon('plus', 'h-7 w-7')}
       </button>`;
 

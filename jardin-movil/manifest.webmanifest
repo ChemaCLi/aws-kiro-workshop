@@ -1,6 +1,6 @@
 {
-  "name": "Jardín de Tareas",
-  "short_name": "Jardín",
+  "name": "Focus Garden",
+  "short_name": "Focus Garden",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",

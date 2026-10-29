@@ -1,16 +1,13 @@
-# Jardín de Tareas (móvil)
+# Focus Garden
 
-Tareas + pomodoro + jardín 3D + estadísticas. Web Components nativos, Tailwind y Three.js por CDN. Sin Node, sin build.
+Tareas + pomodoro + jardín 3D + estadísticas. Responsive y mobile first: barra inferior en móvil, riel lateral desde 768 px. Web Components nativos, Tailwind y Three.js por CDN. Sin Node, sin build.
 
 ## Cómo correrlo
 
-Los módulos ES necesitan HTTP (no funciona con `file://`). Desde esta carpeta:
-
-```bash
-python3 -m http.server 4322
-```
-
-Abre `http://localhost:4322`. Para probar en tu teléfono, usa la IP de tu Mac (`http://192.168.x.x:4322`) en la misma red wifi.
+### Localmente
+Localmente abre el archivo index.html en tu navegador web como Chrome, Edge, Firefox, Brave u Opera.
+### Con servidor
+Puedes crear un servidor con ExpressJS o con Python para servir esta página html como un servicio.
 
 ## Estructura
 

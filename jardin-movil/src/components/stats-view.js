@@ -97,7 +97,7 @@ class StatsView extends StoreView {
     }).join('');
 
     this.innerHTML = `
-      <div class="scroll absolute inset-0 pb-8">
+      <div class="scroll page absolute inset-0 pb-8">
         <header class="pad-top px-5">
           <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Estadísticas</h1>
           <p class="text-sm font-medium text-ink/60">Cómo repartes tu energía.</p>

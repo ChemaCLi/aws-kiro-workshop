@@ -11,7 +11,7 @@ const TABS = [
   { id: 'garden', label: 'Jardín', icon: 'leaf' },
   { id: 'stats', label: 'Stats', icon: 'chart' },
 ];
-const TITLE = 'Jardín · tareas, foco y bosque';
+const TITLE = 'Focus Garden';
 
 class AppShell extends HTMLElement {
   #tab = 'tasks';
@@ -20,20 +20,20 @@ class AppShell extends HTMLElement {
   connectedCallback() {
     const buttons = TABS.map((t) => `
       <button data-tab="${t.id}" aria-label="${t.label}"
-        class="press relative flex flex-1 flex-col items-center gap-0.5 py-1 text-[11px] font-bold text-ink/50">
+        class="press relative flex flex-col items-center gap-0.5 py-1 text-[11px] font-bold text-ink/50">
         <span data-pill class="grid h-8 w-16 place-items-center rounded-full transition-colors">${icon(t.icon, 'h-[22px] w-[22px]')}</span>
         <span>${t.label}</span>
         ${t.id === 'focus' ? '<i data-dot class="absolute right-[22%] top-0.5 hidden h-2.5 w-2.5 animate-pulse rounded-full bg-leaf"></i>' : ''}
       </button>`).join('');
 
     this.innerHTML = `
-      <main class="relative min-h-0 flex-1">
+      <main>
         <tasks-view data-tab="tasks"></tasks-view>
         <focus-view data-tab="focus" hidden></focus-view>
         <garden-view data-tab="garden" hidden></garden-view>
         <stats-view data-tab="stats" hidden></stats-view>
       </main>
-      <nav class="relative z-10 flex shrink-0 border-t border-line bg-paper px-2 pt-2" style="padding-bottom: calc(8px + var(--safe-b))">${buttons}</nav>
+      <nav aria-label="Secciones">${buttons}</nav>
       <div id="toasts" aria-live="polite"></div>
       <div id="sheet-host"></div>`;
 
@@ -102,7 +102,7 @@ class AppShell extends HTMLElement {
 
   #syncTitle() {
     if (store.state.timer.status === 'running') {
-      document.title = `${formatClock(store.remainingMs())} · Foco`;
+      document.title = `${formatClock(store.remainingMs())} · ${TITLE}`;
     }
   }
 

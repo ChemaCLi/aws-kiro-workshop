@@ -81,7 +81,7 @@ class FocusView extends StoreView {
 
     const prevScroll = this.querySelector('.scroll')?.scrollTop ?? 0;
     this.innerHTML = `
-      <div class="scroll absolute inset-0 pb-8">
+      <div class="scroll page absolute inset-0 pb-8">
         <header class="pad-top px-5">
           <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Foco</h1>
           <p class="text-sm font-medium text-ink/60">Una tarea, una ronda a la vez.</p>

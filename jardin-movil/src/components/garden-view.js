@@ -25,14 +25,14 @@ class GardenView extends StoreView {
           <h1 class="text-[34px] font-extrabold leading-tight tracking-tight text-ink">Mi jardín</h1>
           <p data-sub class="text-sm font-semibold text-ink/60"></p>
         </header>
-        <div data-empty class="pop absolute inset-x-5 hidden rounded-3xl bg-paper/90 p-4 text-center shadow-lg backdrop-blur" style="bottom:6.2rem">
+        <div data-empty class="pop absolute inset-x-5 mx-auto hidden max-w-md rounded-3xl bg-paper/90 p-4 text-center shadow-lg backdrop-blur" style="bottom:6.2rem">
           <p class="text-3xl">🏝️</p>
           <p class="mt-1 font-extrabold">Tu isla está vacía</p>
           <p class="mt-0.5 text-sm text-ink/60">Termina una tarea con al menos una ronda 🍅 y brotará algo.</p>
           <button data-act="focus" class="press mt-3 rounded-2xl bg-moss px-5 py-2.5 font-bold text-white">Ir a Foco</button>
         </div>
-        <div data-info class="absolute inset-x-4" style="bottom:5.6rem"></div>
-        <div class="pointer-events-none absolute inset-x-4 bottom-4 flex justify-between rounded-full bg-paper/80 px-4 py-1.5 shadow backdrop-blur" aria-label="Rondas necesarias por planta">${legend}</div>
+        <div data-info class="absolute inset-x-4 mx-auto max-w-md" style="bottom:5.6rem"></div>
+        <div class="pointer-events-none absolute inset-x-4 bottom-4 mx-auto flex max-w-md justify-between rounded-full bg-paper/80 px-4 py-1.5 shadow backdrop-blur" aria-label="Rondas necesarias por planta">${legend}</div>
       </div>`;
     this.stage = this.querySelector('[data-stage]');
 
