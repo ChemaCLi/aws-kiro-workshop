@@ -226,6 +226,13 @@
     return '## Forma de trabajo\n\n' + (workflow || '- ' + DEFAULT_WORKFLOW);
   }
 
+  /** Siempre se agrega al final: las decisiones no deben vivir solo en el chat. */
+  function buildDocumentation() {
+    return '## Documentación\n\n' +
+      'Las decisiones, la arquitectura, el tech stack y los puntos pendientes se deben guardar en una carpeta `docs/` del repositorio. ' +
+      'Actualiza esos documentos al cerrar cada fase y cada vez que cambie una decisión.';
+  }
+
   function buildPrompt() {
     const intro = [
       '# Rol y método',
@@ -243,7 +250,7 @@
       '- Responde en español.'
     ].join('\n');
 
-    return [intro, buildFoundations(), buildOutput(), buildInputs(), buildProcess(), buildWorkflow()].join('\n\n');
+    return [intro, buildFoundations(), buildOutput(), buildInputs(), buildProcess(), buildWorkflow(), buildDocumentation()].join('\n\n');
   }
 
   const BLOCKS = [
