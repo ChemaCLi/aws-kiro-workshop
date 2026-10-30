@@ -10,6 +10,18 @@ Material de apoyo del workshop de **AWS User Group Orizaba**. Aquí están la pr
 | [`exercise/`](exercise/) | Ejemplo del proyecto que se desarrolla en el taller: **Focus Garden**, una lista de tareas con pomodoro y un jardín 3D |
 | [`workshop/`](workshop/) | La presentación y el material de apoyo del taller |
 
+## Versión en línea
+
+Las tres piezas del taller están publicadas en AWS (S3 + CloudFront, con HTTPS):
+
+| Pieza | Enlace |
+|-------|--------|
+| Presentación del taller | https://d1z03etewpzrzo.cloudfront.net |
+| Generador de prompts | https://drkfrxxs7pcro.cloudfront.net |
+| Focus Garden (lista de tareas con pomodoro y jardín 3D) | https://dncc4bsnnymsj.cloudfront.net |
+
+> **Nota:** la presentación en línea se retirará en 2 semanas (alrededor del 13 de noviembre de 2026), porque incluye videos que hacen más costoso el alojamiento. Después de esa fecha, el enlace dejará de funcionar. Las diapositivas seguirán disponibles en este repositorio, en `workshop/presentation/presentation.html`.
+
 ## `.kiro/`: presets para generar apps web
 
 La carpeta `.kiro` es oculta. En macOS se muestra en Finder con `Cmd + Shift + .`; en Windows, desde el Explorador en **Vista › Mostrar › Elementos ocultos**.
