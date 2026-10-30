@@ -1,0 +1,12 @@
+{
+  "name": "export-pptx",
+  "private": true,
+  "type": "module",
+  "description": "Exporta presentation.html a .pptx (imagen por diapositiva + notas del orador)",
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "pptxgenjs": "3.12.0",
+    "puppeteer-core": "24.2.0",
+    "sharp": "^0.33.5"
+  }
+}

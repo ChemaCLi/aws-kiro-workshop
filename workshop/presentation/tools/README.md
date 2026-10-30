@@ -133,3 +133,35 @@ python3 workshop/presentation/tools/insert_slide.py --check
 | `--transition NAME` | ninguna | Transición en `deck-motion` (p. ej. `fade`) |
 | `--check` | off | Valida la consistencia y termina |
 | `--dry-run` | off | No escribe el archivo |
+
+---
+
+# export-pptx/
+
+Exporta `presentation.html` a un `.pptx` con objetos nativos. Necesita Node y Google Chrome.
+
+Cada diapositiva queda así, de abajo hacia arriba:
+
+- **Fondo:** una imagen con las tarjetas, tablas, degradados y bordes, sin texto.
+- **Textos editables:** mismos tamaño, color, negritas, espaciado y saltos de línea que en el navegador.
+- **Imágenes:** logos, QR, fotos y el SVG de la diapositiva 21, con su recorte y fondo transparente.
+- **GIF reales:** los GIF originales; el WebP animado (`robot-fail.webp`) se convierte a GIF porque PowerPoint no lo soporta.
+- **Videos `.mp4`** incrustados en su posición, con el primer cuadro como portada.
+- **Notas del orador** (`data-speaker-notes`).
+
+```bash
+cd workshop/presentation/tools/export-pptx
+npm install                 # solo la primera vez
+node export.mjs             # genera ../../todos-pueden-programar-con-kiro.pptx (tarda unos minutos)
+node export.mjs ~/Desktop/kiro.pptx   # o a otra ruta
+```
+
+Antes de abrir el archivo, instala las fuentes **Inter**, **JetBrains Mono** y **Space Grotesk**
+(gratis en Google Fonts). Si faltan, PowerPoint las sustituye y el texto se verá distinto.
+
+Limitaciones:
+
+- Tarjetas y tablas son parte de la imagen de fondo: se edita su texto, no su forma.
+- Los GIF y los videos se animan en el modo presentación, no en la vista de edición.
+- El fantasma animado de la diapositiva 22 es un SVG animado y queda como imagen fija.
+- Si la ruta de Chrome es distinta, usa `CHROME_PATH=...`.
