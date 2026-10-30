@@ -1,14 +1,61 @@
 # Diseño: Lista de tareas
 
-## Archivos
+## Árbol de archivos
 
 ```
-src/core/rules.js            TASK_TYPES, TYPE_BY_ID, PLANTS, plantForRounds, roundsByTask, computeStats (parcial)
-src/core/store.js            Store, load/persist, tareas
-src/ui/base.js               StoreView
-src/ui/util.js               + announceCompletion
-src/components/tasks-view.js <tasks-view>
-src/components/add-sheet.js  openAddTask
+src/core/rules.js              (nuevo: TASK_TYPES, TYPE_BY_ID, PLANTS, plantForRounds, roundsByTask, computeStats parcial, dayStart)
+src/core/store.js              (nuevo: Store, load/persist, acciones de tareas)
+src/ui/base.js                 (modificar: completar StoreView)
+src/ui/util.js                 (modificar: + announceCompletion)
+src/components/tasks-view.js   (nuevo: <tasks-view>)
+src/components/add-sheet.js    (nuevo: openAddTask)
+src/components/app-shell.js    (modificar: registrar tasks-view, quitar placeholder)
+src/main.js                    (modificar: importar tasks-view)
+```
+
+## Diagrama de componentes
+
+Dirección de dependencias `components → ui → core`.
+
+```mermaid
+flowchart TD
+  tasks["components/tasks-view.js"] --> base["ui/base.js (StoreView)"]
+  tasks --> util["ui/util.js (esc, toast, announceCompletion)"]
+  tasks --> add["components/add-sheet.js (openAddTask)"]
+  add --> sheet["ui/sheet.js (openSheet)"]
+  base --> store["core/store.js (Store)"]
+  tasks --> store
+  store --> rules["core/rules.js (TASK_TYPES, PLANTS, plantForRounds)"]
+  shell["components/app-shell.js"] --> tasks
+```
+
+## Flujo: agregar una tarea
+
+```mermaid
+sequenceDiagram
+  participant V as tasks-view
+  participant A as add-sheet
+  participant S as Store
+  participant D as document
+  V->>A: openAddTask() (toca el FAB +)
+  A->>A: form con chips de tipo (recuerda lastType)
+  A->>S: addTask({ title, type })
+  S->>S: trim + límite 80, uid(), #commit()
+  S-->>V: emite change -> update(state) repinta
+  A->>D: toast('Tarea agregada ✨') + haptic()
+```
+
+## Flujo: completar y deslizar para eliminar
+
+```mermaid
+flowchart TD
+  A["Toca el círculo de una fila"] --> B["store.completeTask(id)"]
+  B --> C{"¿tiene rondas?"}
+  C -- no --> D["announceCompletion: 'no brota nada'"]
+  C -- sí --> E["announceCompletion: planta + botón Ver"]
+  F["Desliza la fila > 90 px a la izquierda"] --> G["store.removeTask(id) devuelve snapshot"]
+  G --> H["toast con Deshacer (~4 s)"]
+  H -- Deshacer --> I["store.restore(snapshot)"]
 ```
 
 ## Modelo de datos

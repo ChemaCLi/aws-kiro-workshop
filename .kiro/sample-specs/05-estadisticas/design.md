@@ -1,11 +1,59 @@
 # Diseño: Estadísticas
 
-## Archivos
+## Árbol de archivos
 
 ```
-src/core/rules.js            + lastDays, computeStats completo
-src/core/store.js            + seedDemo, reset
-src/components/stats-view.js <stats-view>
+src/core/rules.js              (modificar: + lastDays, computeStats completo)
+src/core/store.js              (modificar: + seedDemo, reset)
+src/components/stats-view.js   (nuevo: <stats-view>)
+src/components/app-shell.js    (modificar: registrar pestaña Stats)
+src/main.js                    (modificar: importar stats-view)
+```
+
+## Diagrama de componentes
+
+Dirección de dependencias `components → ui → core`. Las gráficas son SVG propio, sin librerías.
+
+```mermaid
+flowchart TD
+  stats["components/stats-view.js"] --> base["ui/base.js (StoreView)"]
+  stats --> util["ui/util.js (esc)"]
+  stats --> sheet["ui/sheet.js (confirmSheet)"]
+  stats --> store["core/store.js (seedDemo, reset)"]
+  store --> rules["core/rules.js (computeStats, lastDays, dayStart)"]
+  stats --> rules
+  shell["components/app-shell.js"] --> stats
+```
+
+## Flujo: render de estadísticas (derivadas)
+
+```mermaid
+flowchart TD
+  A["update(state)"] --> B["computeStats(state, now)"]
+  B --> C["kpi(): 4 KPIs"]
+  B --> D["donut(byType, total)"]
+  B --> E["weekChart(days)"]
+  C --> F["pinta SVG/HTML con esc()"]
+  D --> F
+  E --> F
+```
+
+## Flujo: datos de ejemplo y borrado
+
+```mermaid
+sequenceDiagram
+  participant V as stats-view
+  participant C as confirmSheet
+  participant S as Store
+  V->>C: seed (si ya hay tareas, confirma)
+  C-->>V: true
+  V->>S: seedDemo()
+  S->>S: 14 terminadas + 2 pendientes, conserva settings
+  S-->>V: change -> repinta
+  V->>C: reset (confirmación roja)
+  C-->>V: true
+  V->>S: reset() -> freshState(settings)
+  S-->>V: change -> toast 'Todo limpio 🌱'
 ```
 
 ## `rules.js`

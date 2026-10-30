@@ -1,15 +1,66 @@
 # Diseño: Pomodoro
 
-## Archivos
+## Árbol de archivos
 
 ```
-src/core/rules.js            + DURATIONS, DEFAULT_MINUTES, durationLabel
-src/core/store.js            + timer, settings, rounds, acciones del pomodoro
-src/core/ticker.js           startTicker(store)
-src/core/ticker.worker.js    pulso
-src/components/focus-view.js <focus-view>
-src/components/tasks-view.js botón ▶ (acción 'focus')
-src/main.js                  startTicker(store)
+src/core/rules.js              (modificar: + DURATIONS, DEFAULT_MINUTES, durationLabel)
+src/core/store.js              (modificar: + timer, settings, rounds, acciones del pomodoro)
+src/core/ticker.js             (nuevo: startTicker(store))
+src/core/ticker.worker.js      (nuevo: pulso)
+src/components/focus-view.js   (nuevo: <focus-view>)
+src/components/tasks-view.js   (modificar: botón ▶, acción 'focus')
+src/components/app-shell.js    (modificar: registrar pestaña Foco, toast de ronda)
+src/main.js                    (modificar: startTicker(store))
+```
+
+## Diagrama de componentes
+
+Dirección de dependencias `components → ui → core`. El worker vive dentro de `core` y se comunica por mensajes.
+
+```mermaid
+flowchart TD
+  focus["components/focus-view.js"] --> base["ui/base.js (StoreView)"]
+  focus --> store["core/store.js (timer, rounds, acciones)"]
+  store --> rules["core/rules.js (DURATIONS, plantForRounds)"]
+  main["main.js"] --> ticker["core/ticker.js (startTicker)"]
+  ticker --> store
+  ticker <--> worker["core/ticker.worker.js (pulso 250 ms)"]
+  shell["components/app-shell.js"] --> focus
+```
+
+## Flujo: el pulso del pomodoro (worker + respaldo)
+
+```mermaid
+sequenceDiagram
+  participant V as focus-view
+  participant S as Store
+  participant T as ticker.js
+  participant W as ticker.worker
+  V->>S: start()
+  S->>S: calcula endsAt, status = running
+  S-->>T: emite change -> sync()
+  T->>W: { cmd: 'start' }
+  loop cada 250 ms
+    W-->>T: tick
+    T->>S: tick(now)
+    S->>S: si now >= endsAt -> #finishRound()
+  end
+  Note over T: guardia cada 2 s: si el worker calla, respaldo con setInterval
+  V->>V: #paint() cada 250 ms (reloj + anillo)
+```
+
+## Flujo: estados del timer
+
+```mermaid
+flowchart LR
+  idle -- start() --> running
+  running -- pause() --> paused
+  paused -- start() --> running
+  running -- "tick: now >= endsAt" --> done
+  running -- cancel() --> idle
+  paused -- cancel() --> idle
+  done -- again --> running
+  done -- complete --> idle
 ```
 
 ## Modelo

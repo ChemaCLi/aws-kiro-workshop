@@ -105,3 +105,31 @@ Comprimir un video nuevo que acabas de grabar y reemplazar el original:
 Con la configuración por defecto (`scale=0.6`, `fps=24`, `crf=28`), los 4
 videos de la demo pasaron de **56.4MB a ~4.4MB (-96%)** sin pérdida visible de
 calidad (texto y UI siguen nítidos).
+
+---
+
+# insert_slide.py
+
+Inserta una diapositiva en `presentation.html` y deja todo sincronizado: el `id`
+de cada `<section class="deck-slide">`, su `aria-label` ("Slide N of TOTAL") y la
+lista `slides` del JSON `#deck-motion`. Solo usa la librería estándar de Python 3.
+
+```bash
+# Insertar después de la diapositiva 20 (el fragmento es un <section> completo)
+python3 workshop/presentation/tools/insert_slide.py --after 20 --fragment /tmp/slide.html --transition fade
+
+# Probar sin escribir
+python3 workshop/presentation/tools/insert_slide.py --after 20 --fragment /tmp/slide.html --dry-run
+
+# Solo validar que ids, labels y deck-motion cuadran
+python3 workshop/presentation/tools/insert_slide.py --check
+```
+
+| Opción | Default | Descripción |
+|---|---|---|
+| `--after N` | | Número de diapositiva después de la cual insertar |
+| `--fragment FILE` | | Archivo con el `<section>` nuevo (su id y aria-label se reescriben) |
+| `--bg COLOR` | `#15161d` | Fondo registrado en `deck-motion` |
+| `--transition NAME` | ninguna | Transición en `deck-motion` (p. ej. `fade`) |
+| `--check` | off | Valida la consistencia y termina |
+| `--dry-run` | off | No escribe el archivo |
