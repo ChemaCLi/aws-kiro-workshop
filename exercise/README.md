@@ -5,15 +5,18 @@ Tareas + pomodoro + jardín 3D + estadísticas. Responsive y mobile first: barra
 ## Cómo correrlo
 
 ### Localmente
-Localmente abre el archivo index.html en tu navegador web como Chrome, Edge, Firefox, Brave u Opera.
+Localmente abre el archivo index.html (la landing) en tu navegador web como Chrome, Edge, Firefox, Brave u Opera. Desde ahí se entra a la app (`app.html`).
 ### Con servidor
 Puedes crear un servidor con ExpressJS o con Python para servir esta página html como un servicio.
 
 ## Estructura
 
 ```
-index.html                 shell, config de Tailwind, import map de Three.js
-src/main.js                arranque
+index.html                 landing (página de presentación, sin SPA)
+app.html                   la app (SPA con pestañas por hash)
+src/landing.js             arranque de la landing
+src/main.js                arranque de la app
+src/styles/                base.css (compartido), app.css y landing.css
 src/core/rules.js          reglas puras: tipos, plantas por rondas, stats, espiral del jardín
 src/core/store.js          estado + localStorage + acciones del pomodoro
 src/core/feedback.js       sonido, vibración, pantalla encendida

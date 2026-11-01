@@ -34,6 +34,15 @@ Isla flotante low-poly con una parcela por tarea terminada que tenga al menos un
 - Rendimiento: renderiza solo si la vista es visible y la pestaña activa; `powerPreference: low-power`; pixel ratio máximo 2.
 - Respaldo: si Three.js no carga, se muestra una cuadrícula de emojis con aviso.
 
+### Nota: opciones de `createGardenScene`
+
+`createGardenScene(container, { onSelect, interactive, freezeWhenReducedMotion, fitMargin })` acepta tres opciones nuevas y devuelve `setLook` en su API. Con los valores por defecto la escena se comporta igual que antes, por lo que `<garden-view>` no cambia.
+
+- `interactive` (por defecto `true`): con `false` la escena es decorativa. Desactiva los controles de cámara, no registra `pointerdown`/`pointerup` (no hay selección) y el canvas lleva `pointer-events: none`.
+- `setLook(look)`: cambia de golpe las luces, el sol y el color de las nubes con un objeto de `GARDEN_LOOKS` (`src/three/garden-looks.js`: `morning`, `midday`, `afternoon`, `night`). La escena nace con `GARDEN_LOOKS.midday`, que replica la luz de siempre.
+- `freezeWhenReducedMotion` (por defecto `false`): con `prefers-reduced-motion` deja la escena totalmente quieta (sin flotado, nubes, alas ni pétalos en movimiento, plantas sin "pop" y reencuadre directo). Solo la activa el hero de la landing (`<hero-garden>`, junto con `interactive: false`); `<garden-view>` no la pasa y conserva su movimiento reducido actual.
+- `fitMargin` (por defecto `1`): multiplica la distancia de encuadre para dejar aire alrededor de la isla. El hero usa `1.3` porque su lienzo es más ancho que alto y, al girar, las esquinas de la isla se cortaban en los bordes; `<garden-view>` no lo pasa y se encuadra igual que siempre.
+
 ### Límites conocidos
 
 - Sin conexión no hay 3D (ver roadmap: service worker).
@@ -67,3 +76,5 @@ Precondición: cargar **datos de ejemplo** en Stats salvo que la prueba indique 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
 | 1.0.0 | 2026-10-29 | Versión inicial documentada: isla low-poly con seis tipos de planta, espiral, selección, nubes, respaldo 2D. |
+| 1.0.1 | 2026-10-31 | La escena acepta `interactive`, `freezeWhenReducedMotion` (por defecto `false`, solo la usa el hero de la landing) y expone `setLook`. Sin cambio de comportamiento en `<garden-view>`. |
+| 1.0.2 | 2026-10-31 | La escena acepta `fitMargin` (por defecto `1`) para alejar la cámara; el hero de la landing lo usa con `1.3` para que la isla no se corte al girar en un lienzo ancho. La luz de la franja `night` (`GARDEN_LOOKS`) es más clara para que la isla no se vea apagada. Sin cambio en `<garden-view>`. |
