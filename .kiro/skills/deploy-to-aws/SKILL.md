@@ -5,7 +5,7 @@ description: Publica Focus Garden en AWS como sitio estático de la forma más s
 
 # Publicar en AWS
 
-Focus Garden es un sitio **100 % estático** (sin build). Se publica copiando `index.html`, `manifest.webmanifest`, `icon.svg`, `melodies/` y `src/`. **No se suben** `.kiro/`, `docs/`, `.git/` ni `README.md`.
+Focus Garden es un sitio **100 % estático** (sin build). Se publica copiando `index.html` (la landing), `app.html` (la app), `manifest.webmanifest`, `icon.svg`, `melodies/` y `src/`. **No se suben** `.kiro/`, `docs/`, `.git/` ni `README.md`.
 
 ## Elegir ruta
 
@@ -47,7 +47,7 @@ bash ../.kiro/skills/deploy-to-aws/scripts/deploy-s3-cloudfront.sh <nombre-stack
 El script despliega `scripts/cloudfront.yaml` (bucket privado + CloudFront con Origin Access Control + HTTPS), sincroniza los archivos con `aws s3 sync` y crea una invalidación de caché. Imprime la URL. Volver a ejecutarlo actualiza el sitio.
 
 Notas:
-- `index.html` es el documento raíz. La navegación usa `#/ruta`, así que **no hace falta** reescritura de rutas SPA.
+- `index.html` es el documento raíz (la landing) y `app.html` es la app. Ambas son archivos reales y la navegación dentro de la app usa `#/ruta`, así que **no hace falta** reescritura de rutas SPA. Si agregas otra página, súmala a la lista de archivos de los scripts.
 - Verificar los tipos de contenido: `.webmanifest` debe servirse como `application/manifest+json`, `.json` como `application/json` y `.js` como `text/javascript`. El script los fija explícitamente.
 - Sin invalidación, CloudFront puede servir la versión anterior hasta por un día.
 
@@ -73,7 +73,7 @@ aws cloudformation delete-stack --stack-name <nombre-stack>
 ## Empaquetar manualmente
 
 ```bash
-zip -r site.zip index.html manifest.webmanifest icon.svg melodies src -x "*.DS_Store"
+zip -r site.zip index.html app.html manifest.webmanifest icon.svg melodies src -x "*.DS_Store"
 ```
 
 ## Migración a otro stack

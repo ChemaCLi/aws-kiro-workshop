@@ -8,7 +8,7 @@ Estilo: **cálido, tranquilo y ordenado**. Papel crema, verdes suaves, bordes fi
 
 ## Colores
 
-Definidos en `tailwind.config` de `index.html`. Usar los tokens, no hexadecimales sueltos en componentes nuevos.
+Definidos en `tailwind.config` de `src/ui/tailwind-config.js`. Usar los tokens, no hexadecimales sueltos en componentes nuevos.
 
 | Token | Hex | Uso |
 |-------|-----|-----|

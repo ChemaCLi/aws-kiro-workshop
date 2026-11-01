@@ -19,7 +19,7 @@ aws sts get-caller-identity >/dev/null || { echo "No hay credenciales de AWS vá
 
 echo "→ Empaquetando solo los archivos publicables"
 rm -f "$ZIP_FILE"
-zip -qr "$ZIP_FILE" index.html manifest.webmanifest icon.svg melodies src -x "*.DS_Store"
+zip -qr "$ZIP_FILE" index.html app.html manifest.webmanifest icon.svg melodies src -x "*.DS_Store"
 
 if [[ -f "$ID_FILE" ]]; then
   APP_ID="$(cat "$ID_FILE")"

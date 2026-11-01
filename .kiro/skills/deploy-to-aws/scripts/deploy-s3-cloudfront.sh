@@ -29,7 +29,7 @@ URL="$(output SiteUrl)"
 # sync sube todo con el tipo de contenido que detecta; luego se fijan los que importan.
 echo "→ Subiendo archivos a s3://$BUCKET"
 aws s3 sync . "s3://$BUCKET" --region "$REGION" --delete \
-  --exclude "*" --include "index.html" --include "manifest.webmanifest" --include "icon.svg" \
+  --exclude "*" --include "index.html" --include "app.html" --include "manifest.webmanifest" --include "icon.svg" \
   --include "melodies/*" --include "src/*"
 
 echo "→ Ajustando tipos de contenido"

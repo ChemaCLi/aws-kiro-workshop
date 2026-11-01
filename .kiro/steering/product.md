@@ -21,6 +21,7 @@ Lista de tareas interactiva con técnica pomodoro y recompensas que gamifican el
 | `pomodoro` | Rondas de enfoque sobre una tarea, con música y sonido | `<focus-view>` |
 | `3d-world` | Isla 3D donde crece una planta por tarea terminada | `<garden-view>` |
 | `statistics` | KPIs, dona por tipo y tendencia de 7 días | `<stats-view>` |
+| `settings` | Ajustes de música, sonido y modo demo, con datos de ejemplo y borrado de datos | `<settings-view>` |
 
 ## Principios de producto
 

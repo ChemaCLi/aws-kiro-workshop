@@ -5,8 +5,9 @@ inclusion: always
 # Stack técnico
 
 - **HTML + JavaScript ES modules**, sin Node, sin bundler, sin paso de build. Se abre `index.html` o se sirve con cualquier servidor estático.
+- **Dos páginas**: `index.html` es la **landing** (página con scroll, sin SPA) y `app.html` es la **app**, una SPA con pestañas por hash. Entrar y salir son navegaciones reales entre ambas.
 - **Web Components nativos** (`customElements.define`) con **light DOM** (sin Shadow DOM) para que Tailwind aplique directo.
-- **Tailwind por CDN** (`https://cdn.tailwindcss.com`) con la configuración de colores en `index.html`.
+- **Tailwind por CDN** (`https://cdn.tailwindcss.com`) con la configuración de colores en `src/ui/tailwind-config.js`, que cargan las dos páginas.
 - **Tone.js por CDN** para la música y la campanita. No hay archivos de audio: las melodías son JSON en `melodies/`.
 - **Three.js por CDN** con import map, solo para el mundo 3D y cargado con `import()` dinámico.
 - **Web Worker** para el pulso del pomodoro (`src/core/ticker.worker.js`).
@@ -18,12 +19,15 @@ inclusion: always
 Las rutas de los steerings, skills, agentes y specs son relativas a la carpeta de la app (`exercise/` en este repositorio). El `.kiro/` vive en la raíz del repositorio.
 
 ```
-index.html                  shell, config de Tailwind, import map, estilos globales
-manifest.webmanifest        metadatos de instalación
+index.html                  landing: contenido estático, import map de Three.js
+app.html                    la app (SPA): <app-shell>, import map, Tone.js
+manifest.webmanifest        metadatos de instalación (start_url: app.html)
 melodies/                   melodías lofi en JSON + index.json
-src/main.js                 arranque
+src/landing.js              arranque de la landing
+src/main.js                 arranque de la app
+src/styles/                 base.css (compartido), app.css, landing.css
 src/core/                   lógica sin DOM: rules, store, ticker, feedback, lofi
-src/ui/                     utilidades de interfaz: icons, sheet, util, base
+src/ui/                     utilidades de interfaz: icons, sheet, util, base, tailwind-config
 src/components/             un Web Component por módulo visible
 src/three/                  escena 3D
 docs/                       features.md y README de cada módulo

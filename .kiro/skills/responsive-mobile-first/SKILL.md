@@ -5,7 +5,7 @@ description: Técnicas web para que Focus Garden se vea y funcione bien en telé
 
 # Responsive y mobile first
 
-Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. Los estilos globales están en `index.html`.
+Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. Los estilos globales están en `src/styles/`: `base.css` (compartido), `app.css` (la app, `app.html`) y `landing.css` (la landing, `index.html`).
 
 ## Técnicas que ya usa el proyecto (y por qué)
 
