@@ -1,6 +1,8 @@
 // Isla flotante low-poly con una parcela por tarea terminada.
 // Three.js se importa de forma dinámica: si el CDN falla, la app sigue funcionando (ver garden-view).
+// La usan garden-view (interactiva) y hero-garden (decorativa, sin controles y con luz según la franja del día).
 import { TYPE_BY_ID, islandSizeFor, spiralCell } from '../core/rules.js';
+import { GARDEN_LOOKS } from './garden-looks.js';
 
 const TOP = 0.14; // altura de la cara superior de cada parcela
 
@@ -18,10 +20,23 @@ const rng = (seed) => () => {
 };
 const easeOutBack = (x) => { const c1 = 1.70158; const c3 = c1 + 1; return 1 + c3 * (x - 1) ** 3 + c1 * (x - 1) ** 2; };
 
-export async function createGardenScene(container, { onSelect }) {
+/**
+ * Crea la isla 3D dentro de `container` y devuelve su API ({ sync, deselect, setLook, resize, dispose }).
+ * - `interactive: false` la vuelve decorativa: sin controles, sin selección y sin capturar punteros.
+ * - `freezeWhenReducedMotion: true` deja la escena totalmente quieta con prefers-reduced-motion
+ *   (solo el hero la pide; garden-view conserva su comportamiento de siempre).
+ * - `fitMargin` (por defecto 1) aleja la cámara para dejar aire alrededor de la isla. El hero lo sube
+ *   porque su lienzo es más ancho que alto y, al girar, las esquinas de la isla se cortaban en los bordes.
+ */
+export async function createGardenScene(
+  container,
+  { onSelect, interactive = true, freezeWhenReducedMotion = false, fitMargin = 1 } = {},
+) {
   const THREE = await import('three');
   const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  // Se decide una sola vez: congela el tiempo de animación, el "pop" de las plantas y el reencuadre interpolado.
+  const isMotionFrozen = freezeWhenReducedMotion && reduceMotion;
 
   // ---------- renderer, cámara, luces ----------
   const scene = new THREE.Scene();
@@ -32,11 +47,13 @@ export async function createGardenScene(container, { onSelect }) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const canvas = renderer.domElement;
   canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none;outline:none';
+  if (!interactive) canvas.style.pointerEvents = 'none'; // decorativa: los toques pasan al contenido de encima
   container.prepend(canvas);
 
-  scene.add(new THREE.HemisphereLight(0xfff6e5, 0x7fa98a, 1.5));
-  const sun = new THREE.DirectionalLight(0xfff0d0, 2.4);
-  sun.position.set(7, 12, 5);
+  // Los colores e intensidades reales los pone setLook(GARDEN_LOOKS.midday) cuando existen los materiales.
+  const hemi = new THREE.HemisphereLight();
+  scene.add(hemi);
+  const sun = new THREE.DirectionalLight();
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.bias = -0.0005;
@@ -53,6 +70,7 @@ export async function createGardenScene(container, { onSelect }) {
   controls.autoRotate = !reduceMotion;
   controls.autoRotateSpeed = 0.7;
   controls.target.set(0, 0.4, 0);
+  controls.enabled = interactive;
 
   // ---------- materiales y geometrías compartidas ----------
   const mat = (color, extra = {}) =>
@@ -65,6 +83,19 @@ export async function createGardenScene(container, { onSelect }) {
     cloud: mat(0xffffff, { roughness: 1 }), dark: mat(0x2b2b2b),
     petal: new THREE.MeshBasicMaterial({ color: 0xffc3da, side: THREE.DoubleSide }),
   };
+
+  /** Cambia de golpe las luces y el color de las nubes según la franja del día (ver garden-looks.js). */
+  const setLook = (look) => {
+    hemi.color.set(look.hemiSky);
+    hemi.groundColor.set(look.hemiGround);
+    hemi.intensity = look.hemiIntensity;
+    sun.color.set(look.sunColor);
+    sun.intensity = look.sunIntensity;
+    sun.position.set(...look.sunPosition);
+    M.cloud.color.set(look.cloudColor);
+  };
+  setLook(GARDEN_LOOKS.midday);
+
   const typeMats = new Map();
   const typeMat = (hex) => {
     if (!typeMats.has(hex)) {
@@ -284,13 +315,13 @@ export async function createGardenScene(container, { onSelect }) {
   const fitDistance = () => {
     const vfov = THREE.MathUtils.degToRad(camera.fov);
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
-    return (size * 0.5 + 0.9) / Math.sin(Math.min(vfov, hfov) / 2);
+    return ((size * 0.5 + 0.9) * fitMargin) / Math.sin(Math.min(vfov, hfov) / 2);
   };
   function reframe(snap) {
     desiredDist = fitDistance();
     controls.maxDistance = desiredDist * 1.4;
     controls.minDistance = Math.min(6, desiredDist * 0.4);
-    if (snap) {
+    if (snap || isMotionFrozen) { // con la escena congelada no se interpola: la cámara salta al encuadre
       const polar = 1.0, az = 0.62;
       camera.position.set(
         controls.target.x + Math.sin(polar) * Math.sin(az),
@@ -360,7 +391,8 @@ export async function createGardenScene(container, { onSelect }) {
       if (e && e.key !== `${plot.plant.kind}|${plot.type}`) { world.remove(e.group); entries.delete(plot.id); e = null; }
       if (!e) {
         e = createPlot(plot, i);
-        e.pop = { start: elapsed + 0.08 + Math.min(fresh, 24) * 0.07, dur: 0.7 };
+        if (isMotionFrozen) e.group.scale.setScalar(1); // sin "pop": la planta aparece ya crecida
+        else e.pop = { start: elapsed + 0.08 + Math.min(fresh, 24) * 0.07, dur: 0.7 };
         fresh += 1;
         entries.set(plot.id, e);
         world.add(e.group);
@@ -377,22 +409,24 @@ export async function createGardenScene(container, { onSelect }) {
     onSelect?.(id);
   }
 
-  // ---------- selección por tap ----------
+  // ---------- selección por tap (solo en escenas interactivas) ----------
   const raycaster = new THREE.Raycaster();
   let down = null;
-  canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
-  canvas.addEventListener('pointerup', (e) => {
-    if (!down) return;
-    const tap = Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6 && performance.now() - down.t < 400;
-    down = null;
-    if (!tap) return;
-    const rect = canvas.getBoundingClientRect();
-    raycaster.setFromCamera(new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1), camera);
-    const hit = raycaster.intersectObjects([...entries.values()].map((x) => x.group), true)[0];
-    let node = hit?.object;
-    while (node && !node.userData.plotId) node = node.parent;
-    setSelected(node?.userData.plotId ?? null);
-  });
+  if (interactive) {
+    canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+    canvas.addEventListener('pointerup', (e) => {
+      if (!down) return;
+      const tap = Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6 && performance.now() - down.t < 400;
+      down = null;
+      if (!tap) return;
+      const rect = canvas.getBoundingClientRect();
+      raycaster.setFromCamera(new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1), camera);
+      const hit = raycaster.intersectObjects([...entries.values()].map((x) => x.group), true)[0];
+      let node = hit?.object;
+      while (node && !node.userData.plotId) node = node.parent;
+      setSelected(node?.userData.plotId ?? null);
+    });
+  }
 
   // ---------- bucle ----------
   let running = false;
@@ -401,10 +435,12 @@ export async function createGardenScene(container, { onSelect }) {
   let last = 0;
 
   function update(dt) {
-    elapsed += dt;
+    // Congelada, el tiempo de animación no avanza: isla, nubes, alas y pétalos se quedan en su pose inicial.
+    const animationDt = isMotionFrozen ? 0 : dt;
+    elapsed += animationDt;
     world.position.y = reduceMotion ? 0 : Math.sin(elapsed * 0.9) * 0.1;
     for (const c of clouds) {
-      c.userData.angle += c.userData.speed * dt;
+      c.userData.angle += c.userData.speed * animationDt;
       c.position.set(Math.cos(c.userData.angle) * c.userData.radius, c.userData.y, Math.sin(c.userData.angle) * c.userData.radius);
     }
     for (const e of entries.values()) {
@@ -453,6 +489,7 @@ export async function createGardenScene(container, { onSelect }) {
   return {
     sync,
     deselect: () => setSelected(null),
+    setLook,
     resize(w, h) {
       sizeOk = w > 2 && h > 2;
       if (sizeOk) {

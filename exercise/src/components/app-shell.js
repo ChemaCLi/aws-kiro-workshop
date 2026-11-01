@@ -10,6 +10,7 @@ const TABS = [
   { id: 'focus', label: 'Foco', icon: 'timer' },
   { id: 'garden', label: 'Jardín', icon: 'leaf' },
   { id: 'stats', label: 'Stats', icon: 'chart' },
+  { id: 'settings', label: 'Ajustes', icon: 'settings' },
 ];
 const TITLE = 'Focus Garden';
 
@@ -21,7 +22,7 @@ class AppShell extends HTMLElement {
     const buttons = TABS.map((t) => `
       <button data-tab="${t.id}" aria-label="${t.label}"
         class="press relative flex flex-col items-center gap-0.5 py-1 text-[11px] font-bold text-ink/50">
-        <span data-pill class="grid h-8 w-16 place-items-center rounded-full transition-colors">${icon(t.icon, 'h-[22px] w-[22px]')}</span>
+        <span data-pill class="grid h-8 w-14 place-items-center rounded-full transition-colors">${icon(t.icon, 'h-[22px] w-[22px]')}</span>
         <span>${t.label}</span>
         ${t.id === 'focus' ? '<i data-dot class="absolute right-[22%] top-0.5 hidden h-2.5 w-2.5 animate-pulse rounded-full bg-leaf"></i>' : ''}
       </button>`).join('');
@@ -32,6 +33,7 @@ class AppShell extends HTMLElement {
         <focus-view data-tab="focus" hidden></focus-view>
         <garden-view data-tab="garden" hidden></garden-view>
         <stats-view data-tab="stats" hidden></stats-view>
+        <settings-view data-tab="settings" hidden></settings-view>
       </main>
       <nav aria-label="Secciones">${buttons}</nav>
       <div id="toasts" aria-live="polite"></div>
@@ -62,8 +64,13 @@ class AppShell extends HTMLElement {
       window.addEventListener('pointerdown', resume, { once: true });
     }
 
-    const initial = location.hash.replace('#/', '');
-    this.go(TABS.some((t) => t.id === initial) ? initial : 'tasks');
+    this.go(this.#tabFromHash());
+  }
+
+  /** Pestaña indicada por el hash (`#/settings`) si existe en TABS; en cualquier otro caso, Tareas. */
+  #tabFromHash() {
+    const fromHash = location.hash.replace('#/', '');
+    return TABS.some((t) => t.id === fromHash) ? fromHash : 'tasks';
   }
 
   go(tab) {

@@ -3,39 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Focus Garden</title>
-  <meta name="description" content="Focus Garden: tareas con pomodoro que hacen crecer un jardín 3D." />
+  <title>Focus Garden · Tareas con pomodoro que hacen crecer tu jardín</title>
+  <meta name="description" content="Focus Garden es una app open source: anota tareas, enfócate con rondas pomodoro y mira crecer un jardín 3D por cada tarea terminada. Sin cuenta, gratis." />
   <meta name="theme-color" content="#fbf6ea" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Focus Garden" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta property="og:title" content="Focus Garden" />
+  <meta property="og:description" content="Cada ronda de enfoque hace crecer tu jardín. Open source y sin cuenta." />
+  <meta property="og:type" content="website" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
 
-  <!-- Tailwind por CDN: sin Node, sin build -->
+  <!-- Tailwind por CDN: sin Node, sin build. Los colores viven en src/ui/tailwind-config.js -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            cream: '#fbf6ea',
-            paper: '#fffdf7',
-            ink: '#23312b',
-            moss: '#2f6f4e',
-            leaf: '#4f9d69',
-            line: '#eadfc6',
-          },
-        },
-      },
-    };
-  </script>
+  <script src="./src/ui/tailwind-config.js"></script>
 
-  <!-- Tone.js por CDN: genera la música lofi de fondo. Si no carga, la app sigue igual. -->
-  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js" defer></script>
-
-  <!-- Three.js por CDN con import map; se importa de forma dinámica en src/three/ -->
+  <!-- Three.js por CDN con import map; hero-garden lo importa de forma dinámica. Si falla, el hero usa emojis. -->
   <script type="importmap">
     {
       "imports": {
@@ -45,104 +26,226 @@
     }
   </script>
 
-  <style>
-    :root { --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px); }
-    * { -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; background: #fbf6ea; }
-    body {
-      color: #23312b;
-      font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      touch-action: manipulation;
-      -webkit-user-select: none; user-select: none;
-    }
-    input { -webkit-user-select: text; user-select: text; font-size: 16px; }
-    button { font: inherit; color: inherit; cursor: pointer; }
-    [hidden] { display: none !important; }
-
-    /* Layout mobile first. El shell se ancla a los bordes de la ventana (fixed + inset 0) en vez de
-       calcular una altura con vh/dvh, que se desfasa con las barras del navegador. La cuadrícula
-       reserva una fila propia para la barra de pestañas: nunca se encoge ni queda fuera de pantalla. */
-    app-shell {
-      position: fixed; inset: 0; box-sizing: border-box; overflow: hidden; background: #fbf6ea;
-      display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto;
-    }
-    app-shell > main { grid-row: 1; grid-column: 1; position: relative; min-height: 0; min-width: 0; }
-    app-shell > nav {
-      grid-row: 2; grid-column: 1; z-index: 10; display: flex; background: #fffdf7; border-top: 1px solid #eadfc6;
-      padding: 8px calc(8px + env(safe-area-inset-right, 0px)) calc(8px + var(--safe-b)) calc(8px + env(safe-area-inset-left, 0px));
-    }
-    app-shell > nav > button { flex: 1 1 0; min-width: 0; }
-    #sheet-host { display: contents; }
-
-    /* Tablet y escritorio (768 px o más): riel lateral y contenido centrado y legible */
-    @media (min-width: 768px) {
-      app-shell { grid-template-columns: 5.75rem minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
-      app-shell > main { grid-row: 1; grid-column: 2; }
-      app-shell > nav {
-        grid-row: 1; grid-column: 1; flex-direction: column; justify-content: flex-start; gap: 6px;
-        border-top: 0; border-right: 1px solid #eadfc6;
-        padding: calc(var(--safe-t) + 20px) 8px 16px calc(8px + env(safe-area-inset-left, 0px));
-      }
-      app-shell > nav > button { flex: 0 0 auto; padding-top: 8px; padding-bottom: 8px; }
-      .page { padding-inline: calc((100% - 640px) / 2); }
-      .fab { right: calc((100% - 640px) / 2 + 1.25rem) !important; }
-      .sheet-root { align-items: center; justify-content: center; }
-      .sheet { max-width: 560px; border-radius: 28px; max-height: 80%; }
-    }
-
-    .view { position: absolute; inset: 0; display: block; }
-    .scroll { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .scroll::-webkit-scrollbar { display: none; }
-    .pad-top { padding-top: calc(var(--safe-t) + 22px); }
-
-    .press { transition: transform .12s ease, background-color .2s ease, opacity .2s ease; }
-    .press:active { transform: scale(.95); }
-    .press:disabled { opacity: .4; pointer-events: none; }
-
-    .view-in { animation: view-in .28s ease both; }
-    .pop { animation: pop-in .35s cubic-bezier(.2,.9,.3,1.2) both; }
-    @keyframes view-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    @keyframes pop-in { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
-    @keyframes toast-in { from { transform: translateY(-14px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
-    @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-
-    .garden-sky { background: linear-gradient(180deg, #a9d8ef 0%, #d4ecee 38%, #f1f1dc 72%, #fbf6ea 100%); }
-
-    /* Chips de tipo */
-    .chip { border: 1.5px solid #eadfc6; background: #fffdf7; transition: background-color .15s, color .15s, border-color .15s, transform .12s; }
-    .chip:active { transform: scale(.95); }
-    .chip[data-on="true"] { background: var(--c); border-color: var(--c); color: #fff; }
-
-    /* Switch */
-    .switch { position: relative; width: 48px; height: 28px; border-radius: 999px; background: #d9d2bd; transition: background-color .2s; flex-shrink: 0; }
-    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
-    .switch[aria-checked="true"] { background: #2f6f4e; }
-    .switch[aria-checked="true"]::after { transform: translateX(20px); }
-    .switch:disabled { opacity: .4; }
-
-    /* Fila deslizable */
-    .swipe { position: relative; border-radius: 18px; }
-    .swipe-bg { position: absolute; inset: 0; border-radius: 18px; background: #e5604f; color: #fff; display: flex; align-items: center; justify-content: flex-end; padding-right: 22px; opacity: 0; }
-    .swipe-fg { position: relative; touch-action: pan-y; }
-
-    /* Bottom sheet */
-    .sheet-root { position: absolute; inset: 0; z-index: 50; display: flex; align-items: flex-end; }
-    .sheet-backdrop { position: absolute; inset: 0; background: rgba(20,30,25,.45); animation: fade .2s ease both; transition: opacity .2s; }
-    .sheet { position: relative; width: 100%; max-height: 88%; overflow-y: auto; background: #fffdf7; border-radius: 28px 28px 0 0; padding: 0 20px calc(22px + var(--safe-b)); animation: sheet-up .3s cubic-bezier(.2,.9,.3,1) both; box-shadow: 0 -10px 40px rgba(0,0,0,.15); }
-    .sheet-handle { display: flex; justify-content: center; padding: 10px 0 12px; touch-action: none; cursor: grab; }
-    .sheet-handle span { width: 40px; height: 5px; border-radius: 99px; background: #d9d2bd; }
-
-    .fab { position: absolute; bottom: 1.25rem; right: 1.25rem; }
-    #toasts { position: absolute; z-index: 60; left: 12px; right: 12px; max-width: 440px; margin-inline: auto; top: calc(var(--safe-t) + 12px); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-    .toast { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #23312b; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: toast-in .25s ease both; }
-  </style>
+  <link rel="stylesheet" href="./src/styles/base.css" />
+  <link rel="stylesheet" href="./src/styles/landing.css" />
 </head>
-<body>
-  <app-shell></app-shell>
-  <noscript>Esta app necesita JavaScript.</noscript>
-  <script type="module" src="./src/main.js"></script>
+<body class="bg-cream text-ink">
+
+  <!-- Barra superior -->
+  <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5">
+      <a href="#inicio" class="flex min-h-11 items-center gap-2 text-lg font-extrabold tracking-tight">
+        <span class="text-2xl" aria-hidden="true">🌱</span> Focus Garden
+      </a>
+      <nav class="hidden items-center gap-8 text-sm font-bold text-ink/70 md:flex" aria-label="Secciones de la página">
+        <a href="#como-funciona" class="inline-flex min-h-11 items-center hover:text-moss">Cómo funciona</a>
+        <a href="#funciones" class="inline-flex min-h-11 items-center hover:text-moss">Funciones</a>
+        <a href="#open-source" class="inline-flex min-h-11 items-center hover:text-moss">Open source</a>
+      </nav>
+      <button type="button" data-enter class="press h-11 rounded-full bg-moss px-5 text-sm font-bold text-white">Entrar</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero: el texto a la izquierda y el jardín 3D a la derecha -->
+    <section id="inicio" class="hero-sky" data-period="midday" aria-labelledby="hero-title">
+      <div class="sky-stars" aria-hidden="true"><span class="shooting-star"></span></div>
+      <div class="sky-body" aria-hidden="true"></div>
+
+      <div class="hero-content mx-auto grid max-w-6xl items-center gap-4 px-5 pb-20 pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-6 lg:pb-28 lg:pt-14">
+        <div>
+          <p class="hero-badge inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold">
+            <span aria-hidden="true">🌱</span> Gratis · Open source · Sin cuenta
+          </p>
+          <h1 id="hero-title" class="mt-5 text-[44px] font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-[66px]">
+            Cada ronda de enfoque <span class="hero-accent">hace crecer</span> tu jardín
+          </h1>
+          <p class="hero-muted mt-5 max-w-xl text-lg font-medium leading-relaxed">
+            Anota tus tareas, enfócate con rondas pomodoro y mira cómo cada tarea terminada brota como una planta en tu isla 3D.
+          </p>
+
+          <div class="mt-8 flex flex-wrap items-center gap-3">
+            <button type="button" data-enter class="btn-primary press">
+              <span data-enter-label>Empezar mi jardín</span>
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <a href="#como-funciona" class="btn-ghost">Cómo funciona</a>
+          </div>
+
+          <dl class="mt-9 flex max-w-md items-start gap-5">
+            <div class="flex flex-col-reverse">
+              <dt class="hero-muted text-xs font-bold uppercase tracking-wide">Plantas</dt>
+              <dd data-stat="plants" class="text-3xl font-extrabold tabular-nums">6</dd>
+            </div>
+            <div class="hero-divider h-10 w-px"></div>
+            <div class="flex flex-col-reverse">
+              <dt class="hero-muted text-xs font-bold uppercase tracking-wide">Tipos de tarea</dt>
+              <dd data-stat="types" class="text-3xl font-extrabold tabular-nums">5</dd>
+            </div>
+            <div class="hero-divider h-10 w-px"></div>
+            <div class="flex flex-col-reverse">
+              <dt class="hero-muted text-xs font-bold uppercase tracking-wide">Cuentas necesarias</dt>
+              <dd class="text-3xl font-extrabold tabular-nums">0</dd>
+            </div>
+          </dl>
+
+          <p data-local-note class="hero-muted mt-6 text-sm font-medium">Tus datos se guardan solo en este dispositivo. Ideal para probar.</p>
+          <button type="button" data-act="account" class="hero-accent press mt-1 min-h-11 rounded-lg text-left text-sm font-bold underline decoration-2 underline-offset-4">
+            Mantén vivo tu jardín, lleva tu progreso contigo
+          </button>
+        </div>
+
+        <!-- Jardín 3D decorativo: a la derecha en escritorio, debajo del texto en el teléfono -->
+        <div class="relative">
+          <hero-garden class="h-[340px] sm:h-[440px] lg:h-[600px]"></hero-garden>
+          <div class="hud-chip pointer-events-none absolute left-0 top-6 flex items-center gap-2 rounded-2xl border border-line bg-paper/90 px-3.5 py-2 text-xs font-bold text-ink shadow-lg backdrop-blur sm:left-4 sm:text-sm" aria-hidden="true">
+            <span class="h-2.5 w-2.5 animate-pulse rounded-full bg-leaf"></span> 🍅 Ronda en curso · 25:00
+          </div>
+          <div class="hud-chip hud-chip--b pointer-events-none absolute bottom-8 right-0 rounded-2xl border border-line bg-paper/90 px-3.5 py-2 text-xs font-bold text-ink shadow-lg backdrop-blur sm:right-4 sm:text-sm" aria-hidden="true">
+            🌸 ¡Creció una sakura en tu jardín!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cómo funciona -->
+    <section id="como-funciona" class="scroll-mt-16 py-20" aria-labelledby="como-title">
+      <div class="mx-auto max-w-6xl px-5">
+        <p class="text-xs font-bold uppercase tracking-wide text-moss">Cómo funciona</p>
+        <h2 id="como-title" class="mt-2 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Tres pasos y tu isla empieza a florecer</h2>
+
+        <ol class="mt-10 grid gap-4 md:grid-cols-3">
+          <li class="rounded-3xl border border-line bg-paper p-6">
+            <span class="grid h-11 w-11 place-items-center rounded-2xl bg-moss text-lg font-extrabold text-white">1</span>
+            <h3 class="mt-4 text-xl font-extrabold">Anota lo que toca</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Crea una tarea en un toque y clasifícala: trabajo, personal, salud, social u ocio. Sin formularios largos.</p>
+          </li>
+          <li class="rounded-3xl border border-line bg-paper p-6">
+            <span class="grid h-11 w-11 place-items-center rounded-2xl bg-moss text-lg font-extrabold text-white">2</span>
+            <h3 class="mt-4 text-xl font-extrabold">Enfócate una ronda</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Toca ▶ en la tarea y arranca una ronda pomodoro. Con música lofi si quieres, y una campanita al terminar.</p>
+          </li>
+          <li class="rounded-3xl border border-line bg-paper p-6">
+            <span class="grid h-11 w-11 place-items-center rounded-2xl bg-moss text-lg font-extrabold text-white">3</span>
+            <h3 class="mt-4 text-xl font-extrabold">Mira crecer tu jardín</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Al terminar la tarea, brota una planta en tu isla 3D. Mientras más rondas le dedicas, más grande es.</p>
+          </li>
+        </ol>
+
+        <div class="mt-6 rounded-3xl border border-line bg-paper p-6 sm:p-8">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h3 class="text-xl font-extrabold">Tu esfuerzo se ve en la isla</h3>
+              <p class="mt-1 max-w-xl text-ink/70">La planta depende solo de las rondas que hiciste en la tarea. Terminar sin rondas no siembra nada.</p>
+            </div>
+          </div>
+          <ul data-plants class="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6" aria-label="Planta según las rondas de la tarea"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Funciones -->
+    <section id="funciones" class="scroll-mt-16 border-y border-line bg-paper py-20" aria-labelledby="funciones-title">
+      <div class="mx-auto max-w-6xl px-5">
+        <p class="text-xs font-bold uppercase tracking-wide text-moss">Funciones</p>
+        <h2 id="funciones-title" class="mt-2 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Lo necesario para enfocarte, nada que estorbe</h2>
+
+        <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <article class="feature-card rounded-3xl border border-line bg-cream p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">📝</span>
+            <h3 class="mt-4 text-lg font-extrabold">Tareas por tipo</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Completa con un toque, elimina deslizando y deshaz si te equivocaste. Filtra por tipo cuando quieras ver solo una parte de tu día.</p>
+            <div data-types class="mt-4 flex flex-wrap gap-2"></div>
+          </article>
+
+          <article class="feature-card rounded-3xl border border-line bg-cream p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">🍅</span>
+            <h3 class="mt-4 text-lg font-extrabold">Pomodoro que no se pierde</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Rondas de 5 a 60 minutos. El reloj usa la hora de fin, así que sigue contando aunque cambies de pestaña, bloquees la pantalla o recargues.</p>
+          </article>
+
+          <article class="feature-card rounded-3xl border border-line bg-cream p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">🏝️</span>
+            <h3 class="mt-4 text-lg font-extrabold">Un jardín 3D que es tuyo</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Una isla flotante con una parcela por tarea terminada. Gírala, acércala y toca una planta para recordar qué lograste. La isla crece contigo.</p>
+          </article>
+
+          <article class="feature-card rounded-3xl border border-line bg-cream p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">📊</span>
+            <h3 class="mt-4 text-lg font-extrabold">Estadísticas con calma</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Tareas terminadas, rondas, minutos de foco y racha de días. Una dona por tipo y la tendencia de los últimos 7 días.</p>
+          </article>
+
+          <article class="feature-card rounded-3xl border border-line bg-cream p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">🎧</span>
+            <h3 class="mt-4 text-lg font-extrabold">Música lofi sin descargas</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Las melodías se generan en tu navegador con Tone.js. No hay archivos de audio, y la música baja sola cuando suena la campanita.</p>
+          </article>
+
+          <article class="feature-card rounded-3xl border border-line bg-cream p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">📱</span>
+            <h3 class="mt-4 text-lg font-extrabold">Pensada para el celular</h3>
+            <p class="mt-2 leading-relaxed text-ink/70">Se diseñó primero para el teléfono, se instala en tu pantalla de inicio y se adapta a tableta y escritorio. Tus datos viven en tu dispositivo.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Open source -->
+    <section id="open-source" class="scroll-mt-16 bg-ink py-20 text-cream" aria-labelledby="oss-title">
+      <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 lg:grid-cols-2">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide text-leaf">Open source</p>
+          <h2 id="oss-title" class="mt-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Código abierto, de principio a fin</h2>
+          <p class="mt-4 text-lg leading-relaxed text-cream/75">
+            Focus Garden es open source: léelo, pruébalo, cópialo y mejóralo. Nació en el taller «Todos pueden programar con Kiro» del AWS User Group Orizaba, como ejemplo de una app real hecha paso a paso.
+          </p>
+          <ul class="mt-6 space-y-3 font-medium text-cream/85">
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> HTML y JavaScript con módulos ES y Web Components nativos</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Tailwind, Tone.js y Three.js por CDN, cada uno con su respaldo si no carga</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Sin Node, sin bundler y sin paso de build: se sirve con cualquier hosting estático</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Sin cuentas ni servidor: tus datos se quedan en tu dispositivo</li>
+          </ul>
+          <a href="https://github.com/ChemaCLi/aws-kiro-workshop" target="_blank" rel="noopener noreferrer"
+            class="btn-primary btn-primary--light mt-8">Ver el código en GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+
+        <figure class="overflow-hidden rounded-3xl border border-white/10 bg-black/30">
+          <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3" aria-hidden="true">
+            <span class="h-3 w-3 rounded-full bg-[#e5604f]"></span><span class="h-3 w-3 rounded-full bg-[#f0a52a]"></span><span class="h-3 w-3 rounded-full bg-[#3fb56b]"></span>
+          </div>
+          <pre class="overflow-x-auto p-5 text-[13px] leading-7 text-cream/90 sm:text-sm"><code><span class="text-cream/40"># Pruébalo en tu máquina</span>
+<span class="text-leaf">$</span> git clone https://github.com/ChemaCLi/aws-kiro-workshop.git
+<span class="text-leaf">$</span> cd aws-kiro-workshop/exercise
+<span class="text-leaf">$</span> python3 -m http.server 8080
+<span class="text-cream/40"># abre http://localhost:8080</span></code></pre>
+          <figcaption class="sr-only">Comandos para ejecutar Focus Garden en tu computadora</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Llamada final -->
+    <section class="bg-moss py-16 text-center text-white" aria-labelledby="cta-title">
+      <div class="mx-auto max-w-2xl px-5">
+        <p class="text-5xl" aria-hidden="true">🌳</p>
+        <h2 id="cta-title" class="mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Tu primera planta está a una ronda de distancia</h2>
+        <p class="mt-3 text-lg text-white/75">Sin registro, sin instalar nada. Abre la app y siembra tu primera tarea.</p>
+        <button type="button" data-enter class="btn-primary btn-primary--light mt-8">
+          <span data-enter-label>Empezar mi jardín</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-ink py-8 text-sm text-cream/60">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5">
+      <p>🌱 Focus Garden · Hecho en el taller de AWS User Group Orizaba</p>
+      <a href="https://github.com/ChemaCLi/aws-kiro-workshop" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center font-bold hover:text-cream">Código en GitHub ↗</a>
+    </div>
+  </footer>
+
+  <div id="sheet-host"></div>
+  <noscript>Esta página necesita JavaScript.</noscript>
+  <script type="module" src="./src/landing.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // Estado único de la app. Se persiste en localStorage y notifica cambios por evento.
 // Guardamos hechos (tareas, rondas terminadas); el jardín y las estadísticas se derivan.
-import { DEFAULT_MINUTES, DURATIONS, plantForRounds } from './rules.js';
+import { DEFAULT_MINUTES, DURATIONS, hasLocalData as stateHasLocalData, plantForRounds } from './rules.js';
 
 const KEY = 'jardin-movil:v1';
 export const DEMO_MS = 10 * 1000;
@@ -12,7 +12,8 @@ export const roundMs = (settings) => (settings.demo ? DEMO_MS : settings.minutes
 const uid = () =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
-const freshState = (settings = {}) => {
+/** Estado vacío con los ajustes dados completados y normalizados: un guardado viejo o corrupto termina con ajustes válidos. */
+export const freshState = (settings = {}) => {
   const s = { demo: false, sound: true, music: false, minutes: DEFAULT_MINUTES, ...settings };
   if (!DURATIONS.includes(s.minutes)) s.minutes = DEFAULT_MINUTES; // datos viejos o corruptos
   const total = roundMs(s);
@@ -58,6 +59,8 @@ class Store extends EventTarget {
     fn(this.state);
     return () => this.removeEventListener('change', handler);
   }
+  /** ¿Hay tareas o rondas guardadas? Define si la landing ofrece "Continuar". No muta el estado. */
+  hasLocalData() { return stateHasLocalData(this.state); }
   taskById(id) { return this.state.tasks.find((t) => t.id === id) ?? null; }
   roundsOf(id) { return this.state.rounds.filter((r) => r.taskId === id).length; }
   remainingMs(now = Date.now()) {

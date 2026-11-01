@@ -1,9 +1,16 @@
 // <stats-view>: KPIs, distribución por tipo (dona) y tendencia de 7 días (barras apiladas). SVG puro.
-import { store } from '../core/store.js';
+import { TASK_TYPES, computeStats, hasLocalData } from '../core/rules.js';
 import { StoreView } from '../ui/base.js';
-import { TASK_TYPES, computeStats } from '../core/rules.js';
-import { confirmSheet } from '../ui/sheet.js';
-import { esc, toast } from '../ui/util.js';
+import { esc, navigate } from '../ui/util.js';
+
+/** Sin datos locales no hay nada que contar: invita a cargar los de ejemplo, que viven en Ajustes. */
+const emptyState = () => `
+  <section class="mx-5 mt-4 rounded-3xl border border-line bg-paper p-5 text-center">
+    <p class="text-5xl" aria-hidden="true">📊</p>
+    <h2 class="mt-2 text-lg font-extrabold">Aún no hay nada que contar</h2>
+    <p class="mt-1 text-sm font-medium text-ink/60">Termina una tarea con rondas de enfoque y aquí verás tu avance.</p>
+    <button data-act="settings" class="press mt-4 min-h-11 rounded-full border border-line bg-cream px-5 py-2.5 text-[15px] font-bold text-moss">Cargar datos de ejemplo en Ajustes</button>
+  </section>`;
 
 const kpi = (emoji, value, label) => `
   <div class="rounded-2xl border border-line bg-paper p-3.5">
@@ -103,6 +110,8 @@ class StatsView extends StoreView {
           <p class="text-sm font-medium text-ink/60">Cómo repartes tu energía.</p>
         </header>
 
+        ${hasLocalData(state) ? '' : emptyState()}
+
         <div class="mx-5 mt-4 grid grid-cols-2 gap-3">
           ${kpi('✅', s.doneCount, 'Tareas terminadas')}
           ${kpi('🍅', s.rounds, 'Rondas de pomodoro')}
@@ -127,38 +136,13 @@ class StatsView extends StoreView {
             ${TASK_TYPES.map((t) => `<span class="flex items-center gap-1 text-[11px] font-semibold text-ink/60"><i class="h-2 w-2 rounded-full" style="background:${t.color}"></i>${esc(t.label)}</span>`).join('')}
           </div>
         </section>
-
-        <div class="mx-5 mt-5 grid gap-2">
-          <button data-act="seed" class="press rounded-2xl border border-line bg-paper py-3.5 font-bold">✨ Cargar datos de ejemplo</button>
-          <button data-act="reset" class="press rounded-2xl py-3 text-sm font-bold text-red-600/80">Borrar todos los datos</button>
-        </div>
       </div>`;
     this.querySelector('.scroll').scrollTop = prevScroll;
   }
 
-  async #onClick(e) {
+  #onClick(e) {
     const act = e.target.closest('[data-act]')?.dataset.act;
-    if (act === 'seed') {
-      if (store.state.tasks.length) {
-        const ok = await confirmSheet({
-          title: '¿Cargar datos de ejemplo?',
-          message: 'Esto reemplaza tus tareas y rondas actuales por datos de demostración.',
-          confirmLabel: 'Cargar',
-        });
-        if (!ok) return;
-      }
-      store.seedDemo();
-      toast('Datos de ejemplo cargados ✨');
-    }
-    if (act === 'reset') {
-      const ok = await confirmSheet({
-        title: '¿Borrar todo?',
-        message: 'Se eliminan tareas, rondas y el jardín. No se puede deshacer.',
-        confirmLabel: 'Borrar todo',
-        danger: true,
-      });
-      if (ok) { store.reset(); toast('Todo limpio 🌱'); }
-    }
+    if (act === 'settings') navigate('settings');
   }
 }
 

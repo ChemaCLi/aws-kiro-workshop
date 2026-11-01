@@ -122,3 +122,44 @@ export function islandSizeFor(count) {
   const ring = count <= 1 ? 0 : Math.ceil((Math.sqrt(count) - 1) / 2);
   return 2 * Math.max(3, ring + 1) + 1;
 }
+
+// ---------- Landing (index.html) ----------
+
+/** Franjas del día según la hora local del dispositivo. */
+export const TIME_PERIODS = ['morning', 'midday', 'afternoon', 'night'];
+
+/**
+ * Franja del día para pintar el jardín de bienvenida. Solo mira la hora local:
+ * 06-11 morning, 12-15 midday, 16-19 afternoon, 20-05 night. Una fecha inválida
+ * devuelve 'midday', el look neutro, para no dejar el hero sin cielo.
+ */
+export function timePeriodFor(date) {
+  const hour = date.getHours();
+  if (Number.isNaN(hour)) return 'midday';
+  if (hour >= 6 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 16) return 'midday';
+  if (hour >= 16 && hour < 20) return 'afternoon';
+  return 'night';
+}
+
+/** Hay algo que "continuar": al menos una tarea o una ronda. No muta el estado. */
+export const hasLocalData = (state) => state.tasks.length > 0 || state.rounds.length > 0;
+
+/** Parcela de muestra con la misma forma que las de gardenPlots; la planta se deriva de las rondas. */
+const starterPlot = (id, type, rounds) =>
+  ({ id, title: '', type, doneAt: 0, rounds, plant: plantForRounds(rounds) });
+
+/** Plantas de muestra cuando aún no hay jardín propio. Ids fijos: la escena las dibuja siempre igual. */
+export const LANDING_STARTER_PLOTS = [
+  starterPlot('starter-tree', 'personal', 4),
+  starterPlot('starter-flower', 'salud', 2),
+  starterPlot('starter-grass', 'trabajo', 1),
+  starterPlot('starter-bush', 'social', 3),
+  starterPlot('starter-flower-2', 'ocio', 2),
+];
+
+/** El hero muestra el jardín real si tiene plantas; si no, las plantas de inicio. */
+export function heroPlots(state) {
+  const plots = gardenPlots(state);
+  return plots.length ? plots : LANDING_STARTER_PLOTS;
+}

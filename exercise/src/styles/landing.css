@@ -1,0 +1,151 @@
+/* Estilos de la landing (index.html). Es una página con scroll normal, a diferencia de la app.
+   El hero cambia de cielo, astro y colores de texto según la franja del día (data-period). */
+
+html { scroll-behavior: smooth; }
+:focus-visible { outline: 3px solid #4f9d69; outline-offset: 3px; border-radius: 8px; }
+
+/* #sheet-host de la landing: capa fija para las hojas de sheet.js, sin bloquear la página cuando está vacía */
+#sheet-host { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+#sheet-host > * { pointer-events: auto; }
+
+/* ---------- Hero: cielo por franja del día ---------- */
+.hero-sky {
+  --hero-ink: #23312b;
+  --hero-muted: rgba(35, 49, 43, .74);
+  --hero-accent: #2f6f4e;
+  --hero-badge-bg: rgba(255, 253, 247, .72);
+  --hero-badge-line: rgba(35, 49, 43, .12);
+  --hero-ghost-line: rgba(35, 49, 43, .28);
+  --hero-cta: #2f6f4e;
+  --hero-cta-edge: #1e4a34;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--hero-ink);
+}
+.hero-sky[data-period="morning"]   { background: linear-gradient(180deg, #f9d9b6 0%, #f6e6cc 34%, #eef0dc 70%, #fbf6ea 100%); }
+.hero-sky[data-period="midday"]    { background: linear-gradient(180deg, #a9d8ef 0%, #d4ecee 38%, #f1f1dc 72%, #fbf6ea 100%); }
+.hero-sky[data-period="afternoon"] { background: linear-gradient(180deg, #eeb98c 0%, #f4d3b0 36%, #f6e6cc 72%, #fbf6ea 100%); }
+.hero-sky[data-period="night"] {
+  background: linear-gradient(180deg, #141c33 0%, #26355a 48%, #3f5078 80%, #6f7f9f 100%);
+  --hero-ink: #f6f2e4;
+  --hero-muted: rgba(246, 242, 228, .8);
+  --hero-accent: #9be3b0;
+  --hero-badge-bg: rgba(15, 22, 40, .5);
+  --hero-badge-line: rgba(255, 255, 255, .2);
+  --hero-ghost-line: rgba(255, 255, 255, .38);
+  --hero-cta: #3f8f65;
+  --hero-cta-edge: #276445;
+}
+/* El hero se funde con el fondo crema de la página: sin corte duro, sobre todo de noche */
+.hero-sky::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 140px; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(251, 246, 234, 0), #fbf6ea);
+}
+.hero-content { position: relative; z-index: 10; }
+
+.hero-muted { color: var(--hero-muted); }
+.hero-accent { color: var(--hero-accent); }
+.hero-badge { background: var(--hero-badge-bg); border: 1px solid var(--hero-badge-line); backdrop-filter: blur(6px); }
+.hero-divider { background: var(--hero-badge-line); }
+
+/* ---------- Astro: sol o luna según la franja ---------- */
+.sky-body {
+  position: absolute; z-index: 0; pointer-events: none; border-radius: 50%;
+  width: 88px; height: 88px;
+  transition: top 1.2s ease, right 1.2s ease, background .8s ease, box-shadow .8s ease;
+}
+.hero-sky[data-period="morning"] .sky-body {
+  top: 30%; right: 10%;
+  background: radial-gradient(circle at 35% 35%, #fff3d6, #ffd29a);
+  box-shadow: 0 0 80px 28px rgba(255, 200, 130, .5);
+}
+.hero-sky[data-period="midday"] .sky-body {
+  top: 7%; right: 18%;
+  background: radial-gradient(circle at 35% 35%, #fffbe6, #ffe58a);
+  box-shadow: 0 0 90px 34px rgba(255, 236, 150, .6);
+}
+.hero-sky[data-period="afternoon"] .sky-body {
+  top: 24%; right: 7%; width: 104px; height: 104px;
+  background: radial-gradient(circle at 35% 35%, #ffe3bd, #ff9f62);
+  box-shadow: 0 0 100px 36px rgba(255, 150, 90, .5);
+}
+.hero-sky[data-period="night"] .sky-body {
+  top: 8%; right: 14%; width: 72px; height: 72px;
+  background:
+    radial-gradient(circle at 62% 66%, rgba(150, 160, 175, .35) 0 9%, transparent 10%),
+    radial-gradient(circle at 34% 40%, rgba(150, 160, 175, .3) 0 12%, transparent 13%),
+    radial-gradient(circle at 35% 35%, #fffdf2, #dcdfd0);
+  box-shadow: 0 0 70px 20px rgba(190, 210, 255, .3);
+}
+
+/* En teléfono el texto ocupa todo el ancho: el astro baja de tamaño y se va a la esquina, junto a la insignia */
+@media (max-width: 1023px) {
+  .hero-sky[data-period] .sky-body { top: 14px; right: 16px; width: 56px; height: 56px; }
+}
+
+/* ---------- Estrellas (solo de noche). landing.js crea los <i> con --x, --y, --s, --d y --delay ---------- */
+.sky-stars { position: absolute; inset: 0 0 20% 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+.hero-sky[data-period="night"] .sky-stars { opacity: 1; }
+.sky-stars i {
+  position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s);
+  border-radius: 50%; background: #fff; opacity: .85;
+  animation: twinkle var(--d) ease-in-out var(--delay) infinite;
+}
+.sky-stars i.is-bright { box-shadow: 0 0 8px 2px rgba(255, 255, 255, .55); }
+@keyframes twinkle { 0%, 100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.25); } }
+
+.shooting-star {
+  position: absolute; top: 14%; left: 8%; width: 120px; height: 2px; border-radius: 2px; opacity: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff);
+  transform: rotate(28deg);
+  animation: shoot 11s ease-in 3s infinite;
+}
+@keyframes shoot {
+  0% { opacity: 0; transform: translate(0, 0) rotate(28deg); }
+  2% { opacity: 1; }
+  8% { opacity: 0; transform: translate(260px, 140px) rotate(28deg); }
+  100% { opacity: 0; transform: translate(260px, 140px) rotate(28deg); }
+}
+
+/* ---------- Botones ---------- */
+/* Botón principal con borde inferior grueso: guiño a los botones de videojuego. Solo se usa en la landing. */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 3.5rem; padding: 0 1.75rem; border-radius: 1rem; border: 0;
+  background: var(--hero-cta, #2f6f4e); color: #fff; font-size: 1.0625rem; font-weight: 800;
+  box-shadow: 0 5px 0 var(--hero-cta-edge, #1e4a34), 0 18px 28px -10px rgba(35, 49, 43, .4);
+  transition: transform .12s ease, box-shadow .12s ease, filter .2s ease;
+}
+.btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--hero-cta-edge, #1e4a34); }
+.btn-primary--light { --hero-cta: #fffdf7; --hero-cta-edge: #cfc6a9; color: #23312b; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 3.5rem; padding: 0 1.5rem; border-radius: 1rem;
+  border: 2px solid var(--hero-ghost-line); color: var(--hero-ink); font-weight: 700;
+  transition: background-color .2s ease, transform .12s ease;
+}
+.btn-ghost:hover { background: var(--hero-badge-bg); }
+.btn-ghost:active { transform: scale(.97); }
+
+/* ---------- Elementos flotantes sobre el jardín (decoración tipo HUD) ---------- */
+.hud-chip { animation: float 5.5s ease-in-out infinite; }
+.hud-chip--b { animation-delay: -2.7s; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+/* ---------- Tarjetas de funciones ---------- */
+.feature-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.feature-card:hover { transform: translateY(-3px); border-color: #cfc6a9; box-shadow: 0 14px 30px -18px rgba(35, 49, 43, .35); }
+
+.plant-tile { transition: transform .2s ease; }
+.plant-tile:hover { transform: translateY(-4px) rotate(-1.5deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .sky-stars i, .hud-chip, .shooting-star { animation: none; }
+  .shooting-star { display: none; }
+  .feature-card, .plant-tile, .btn-primary, .sky-body { transition: none; }
+  .feature-card:hover, .plant-tile:hover { transform: none; }
+}

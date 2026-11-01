@@ -52,9 +52,15 @@ class TasksView extends StoreView {
 
     this.innerHTML = `
       <div class="scroll page absolute inset-0 pb-32">
-        <header class="pad-top px-5">
-          <p class="text-sm font-semibold text-moss/70">${today}</p>
-          <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Mis tareas</h1>
+        <header class="pad-top flex items-start justify-between gap-3 px-5">
+          <div>
+            <p class="text-sm font-semibold text-moss/70">${today}</p>
+            <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Mis tareas</h1>
+          </div>
+          <a href="./index.html" aria-label="Salir a la página de inicio" title="Salir"
+            class="press mt-1 grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-paper text-ink/60">
+            ${icon('logout', 'h-5 w-5')}
+          </a>
         </header>
         <section class="mx-5 mt-3 rounded-3xl bg-moss p-4 text-white">
           <div class="flex items-end justify-between">

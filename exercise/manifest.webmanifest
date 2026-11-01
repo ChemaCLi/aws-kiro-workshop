@@ -1,7 +1,7 @@
 {
   "name": "Focus Garden",
   "short_name": "Focus Garden",
-  "start_url": "./index.html",
+  "start_url": "./app.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fbf6ea",

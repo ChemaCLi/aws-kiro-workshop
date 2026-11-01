@@ -1,13 +1,13 @@
 // <focus-view>: pomodoro de la tarea elegida. El reloj se calcula con `endsAt`,
-// así sobrevive a cambiar de pestaña o recargar la página.
+// así sobrevive a cambiar de pestaña o recargar la página. Música, sonido y modo demo
+// se ajustan en <settings-view>; aquí solo se avisa si el modo demo está activo.
 import { store } from '../core/store.js';
 import { StoreView } from '../ui/base.js';
 import { DURATIONS, PLANTS, TYPE_BY_ID, durationLabel, plantForRounds } from '../core/rules.js';
 import { haptic, unlockAudio } from '../core/feedback.js';
-import { startMusic, stopMusic, isMusicAvailable } from '../core/lofi.js';
 import { icon } from '../ui/icons.js';
 import { openSheet } from '../ui/sheet.js';
-import { announceCompletion, esc, formatClock, toast } from '../ui/util.js';
+import { announceCompletion, esc, formatClock, navigate, toast } from '../ui/util.js';
 import { openAddTask } from './add-sheet.js';
 
 const RADIUS = 88;
@@ -64,13 +64,6 @@ class FocusView extends StoreView {
           class="press grid h-14 w-14 place-items-center rounded-full border border-line bg-paper text-moss">${icon('check', 'h-6 w-6')}</button>
       </div>`;
 
-    const row = (act, title, sub, on, disabled = false) => `
-      <div class="flex items-center justify-between gap-3 p-3.5">
-        <div><p class="text-[15px] font-bold">${title}</p><p class="text-xs text-ink/50">${sub}</p></div>
-        <button role="switch" aria-checked="${on}" data-act="${act}" ${disabled ? 'disabled' : ''} class="switch" aria-label="${title}"></button>
-      </div>`;
-    const musicAvailable = isMusicAvailable();
-
     const durationsLocked = locked || state.settings.demo;
     const durations = DURATIONS.map((min) => {
       const on = !state.settings.demo && state.settings.minutes === min;
@@ -99,9 +92,10 @@ class FocusView extends StoreView {
         </div>
 
         <div class="mx-5 mt-4">
-          <div class="mb-1.5 flex items-baseline justify-between px-1">
+          <div class="mb-1.5 flex items-center justify-between px-1">
             <p class="text-xs font-bold uppercase tracking-wide text-ink/50">Duración · minutos</p>
-            ${state.settings.demo ? '<p class="text-xs font-semibold text-moss">Modo demo: 10 s</p>' : ''}
+            ${state.settings.demo ? `<p class="flex items-center gap-2 text-xs font-semibold text-moss">Modo demo
+              <button data-act="settings" class="press min-h-11 px-1 font-bold underline underline-offset-2">Cambiar en Ajustes</button></p>` : ''}
           </div>
           <div class="flex gap-1.5" role="radiogroup" aria-label="Duración de la ronda">${durations}</div>
         </div>
@@ -123,12 +117,6 @@ class FocusView extends StoreView {
         <div class="mx-5 mt-6 rounded-2xl border border-line bg-paper p-3">
           <div class="flex items-center justify-between px-1">${strip}</div>
           <p class="mt-2 text-center text-xs font-medium text-ink/60">${hint}</p>
-        </div>
-
-        <div class="mx-5 mt-4 divide-y divide-line rounded-2xl border border-line bg-paper">
-          ${row('demo', 'Modo demo', 'Rondas de 10 s para mostrarlo en vivo', state.settings.demo, locked)}
-          ${row('sound', 'Sonido', 'Campanita al terminar la ronda', state.settings.sound)}
-          ${row('music', 'Música de fondo', musicAvailable ? 'Lofi para concentrarte' : 'No disponible (sin conexión)', state.settings.music && musicAvailable, !musicAvailable)}
         </div>
       </div>`;
     this.querySelector('.scroll').scrollTop = prevScroll;
@@ -173,17 +161,7 @@ class FocusView extends StoreView {
       case 'duration':
         if (store.setDuration(Number(btn.dataset.min))) haptic(8);
         break;
-      case 'demo': store.setSetting('demo', !store.state.settings.demo); break;
-      case 'sound': store.setSetting('sound', !store.state.settings.sound); break;
-      case 'music': {
-        if (!isMusicAvailable()) break;
-        unlockAudio();
-        const on = !store.state.settings.music;
-        store.setSetting('music', on);
-        haptic(10);
-        if (on) startMusic(); else stopMusic();
-        break;
-      }
+      case 'settings': navigate('settings'); break;
     }
   }
 

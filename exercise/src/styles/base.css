@@ -1,0 +1,36 @@
+/* Estilos compartidos por la landing (index.html) y la app (app.html):
+   tipografía, botones con presión, animaciones comunes y las hojas inferiores (sheet.js). */
+
+:root { --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px); }
+* { -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  background: #fbf6ea;
+  color: #23312b;
+  font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+
+.press { transition: transform .12s ease, background-color .2s ease, opacity .2s ease; }
+.press:active { transform: scale(.95); }
+.press:disabled { opacity: .4; pointer-events: none; }
+
+.pop { animation: pop-in .35s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes pop-in { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+
+/* Bottom sheet */
+.sheet-root { position: absolute; inset: 0; z-index: 50; display: flex; align-items: flex-end; }
+.sheet-backdrop { position: absolute; inset: 0; background: rgba(20,30,25,.45); animation: fade .2s ease both; transition: opacity .2s; }
+.sheet { position: relative; width: 100%; max-height: 88%; overflow-y: auto; background: #fffdf7; border-radius: 28px 28px 0 0; padding: 0 20px calc(22px + var(--safe-b)); animation: sheet-up .3s cubic-bezier(.2,.9,.3,1) both; box-shadow: 0 -10px 40px rgba(0,0,0,.15); }
+.sheet-handle { display: flex; justify-content: center; padding: 10px 0 12px; touch-action: none; cursor: grab; }
+.sheet-handle span { width: 40px; height: 5px; border-radius: 99px; background: #d9d2bd; }
+
+/* Tablet y escritorio: la hoja pasa a diálogo centrado */
+@media (min-width: 768px) {
+  .sheet-root { align-items: center; justify-content: center; }
+  .sheet { max-width: 560px; border-radius: 28px; max-height: 80%; }
+}
