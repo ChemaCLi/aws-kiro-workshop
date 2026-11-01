@@ -1,0 +1,557 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Agregar las reglas puras de la landing en `src/core/rules.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479049716
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479058185
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479214343
+      }
+    ],
+    "1.2 Agregar `introSeen` y `hasLocalData()` en `src/core/store.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479049809
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479222602
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479426221
+      }
+    ],
+    "1.3 Crear `docs/modules/settings/README.md` con el esqueleto y el arnés de propiedades": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479049878
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479058382
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479215149
+      }
+    ],
+    "1.4 Escribir la prueba de la propiedad 1 (franja horaria)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479049933
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479437976
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479783773
+      }
+    ],
+    "1.5 Escribir la prueba de la propiedad 2 (el hero nunca queda vacío)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479049985
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479438020
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479784677
+      }
+    ],
+    "1.6 Escribir la prueba de la propiedad 3 (`hasLocalData` exacto y sin mutación)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050033
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479792449
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793480555638
+      }
+    ],
+    "1.7 Escribir la prueba de la propiedad 4 (cuándo aparece la Intro_Modal)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050077
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479438644
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479785798
+      }
+    ],
+    "1.8 Escribir la prueba de la propiedad 5 (`introSeen` booleano, aditivo e idempotente)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050116
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479793417
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793480556093
+      }
+    ],
+    "1.9 Escribir la prueba de la propiedad 6 (`reset` y `seedDemo` conservan los ajustes)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050160
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479794474
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793480557144
+      }
+    ],
+    "1.10 Escribir la prueba de la propiedad 7 (alternar un ajuste dos veces)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050291
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793480566601
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481163782
+      }
+    ],
+    "2. Checkpoint - Reglas y estado": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050367
+      }
+    ],
+    "3.1 Agregar el ícono `settings` en `src/ui/icons.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050435
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479059198
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479215958
+      }
+    ],
+    "3.2 Crear `src/three/garden-looks.js` con `GARDEN_LOOKS`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050500
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479060019
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479216743
+      }
+    ],
+    "3.3 Modificar `src/three/garden-scene.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050559
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479222540
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479426515
+      }
+    ],
+    "3.4 Agregar los cielos y el apilado de la landing en `index.html`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050617
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479060831
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479217257
+      }
+    ],
+    "4.1 Crear `src/components/hero-garden.js` (`<hero-garden>`)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050674
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479791482
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793480557937
+      }
+    ],
+    "4.2 Crear `src/components/landing-sheets.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050733
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479791527
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793480558805
+      }
+    ],
+    "4.3 Crear `src/components/landing-view.js` (`<landing-view>`)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050788
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481169011
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481262489
+      }
+    ],
+    "4.4 Crear `src/components/settings-view.js` (`<settings-view>`)": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050824
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479223148
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479427548
+      }
+    ],
+    "4.5 Modificar `src/components/focus-view.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050894
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479223908
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479428506
+      }
+    ],
+    "4.6 Modificar `src/components/stats-view.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479050968
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479224499
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479429279
+      }
+    ],
+    "4.7 Modificar `src/components/app-shell.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051059
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481266114
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481316172
+      }
+    ],
+    "4.8 Modificar `src/main.js`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051135
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481266821
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481316228
+      }
+    ],
+    "5. Checkpoint - Componentes integrados": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051228
+      }
+    ],
+    "6.1 Completar `docs/modules/settings/README.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051298
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481321627
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481563682
+      }
+    ],
+    "6.2 Actualizar `docs/modules/pomodoro/README.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051350
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481321718
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481564120
+      }
+    ],
+    "6.3 Actualizar `docs/modules/statistics/README.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051409
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481322454
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481565146
+      }
+    ],
+    "6.4 Actualizar `docs/modules/3d-world/README.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051465
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481323379
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481566235
+      }
+    ],
+    "6.5 Actualizar `docs/features.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051508
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481324172
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481566785
+      }
+    ],
+    "6.6 Agregar el módulo `settings` a la tabla de módulos de `.kiro/steering/product.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051553
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481569977
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481594476
+      }
+    ],
+    "6.7 Agregar el módulo `settings` al mapa de `.kiro/steering/docs-and-qa.md`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051651
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481570862
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481595546
+      }
+    ],
+    "7.1 Ejecutar el agente `qa-tester` sobre `settings`, `pomodoro`, `statistics` y `3d-world`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479051725
+      },
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481602104
+      },
+      {
+        "executionId": "25091911-5563-499f-a3ae-c1b2ee3d6f4f",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793515528546
+      }
+    ],
+    "3. Iconos, escena 3D y estilos base": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793479426549
+      }
+    ],
+    "1. Reglas y estado en `core`": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481163840
+      }
+    ],
+    "4. Componentes": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481316273
+      }
+    ],
+    "6. Documentación": [
+      {
+        "executionId": "59b6959a-9211-4fc6-9854-32675a10a238",
+        "chatSessionId": "sess_9d8f1466-3886-49fc-8aee-e685a772e9cc",
+        "timestamp": 1793481595592
+      }
+    ]
+  }
+}
