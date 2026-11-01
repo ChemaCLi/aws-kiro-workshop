@@ -1,6 +1,6 @@
 # Melodías
 
-Cada archivo `.json` de esta carpeta es una melodía lofi. Para agregar una:
+Cada archivo `.json` de esta carpeta es una melodía de fondo (lofi o hiphop/trap). Para agregar una:
 
 1. Crea `mi-melodia.json` con este formato (un compás por elemento, todas las listas con el mismo largo):
 
@@ -20,7 +20,7 @@ Cada archivo `.json` de esta carpeta es una melodía lofi. Para agregar una:
 - `chords`: notas del acorde de cada compás.
 - `bass`: nota raíz de cada compás.
 - `melody`: 8 corcheas por compás; `null` es silencio.
-- `bpm` es opcional (por defecto 72).
+- `bpm` es opcional (por defecto 72). Lofi: 60 a 85. Hiphop/trap enérgico: 130 a 140 (la caja cae en el tiempo 3, así que se siente en medio tiempo).
 
 2. Agrega el nombre del archivo a `index.json` (el navegador no puede listar carpetas).
 

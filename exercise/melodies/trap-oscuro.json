@@ -1,0 +1,17 @@
+{
+  "name": "Trap en Do menor",
+  "bpm": 138,
+  "chords": [
+    ["C4", "Eb4", "G4", "Bb4"],
+    ["Ab3", "C4", "Eb4", "G4"],
+    ["F3", "Ab3", "C4", "Eb4"],
+    ["G3", "B3", "D4", "F4"]
+  ],
+  "bass": ["C2", "Ab2", "F2", "G2"],
+  "melody": [
+    ["G5", "Eb5", null, "G5", "Bb5", null, "G5", null],
+    ["Eb5", "C5", null, "Eb5", "G5", null, "Eb5", null],
+    ["F5", "C5", null, "F5", "Ab5", null, "F5", null],
+    ["D5", "F5", null, "G5", "F5", "D5", null, null]
+  ]
+}
