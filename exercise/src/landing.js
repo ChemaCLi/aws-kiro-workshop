@@ -3,7 +3,7 @@
 import { PLANTS, TASK_TYPES, heroPlots, timePeriodFor } from './core/rules.js';
 import { store } from './core/store.js';
 import './components/hero-garden.js';
-import { openAccountReminderSheet, openComingSoonSheet } from './components/landing-sheets.js';
+import { openAccountReminderSheet } from './components/landing-sheets.js';
 
 const APP_URL = './app.html';
 
@@ -101,9 +101,10 @@ function enterApp() {
   openAccountReminderSheet({ onDone: () => location.assign(APP_URL) });
 }
 
+// El Create_Account_Button (data-act="account") ahora es un enlace directo a app.html#/cuenta, así
+// que solo se intercepta "Entrar" para pasar por el recordatorio antes de abrir la app.
 document.addEventListener('click', (event) => {
   if (event.target.closest('[data-enter]')) enterApp();
-  if (event.target.closest('[data-act="account"]') && !isEntering) openComingSoonSheet();
 });
 
 document.addEventListener('visibilitychange', () => {

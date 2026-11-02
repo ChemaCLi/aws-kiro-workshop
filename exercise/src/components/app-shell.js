@@ -14,6 +14,27 @@ const TABS = [
 ];
 const TITLE = 'Focus Garden';
 
+/**
+ * Decide, SOLO a partir del hash, si se muestra la Auth_Page o una pestaña. Es pura:
+ * recibe el hash como argumento (no lee `location`), no lanza y no muta nada, para que la
+ * propiedad 1 pueda recorrer cientos de hashes sin efectos secundarios.
+ *
+ * `#/cuenta` es una ruta con barra, no una pestaña de `TABS`: devuelve
+ * `{ kind: 'route', id: 'account' }`. Cualquier otro hash es una pestaña: devuelve
+ * `{ kind: 'tab', id }`, con `id` el tab si existe en `TABS` o `'tasks'` como respaldo.
+ *
+ * @param {string} hash el valor de `location.hash` (p.ej. `'#/cuenta'`, `'#/focus'`, `''`).
+ * @returns {{ kind: 'route', id: 'account' } | { kind: 'tab', id: string }}
+ */
+export function routeFromHash(hash) {
+  // Normaliza: quita el '#', la barra inicial y los espacios de los bordes. Tolera tanto
+  // `#/cuenta` como `#cuenta` o con espacios, sin depender de un formato exacto.
+  const normalized = String(hash ?? '').replace(/^#\/?/, '').trim();
+  if (normalized === 'cuenta') return { kind: 'route', id: 'account' };
+  const id = TABS.some((t) => t.id === normalized) ? normalized : 'tasks';
+  return { kind: 'tab', id };
+}
+
 class AppShell extends HTMLElement {
   #tab = 'tasks';
   #wasRunning = false;
@@ -36,19 +57,18 @@ class AppShell extends HTMLElement {
         <settings-view data-tab="settings" hidden></settings-view>
       </main>
       <nav aria-label="Secciones">${buttons}</nav>
+      <account-view hidden></account-view>
       <div id="toasts" aria-live="polite"></div>
       <div id="sheet-host"></div>`;
 
     this.nav = this.querySelector('nav');
+    this.accountView = this.querySelector('account-view');
     this.nav.addEventListener('click', (e) => {
       const b = e.target.closest('button[data-tab]');
       if (b) { haptic(8); this.go(b.dataset.tab); }
     });
     document.addEventListener('app:navigate', (e) => this.go(e.detail.tab));
-    window.addEventListener('hashchange', () => {
-      const tab = location.hash.replace('#/', '');
-      if (tab !== this.#tab) this.go(tab);
-    });
+    window.addEventListener('hashchange', () => this.#applyRoute());
     document.addEventListener('app:toast', (e) => this.#toast(e.detail));
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) keepAwake(store.state.timer.status === 'running');
@@ -64,18 +84,35 @@ class AppShell extends HTMLElement {
       window.addEventListener('pointerdown', resume, { once: true });
     }
 
-    this.go(this.#tabFromHash());
+    this.#applyRoute();
   }
 
-  /** Pestaña indicada por el hash (`#/settings`) si existe en TABS; en cualquier otro caso, Tareas. */
-  #tabFromHash() {
-    const fromHash = location.hash.replace('#/', '');
-    return TABS.some((t) => t.id === fromHash) ? fromHash : 'tasks';
+  /**
+   * Aplica la ruta que dicta el hash actual. Es el único punto que lee `location.hash`:
+   * delega la decisión a `routeFromHash` (pura) y traduce el resultado a DOM. En la ruta
+   * `account` monta la Auth_Page a pantalla completa ocultando la barra; en una pestaña,
+   * oculta la cuenta, restaura la barra y reusa `go(id)` tal como funcionaba antes.
+   */
+  #applyRoute() {
+    const route = routeFromHash(location.hash);
+    if (route.kind === 'route' && route.id === 'account') {
+      // Cuenta a pantalla completa: ocultamos la pestaña activa y la barra; la cuenta tapa todo.
+      for (const view of this.querySelectorAll('main > [data-tab]')) view.hidden = true;
+      this.nav.hidden = true;
+      this.accountView.hidden = false;
+      return;
+    }
+    // Volvemos a una pestaña: `go` ya oculta la cuenta, muestra la barra y pinta la pestaña.
+    this.go(route.id);
   }
 
   go(tab) {
     if (!TABS.some((t) => t.id === tab)) return;
     this.#tab = tab;
+    // Mostrar una pestaña siempre implica salir de la cuenta: aseguramos que la Auth_Page
+    // quede oculta y la barra visible, venga `go` del hash, de un botón o de `app:navigate`.
+    if (this.accountView) this.accountView.hidden = true;
+    this.nav.hidden = false;
     for (const view of this.querySelectorAll('main > [data-tab]')) {
       const on = view.dataset.tab === tab;
       if (on && view.hidden) {

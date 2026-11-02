@@ -33,7 +33,13 @@ Pestaña **Ajustes** (ícono de engrane `settings`), la última de `TABS` en `ap
   - **Sonido de la campanita** (`settings.sound`).
   - **Modo demo** (`settings.demo`): "Rondas de 10 segundos para mostrar la app". No se puede cambiar mientras hay una ronda en curso (corriendo o en pausa).
 - **Datos**: **"Cargar datos de ejemplo"** pide confirmación solo si ya hay tareas (reemplaza tareas y rondas), si no, carga directo y muestra el toast "Datos de ejemplo cargados ✨". **"Borrar todos los datos"** siempre pide confirmación en modo peligro y, al confirmar, muestra "Todo limpio 🌱". Cancelar no cambia nada. `reset()` y `seedDemo()` conservan `music`, `sound`, `demo` y `minutes`.
-- **Espacios reservados**: bloques **"Mi cuenta"** ("Aquí podrás crear tu cuenta e iniciar sesión") y **"Mis sesiones"** ("Aquí verás los dispositivos donde tienes abierta tu cuenta"), con la etiqueta "Próximamente", atenuados (`text-ink/50`), con `aria-disabled="true"`, sin respuesta a toques, sin peticiones de red ni datos de cuenta. Anclan los specs futuros `accounts-auth`, `cloud-sync` y `multi-device-sessions`.
+- **Mi cuenta** (Account_Slot real, spec `accounts-auth`): bloque que vive en `settings-view.js` y refleja el estado de la cuenta. Tiene tres situaciones, derivadas por `accountSlotModel(getSession(), isAuthAvailable())`:
+  - **Sin sesión** (con autenticación disponible): un control "Mi cuenta" que lleva a la página de cuenta (`app.html#/cuenta`, la Auth_Page).
+  - **Con sesión**: muestra el nombre (`Display_Name`) o, si no hay, el correo, y ofrece **"Cerrar sesión"**. Cerrar sesión es un efecto local que borra solo la sesión (clave `focus-garden:auth:v1`) y **no toca los datos locales del jardín** (`jardin-movil:v1`): tareas, rondas y ajustes quedan intactos.
+  - **Sin red o sin WebCrypto (`crypto.subtle`)**: el bloque se muestra deshabilitado y atenuado (`text-ink/50`, `aria-disabled="true"`) con un aviso, y el resto de Ajustes sigue funcionando.
+
+  La lógica, el flujo OAuth y las pruebas detalladas de la cuenta viven en el módulo [`accounts-auth`](../accounts-auth/README.md); aquí solo se documenta lo que toca la vista Ajustes.
+- **Espacio reservado**: el bloque **"Mis sesiones"** ("Aquí verás los dispositivos donde tienes abierta tu cuenta") sigue con la etiqueta "Próximamente", atenuado (`text-ink/50`), con `aria-disabled="true"`, sin respuesta a toques, sin peticiones de red ni datos de cuenta. Ancla el spec futuro `multi-device-sessions`.
 
 ### Cambios en otras vistas
 
@@ -151,14 +157,15 @@ Antes de empezar: servir la carpeta de la app con un servidor estático y abrir 
 
 **Esperado:** Foco no muestra controles de música, sonido ni modo demo y mantiene los chips 5, 10, 15, 25, 35, 45 y 60 minutos; con el modo demo activo aparece "Modo demo" con un enlace ("Cambiar en Ajustes") que navega a Ajustes; Stats no muestra las acciones de datos; su estado vacío ofrece "Cargar datos de ejemplo en Ajustes" y navega a Ajustes; al terminar la ronda con música sonando, la música baja de volumen y suena la campanita como antes.
 
-#### Caso 11 — Espacios reservados para cuenta y sesiones (Requisito 11)
+#### Caso 11 — Account_Slot y espacio reservado de sesiones (Requisito 11)
 
-1. En Ajustes, desplazarse hasta el final y leer los bloques "Mi cuenta" y "Mis sesiones".
-2. Inspeccionar los elementos (`aria-disabled`, clases de opacidad) y tocar cada bloque y la etiqueta.
-3. Con la pestaña Network abierta y limpia, entrar a Ajustes, desplazarse y tocar los bloques.
-4. Revisar `localStorage` (`jardin-movil:v1`) en busca de datos de cuenta.
+Este caso cubre solo lo que muestra la vista Ajustes. El flujo completo de la cuenta (registro, inicio de sesión, OAuth) se verifica en [`accounts-auth`](../accounts-auth/README.md).
 
-**Esperado:** "Mi cuenta" muestra la etiqueta "Próximamente" y el texto "Aquí podrás crear tu cuenta e iniciar sesión"; "Mis sesiones" muestra "Próximamente" y "Aquí verás los dispositivos donde tienes abierta tu cuenta"; ambos se ven atenuados (`text-ink/50`) frente a los controles activos, tienen `aria-disabled="true"` y no responden a toques; **no hay peticiones de red** desde Ajustes y no se guarda ningún dato de cuenta.
+1. Con **sin sesión** y autenticación disponible, en Ajustes desplazarse hasta el bloque "Mi cuenta" y tocar su control; observar la navegación y la URL.
+2. Volver a Ajustes y leer el bloque "Mis sesiones"; inspeccionarlo (`aria-disabled`, clases de opacidad) y tocarlo junto con su etiqueta.
+3. Con una sesión iniciada (desde la página de cuenta), volver a Ajustes: anotar las tareas y rondas (`__store.state`), tocar **"Cerrar sesión"** y volver a revisarlas.
+
+**Esperado:** sin sesión, "Mi cuenta" muestra un control que lleva a la página de cuenta (`app.html#/cuenta`); "Mis sesiones" muestra la etiqueta "Próximamente" y el texto "Aquí verás los dispositivos donde tienes abierta tu cuenta", se ve atenuado (`text-ink/50`), tiene `aria-disabled="true"` y no responde a toques; con sesión, "Mi cuenta" muestra el nombre (o el correo) y el botón "Cerrar sesión", y al cerrar sesión las tareas y rondas (`jardin-movil:v1`) quedan **idénticas**; si no hay red ni `crypto.subtle`, el bloque "Mi cuenta" se ve deshabilitado con aviso y el resto de Ajustes sigue funcionando.
 
 #### Caso 12 — Landing y app son páginas separadas, con botón de salir
 
@@ -227,6 +234,7 @@ const forAll = (runs, generate, check) => {
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| 2.1.0 | 2026-11-01 | El Reserved_Slot "Mi cuenta" ("Próximamente") pasa a ser el **Account_Slot real** (spec `accounts-auth`): sin sesión ofrece un control que lleva a la página de cuenta (`app.html#/cuenta`); con sesión muestra el nombre o el correo y permite "Cerrar sesión" sin tocar los datos locales (`jardin-movil:v1`); sin red/WebCrypto se deshabilita con aviso. "Mis sesiones" sigue como espacio reservado "Próximamente". El detalle de la cuenta (flujo OAuth y sus pruebas) vive en el módulo `accounts-auth`. |
 | 2.0.0 | 2026-10-31 | La landing deja de ser un componente dentro de la SPA y pasa a ser la página `index.html`; la app se muda a `app.html` (y el `start_url` del manifiesto la apunta). Landing rediseñada: hero con el texto a la izquierda y el jardín a la derecha, estrellas y luna de noche, sol por franja, secciones *Cómo funciona*, *Funciones* y *Open source*. El recordatorio de la cuenta sale **siempre** al entrar desde la landing (antes solo la primera vez y sin "Continuar"); se elimina `settings.introSeen`, `shouldShowIntro` y `ENTRY_MODES`, y con ellos las propiedades 4 y 5 anteriores (las demás se renumeraron). Botón de salir en Tareas y en Ajustes. Estilos compartidos en `src/styles/` y colores de Tailwind en `src/ui/tailwind-config.js`. La hoja "Próximamente" ahora solo informa. Cambio MAYOR de estructura sin migración de datos: la clave `jardin-movil:v1` no cambia. |
 | 1.0.0 | 2026-10-31 | Versión inicial del módulo: landing de bienvenida con hero 3D según la hora del día (con respaldo de CSS y emojis y soporte de movimiento reducido), Intro_Modal de una sola vez controlada por `settings.introSeen`, hoja "Próximamente" para crear cuenta, pestaña Ajustes (`<settings-view>`) con música, sonido, modo demo y la sección "Datos", y espacios reservados "Mi cuenta" y "Mis sesiones". `introSeen` es un campo aditivo: la clave `jardin-movil:v1` no cambia. |
 | 0.1.0 | 2026-10-29 | Esqueleto del módulo: secciones fijas y arnés de propiedades `forAll` para la consola. |

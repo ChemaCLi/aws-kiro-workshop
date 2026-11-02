@@ -2,14 +2,14 @@
 
 Este documento guarda el requerimiento original y el plan para construirlo en varios specs progresivos. Léelo antes de retomar el trabajo.
 
-Última actualización: 2026-10-31.
+Última actualización: 2026-11-01.
 
 ## Estado
 
 | # | Spec | Estado |
 |---|------|--------|
-| 1 | `landing-and-settings` | **Implementado** (2026-10-31), con la landing rediseñada como página aparte. QA parcial: propiedades en Node y una pasada en navegador; falta una pasada de `qa-tester` con navegador para sonido, vibración y gestos (ver `docs/qa-reports/2026-10-31-landing-and-settings.md`). |
-| 2 | `accounts-auth` | Sin spec. Solo está descrito aquí. |
+| 1 | `landing-and-settings` | ✅ **Completado** (2026-10-31). Todas las tareas de `tasks.md` cerradas, con la landing rediseñada como página aparte. QA: propiedades en Node y una pasada en navegador; queda como seguimiento una pasada de `qa-tester` con navegador para sonido, vibración y gestos (ver `docs/qa-reports/2026-10-31-landing-and-settings.md`). |
+| 2 | `accounts-auth` | ✅ **Completado** (2026-11-01). Spec en `.kiro/specs/accounts-auth/` (`requirements.md`, `design.md`, `tasks.md`). Autenticación opcional con Amazon Cognito (usuario/contraseña, Google, Meta, Login with Amazon y GitHub vía el puente OIDC `oidc-bridge/`); los datos locales siguen intactos. QA: ver `docs/qa-reports/2026-11-01-accounts-auth.md`, con el puente OIDC probado (14/14); los flujos que requieren Cognito real y navegador quedan pendientes de una pasada con el backend configurado. |
 | 3 | `cloud-sync` | Sin spec. Solo está descrito aquí. |
 | 4 | `multi-device-sessions` | Sin spec. Solo está descrito aquí. |
 
@@ -84,10 +84,10 @@ Todo lo que no necesita servidor.
 - El movimiento reducido ampliado aplica solo al jardín de la landing. El jardín del módulo 3D no cambia.
 - Sigue en `localStorage` con la clave `jardin-movil:v1`, sin cambios de forma.
 
-### 2. `accounts-auth`
+### 2. `accounts-auth` (spec implementado, 2026-11-01)
 
 - Registro e inicio de sesión con Amazon Cognito.
-- Proveedores: usuario y contraseña, Google, GitHub, Meta (Instagram) y AWS account.
+- Proveedores: usuario y contraseña, Google, GitHub (vía el puente OIDC `oidc-bridge/`), Meta (Instagram) y AWS account (resuelto como Login with Amazon).
 - 2FA opcional.
 - Página de registro (hoy es la hoja "Próximamente"), pregunta del nombre, botón "Ir a mi Garden" y repregunta si falta el nombre.
 - Reemplaza el bloque reservado "Mi cuenta" por la cuenta real.
@@ -119,14 +119,14 @@ Nota técnica: los navegadores no reciben webhooks. El canal en tiempo real debe
 
 ## Cómo retomar
 
-1. El spec 1 está implementado (tareas en `.kiro/specs/landing-and-settings/tasks.md`). Queda la pasada de `qa-tester` con navegador automatizado.
-2. Crear el spec 2 como Quick Spec o Requirements-first. Antes, responder las preguntas abiertas de arriba (sobre todo qué es "AWS account") y actualizar los steerings.
-3. Repetir para los specs 3 y 4.
+1. Los specs 1 y 2 están implementados (tareas en `.kiro/specs/landing-and-settings/tasks.md` y `.kiro/specs/accounts-auth/tasks.md`). Del spec 1 queda la pasada de `qa-tester` con navegador automatizado; del spec 2 quedan los flujos que requieren Cognito real y navegador, pendientes de una pasada con el backend configurado.
+2. El siguiente paso es el spec 3 (`cloud-sync`): crearlo como Quick Spec o Requirements-first. Antes, responder las preguntas abiertas que siguen (DynamoDB vs. MongoDB y la resolución de conflictos) y actualizar los steerings si hace falta.
+3. Repetir para el spec 4 (`multi-device-sessions`).
 4. Al terminar cada spec, actualizar el estado de la tabla de este documento y `docs/features.md`.
 
 ## Preguntas abiertas
 
-- ¿Qué significa "AWS account" como método de inicio de sesión?
+- ~~¿Qué significa "AWS account" como método de inicio de sesión?~~ **Resuelta:** se interpretó como Login with Amazon, ya decidido e implementado en el spec 2 `accounts-auth`.
 - ¿DynamoDB está bien como base de datos, o prefieres MongoDB a pesar del costo y la administración?
 - ¿Cómo se resuelven los conflictos de datos entre dispositivos (gana el último cambio, o se pregunta)?
 - ¿El canal en tiempo real será WebSocket o polling?

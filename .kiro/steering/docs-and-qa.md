@@ -15,6 +15,7 @@ docs/modules/pomodoro/README.md       módulo de foco
 docs/modules/3d-world/README.md       módulo del jardín 3D
 docs/modules/statistics/README.md     módulo de estadísticas
 docs/modules/settings/README.md       módulo de ajustes y landing
+docs/modules/accounts-auth/README.md  módulo de cuentas y autenticación
 ```
 
 Cada README de módulo tiene tres secciones fijas: **Descripción**, **Pruebas para qa-tester** y **Changelog**.

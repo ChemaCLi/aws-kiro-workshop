@@ -1,9 +1,11 @@
-// <settings-view>: preferencias (música, sonido, modo demo), acciones de datos y espacios
-// reservados para las cuentas. Es el único lugar donde viven estos controles.
+// <settings-view>: preferencias (música, sonido, modo demo), acciones de datos, el
+// Account_Slot de la cuenta y un espacio reservado para las sesiones. Es el único lugar
+// donde viven estos controles.
 import { store } from '../core/store.js';
 import { StoreView } from '../ui/base.js';
 import { haptic, unlockAudio } from '../core/feedback.js';
 import { startMusic, stopMusic, isMusicAvailable } from '../core/lofi.js';
+import { accountSlotModel, getSession, isAuthAvailable, signOut } from '../core/auth.js';
 import { icon } from '../ui/icons.js';
 import { confirmSheet } from '../ui/sheet.js';
 import { esc, toast } from '../ui/util.js';
@@ -29,13 +31,70 @@ const reservedSlot = (title, description) => `
     <p class="mt-1 text-sm font-medium">${esc(description)}</p>
   </section>`;
 
+/**
+ * Account_Slot real de Ajustes. Pinta una de las tres situaciones que `accountSlotModel`
+ * deriva de la sesión y la disponibilidad del SDK (ver la tabla de `settings-view.js` en
+ * el diseño):
+ *   - `disabled`: sin red/SDK, el bloque se atenúa con el aviso y no ofrece acciones de
+ *     cuenta; el resto de Ajustes sigue funcionando (req. 10.1, 10.3).
+ *   - `guest`: con SDK y sin sesión, un control que lleva a la Auth_Page (req. 7.3).
+ *   - `signed-in`: con sesión, muestra la Display_Name (o el correo) y el botón de cerrar
+ *     sesión (req. 7.1, 7.2).
+ */
+const accountSlot = (model) => {
+  if (model.mode === 'disabled') {
+    return `
+      <section aria-disabled="true" class="mx-5 mt-4 rounded-2xl border border-line bg-paper p-4 text-ink/50">
+        <h2 class="text-base font-extrabold">Mi cuenta</h2>
+        <p class="mt-1 text-sm font-medium">${esc(model.label)}</p>
+      </section>`;
+  }
+
+  if (model.mode === 'guest') {
+    return `
+      <section class="mx-5 mt-4 rounded-2xl border border-line bg-paper p-4">
+        <h2 class="text-base font-extrabold">Mi cuenta</h2>
+        <p class="mt-1 text-sm font-medium text-ink/60">Guarda tu jardín y entra desde otros dispositivos</p>
+        <button data-act="account"
+          class="press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-moss py-3 font-bold text-paper">
+          ${icon('user', 'h-5 w-5')} ${esc(model.label)}
+        </button>
+      </section>`;
+  }
+
+  // signed-in: la etiqueta es la Display_Name o el correo que derivó el modelo.
+  return `
+    <section class="mx-5 mt-4 rounded-2xl border border-line bg-paper p-4">
+      <h2 class="text-base font-extrabold">Mi cuenta</h2>
+      <p class="mt-1 flex items-center gap-2 text-sm font-bold text-ink/80">
+        ${icon('user', 'h-5 w-5')} <span class="min-w-0 truncate">${esc(model.label)}</span>
+      </p>
+      <button data-act="signout"
+        class="press mt-3 min-h-11 w-full rounded-2xl border border-line py-3 text-sm font-bold text-red-600/80">
+        Cerrar sesión
+      </button>
+    </section>`;
+};
+
 class SettingsView extends StoreView {
-  setup() { this.addEventListener('click', (e) => this.#onClick(e)); }
+  setup() {
+    this.addEventListener('click', (e) => this.#onClick(e));
+    // La sesión vive fuera del store (clave `focus-garden:auth:v1`), así que el repintado por
+    // `change` del store no la refleja: escuchamos `app:auth` para repintar el Account_Slot
+    // cuando se inicia o cierra sesión, sin acoplar esta vista con `account-view`.
+    this.onAuthChange = () => this.update(store.state);
+    document.addEventListener('app:auth', this.onAuthChange);
+  }
+
+  teardown() {
+    document.removeEventListener('app:auth', this.onAuthChange);
+  }
 
   update(state) {
     const { settings, timer } = state;
     const isRoundInProgress = timer.status === 'running' || timer.status === 'paused';
     const musicAvailable = isMusicAvailable();
+    const account = accountSlotModel(getSession(), isAuthAvailable());
     const prevScroll = this.querySelector('.scroll')?.scrollTop ?? 0;
 
     this.innerHTML = `
@@ -76,7 +135,7 @@ class SettingsView extends StoreView {
           </div>
         </section>
 
-        ${reservedSlot('Mi cuenta', 'Aquí podrás crear tu cuenta e iniciar sesión')}
+        ${accountSlot(account)}
         ${reservedSlot('Mis sesiones', 'Aquí verás los dispositivos donde tienes abierta tu cuenta')}
 
         <a href="./index.html" class="press mx-5 mt-6 flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-line bg-paper font-bold text-ink/70">
@@ -93,6 +152,8 @@ class SettingsView extends StoreView {
     if (act === 'demo') this.#toggleDemo();
     if (act === 'seed') this.#seedSampleData();
     if (act === 'reset') this.#resetAllData();
+    if (act === 'account') this.#goToAccount();
+    if (act === 'signout') this.#signOut();
   }
 
   #toggleSetting(key) {
@@ -115,6 +176,24 @@ class SettingsView extends StoreView {
     store.setSetting('music', turnOn);
     haptic(10);
     if (turnOn) startMusic(); else stopMusic();
+  }
+
+  /**
+   * Lleva a la Auth_Page. `#/cuenta` es una ruta con barra, no una pestaña de `TABS`, así que
+   * `navigate()` (que emite `app:navigate` con el id de pestaña) no la cubre: se fija el hash
+   * directamente, que es la señal que `app-shell` lee con `routeFromHash(location.hash)` para
+   * montar `<account-view>`. Dejar el hash coherente también hace que entrar por URL funcione.
+   */
+  #goToAccount() {
+    haptic(10);
+    location.hash = '#/cuenta';
+  }
+
+  /** Cerrar sesión es un efecto local: borra la sesión (sin tocar `jardin-movil:v1`) y avisa. */
+  #signOut() {
+    signOut();
+    haptic(10);
+    toast('Sesión cerrada');
   }
 
   /** Reemplazar datos pide confirmación solo si hay tareas que perder. */

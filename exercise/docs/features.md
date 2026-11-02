@@ -63,7 +63,7 @@ La landing es una página aparte (`index.html`); la app vive en `app.html`. Deta
 | L2 | Ver mi jardín según la hora | Cielo, astro y luz cambian en cuatro franjas (mañana, mediodía, tarde y noche); de noche hay luna y estrellas. Muestra mis plantas, o plantas de muestra si aún no tengo |
 | L3 | Entrar con un toque | Botones **Continuar mi jardín** (si ya hay tareas o rondas) o **Empezar mi jardín**; también **Entrar** en la barra superior |
 | L4 | Saber que puedo crear una cuenta cuando quiera | Al entrar sale siempre el aviso "Puedes crear una cuenta desde los ajustes si así lo deseas" (**Entendido**) |
-| L5 | Saber que habrá cuentas | Botón "Mantén vivo tu jardín, lleva tu progreso contigo": abre un aviso **Próximamente**, sin registro ni peticiones de red |
+| L5 | Crear una cuenta desde la landing | Botón "Mantén vivo tu jardín, lleva tu progreso contigo": lleva a la página de cuenta (`app.html#/cuenta`) para registrarse o iniciar sesión |
 | L6 | Usar la landing sin 3D o con movimiento reducido | Isla de emojis si Three.js o WebGL fallan; escena, estrellas y chips quietos con `prefers-reduced-motion` |
 | L7 | Saber que es open source | Sección *Open source* con el stack, los comandos para correrlo y el enlace al repositorio |
 | L8 | Salir de la app y volver a la landing | Botón de salida en Tareas y fila "Salir a la página de inicio" en Ajustes; los botones atrás y adelante del navegador también funcionan |
@@ -78,7 +78,23 @@ La landing es una página aparte (`index.html`); la app vive en `app.html`. Deta
 | A4 | Mostrarlo en una demo | Interruptor **Modo demo** (rondas de 10 segundos); Foco muestra un indicador con enlace a Ajustes |
 | A5 | Probar la app con datos | **Cargar datos de ejemplo** en la sección Datos (pide confirmación si ya hay tareas); también desde el estado vacío de Estadísticas |
 | A6 | Empezar de cero | **Borrar todos los datos** (con confirmación); conserva los ajustes |
-| A7 | Ver qué viene | Espacios "Mi cuenta" y "Mis sesiones" marcados **Próximamente**; no hacen nada todavía |
+| A7 | Entrar a mi cuenta desde Ajustes | Bloque **Mi cuenta** real: sin sesión lleva a la página de cuenta para crear cuenta o iniciar sesión; con sesión muestra mi nombre (o correo) y **Cerrar sesión** |
+| A8 | Ver qué viene | Espacio "Mis sesiones" marcado **Próximamente**; aún no hace nada |
+
+### Tener una cuenta propia (módulo [accounts-auth](modules/accounts-auth/README.md))
+
+La cuenta es **opcional**: sin ella la app funciona igual, con los datos en el dispositivo. La página de cuenta vive en `app.html#/cuenta`.
+
+| # | Caso de uso | Cómo se hace |
+|---|-------------|--------------|
+| C1 | Crear una cuenta con mi correo | Página de cuenta: registro con correo y contraseña; llega un código de confirmación que se escribe para activar la cuenta |
+| C2 | Iniciar sesión con correo y contraseña | Formulario de inicio de sesión en la página de cuenta; restaura la sesión en este dispositivo |
+| C3 | Entrar con Google, Meta o mi cuenta de Amazon | Botones de proveedor social; redirigen al inicio de sesión alojado por Cognito (OAuth 2.0 con PKCE) |
+| C4 | Entrar con GitHub | Botón de GitHub; usa el puente OIDC porque Cognito no lo soporta de forma nativa. Si el puente no responde, los demás métodos siguen funcionando |
+| C5 | Poner mi nombre tras registrarme | Tras el registro se pide solo el nombre; luego aparece **Ir a mi Garden** que lleva a Tareas |
+| C6 | Ver mi cuenta y cerrar sesión | Bloque **Mi cuenta** en Ajustes: muestra mi nombre (o correo) y **Cerrar sesión**, que no borra mis datos locales |
+| C7 | Usar la app sin cuenta | Todo sigue funcionando sin registrarse; crear cuenta no toca los datos locales |
+| C8 | Seguir sin cuentas si no hay red o SDK | Sin conexión o sin el SDK de cuentas, los controles de cuenta se muestran deshabilitados con aviso y el resto de la app sigue igual |
 
 ### Transversales
 
@@ -107,7 +123,6 @@ Ordenado por valor para el problema central (organización, avance y enfoque). C
 | Baja | Metas diarias y logros | statistics | |
 | Baja | Tema oscuro | transversal | Tokens de color nuevos en `design-system.md` |
 | Baja | Pruebas automáticas de `rules.js` y `store.js` | transversal | Con `node --test`, sin librerías |
-| Media | `accounts-auth`: registro e inicio de sesión | transversal | Permitirá tener una cuenta propia; hoy la landing y "Mi cuenta" en Ajustes solo anuncian "Próximamente". Contradice el principio "datos locales / sin servidor": deberá actualizar `product.md` y `tech.md` |
 | Media | `cloud-sync`: guardar el progreso en la nube | transversal | Respaldará tareas, rondas y ajustes para no perderlos al cambiar de dispositivo. Se sugiere DynamoDB en lugar de MongoDB. Contradice "datos locales / sin servidor": deberá actualizar `product.md` y `tech.md` y definir qué datos viajan y qué sigue funcionando sin conexión |
 | Baja | `multi-device-sessions`: sección "Mis sesiones" | settings | Mostrará los dispositivos donde la cuenta está abierta. Depende de `accounts-auth` y `cloud-sync` |
 | Fuera de alcance por ahora | Multilenguaje | transversal | Es un refactor amplio: todos los textos viven dentro de los componentes |

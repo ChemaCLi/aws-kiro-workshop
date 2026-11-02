@@ -1,0 +1,5 @@
+# Dependencias instaladas por npm (express, jose). Se reinstalan con npm install.
+node_modules/
+
+# Entorno con secretos reales (claves de firma, client secret). El .env.example sí se versiona.
+.env

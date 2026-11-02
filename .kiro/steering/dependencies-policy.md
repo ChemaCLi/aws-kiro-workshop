@@ -23,6 +23,7 @@ Responder en este orden:
 - Iconos: `ui/icons.js`, no una librería de íconos.
 - Eventos entre componentes: eventos en `document`, no un bus externo.
 - Utilidades (debounce, clamp, formateo): una función en `ui/util.js`.
+- Autenticación con Cognito (frontend): el flujo OAuth 2.0 *authorization code + PKCE* se escribe a mano en `src/core/auth.js` con `fetch` nativo y WebCrypto (`crypto.subtle`), **sin SDK**. No se agrega `amazon-cognito-identity-js` ni equivalente. Es coherente con esta política porque el navegador ya lo hace: PKCE es `crypto.subtle.digest('SHA-256')` + base64url, el canje del `code` es un `fetch` de formulario contra el endpoint de token, y la validación de firma y claims del ID token es WebCrypto (`importKey`/`verify` RS256) contra el JWKS de Cognito. El frontend sigue sin bundler y sin dependencias instaladas.
 
 ## Qué sí puede venir de CDN
 
@@ -41,6 +42,20 @@ Reglas para una nueva librería por CDN:
 - La app debe seguir funcionando si falla. Escribir la degradación elegante.
 - Documentarla en `tech.md` y en el README del módulo que la usa, con el motivo.
 - Pedir confirmación al usuario antes de agregarla.
+
+## Excepción: el puente OIDC (`oidc-bridge/`)
+
+El puente de GitHub (`oidc-bridge/`, ver spec `accounts-auth`) es un **servicio Node + Express aparte**, fuera del frontend. La regla de "sin build, sin instalar nada, solo CDN" aplica al frontend; el puente es Node y **sí** usa dependencias instaladas con `npm`. Viven solo en `oidc-bridge/package.json`; no tocan el frontend, que sigue sin bundler ni dependencias instaladas.
+
+Sus dos únicas dependencias, con versión fija en `package.json` (nunca `latest`):
+
+| Librería | Para qué | Motivo |
+|----------|----------|--------|
+| `express` | Base del servidor HTTP: rutas `authorize`, `callback`, `token`, `jwks` y descubrimiento OIDC | Estándar del ecosistema Node para un servicio HTTP pequeño; escribirlo con `http` crudo no aporta valor al taller |
+| `jose` | Firma y verificación de JWT (RS256) y publicación del JWKS que Cognito valida | Criptografía JOSE no trivial (RS256, manejo de claves y JWKS). Implementarla a mano sería frágil e inseguro; es justo el caso en que una librería se justifica |
+
+- Los secretos (clave de firma, secreto de GitHub) viven en variables de entorno del puente, nunca en el frontend ni en `auth-config.js`.
+- Documentar ambas en el `README.md` del puente y en `tech.md`, con su motivo.
 
 ## Excepción: migración de tecnología
 

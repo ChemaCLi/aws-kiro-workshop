@@ -1,0 +1,20 @@
+{
+  "name": "oidc-bridge",
+  "version": "1.0.0",
+  "description": "Puente OIDC de GitHub para Focus Garden: traduce el inicio de sesion de GitHub a un proveedor OIDC que Amazon Cognito acepta. Servicio Node + Express puro, aparte del frontend.",
+  "type": "module",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "5.3.0",
+    "jose": "6.2.14"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

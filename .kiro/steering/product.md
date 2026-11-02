@@ -22,6 +22,7 @@ Lista de tareas interactiva con técnica pomodoro y recompensas que gamifican el
 | `3d-world` | Isla 3D donde crece una planta por tarea terminada | `<garden-view>` |
 | `statistics` | KPIs, dona por tipo y tendencia de 7 días | `<stats-view>` |
 | `settings` | Ajustes de música, sonido y modo demo, con datos de ejemplo y borrado de datos | `<settings-view>` |
+| `accounts-auth` | Registro e inicio de sesión opcional con Amazon Cognito (usuario/contraseña, Google, Meta, Login with Amazon y GitHub) | `<account-view>` |
 
 ## Principios de producto
 
@@ -30,7 +31,9 @@ Lista de tareas interactiva con técnica pomodoro y recompensas que gamifican el
 3. **Mobile first, responsive siempre.** Se diseña primero para el teléfono. Desde 768 px la navegación pasa a un riel lateral y el contenido se centra.
 4. **Recompensa honesta.** La planta depende solo de las rondas de pomodoro hechas en la tarea (1 pasto, 2 flor, 3 arbusto, 4 árbol, 5 mariposa, 6 o más sakura). Terminar sin rondas no siembra nada.
 5. **Solo en español.** Agregar otros idiomas es un refactor amplio y no se hace dentro de una iteración normal.
-6. **Datos locales.** Todo vive en `localStorage`. No hay cuentas ni servidor.
+6. **Datos locales, cuenta opcional.** Por defecto y sin cuenta, todo vive en `localStorage`: la app funciona plena sin registro. Desde el spec `accounts-auth` existe la **opción** de crear una cuenta (autenticación con Amazon Cognito), pero crear cuenta no cambia que los datos siguen siendo locales en esta iteración; el guardado en la nube será el spec `cloud-sync`.
+
+   > **Tensión reconocida.** Este principio decía "no hay cuentas ni servidor". El spec `accounts-auth` introduce cuentas y un backend mínimo (solo el puente OIDC para iniciar sesión con GitHub, que Cognito no soporta de forma nativa), lo que matiza esa frase. Se mantiene el espíritu: la app es plenamente usable sin cuenta y los datos son locales por defecto.
 
 ## Antes de construir algo nuevo
 
