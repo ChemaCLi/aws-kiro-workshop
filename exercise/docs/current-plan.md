@@ -4,6 +4,8 @@ Este documento guarda el requerimiento original y el plan para construirlo en va
 
 Última actualización: 2026-11-01.
 
+> **Decisión (2026-11-01): se migrará la app a Astro.** El desarrollo con Web Components nativos se complicó demasiado. La migración queda pendiente y la hará la persona dueña del proyecto en otro IDE. Detalle, qué se conserva y qué cambia en [`docs/decisions/0001-migrar-a-astro.md`](decisions/0001-migrar-a-astro.md). Los specs 3 (`cloud-sync`) y 4 (`multi-device-sessions`) deben plantearse sobre el stack nuevo, no sobre Web Components.
+
 ## Estado
 
 | # | Spec | Estado |
@@ -120,7 +122,7 @@ Nota técnica: los navegadores no reciben webhooks. El canal en tiempo real debe
 ## Cómo retomar
 
 1. Los specs 1 y 2 están implementados (tareas en `.kiro/specs/landing-and-settings/tasks.md` y `.kiro/specs/accounts-auth/tasks.md`). Del spec 1 queda la pasada de `qa-tester` con navegador automatizado; del spec 2 quedan los flujos que requieren Cognito real y navegador, pendientes de una pasada con el backend configurado.
-2. El siguiente paso es el spec 3 (`cloud-sync`): crearlo como Quick Spec o Requirements-first. Antes, responder las preguntas abiertas que siguen (DynamoDB vs. MongoDB y la resolución de conflictos) y actualizar los steerings si hace falta.
+2. Antes del spec 3, leer la decisión de migrar a Astro (nota al inicio de este documento): el spec debe escribirse sobre el stack nuevo. El siguiente paso es el spec 3 (`cloud-sync`): crearlo como Quick Spec o Requirements-first. Antes, responder las preguntas abiertas que siguen (DynamoDB vs. MongoDB y la resolución de conflictos) y actualizar los steerings si hace falta.
 3. Repetir para el spec 4 (`multi-device-sessions`).
 4. Al terminar cada spec, actualizar el estado de la tabla de este documento y `docs/features.md`.
 
