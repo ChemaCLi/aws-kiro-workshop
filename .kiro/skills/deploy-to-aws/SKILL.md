@@ -135,6 +135,41 @@ Agrega los 4 (`Google`, `Facebook`, `LoginWithAmazon`, el nombre del proveedor O
 
 Copia `exercise/.env.example` a `exercise/.env` y pon ahí `PUBLIC_COGNITO_USER_POOL_ID`, `PUBLIC_COGNITO_CLIENT_ID`, `PUBLIC_COGNITO_DOMAIN` y `PUBLIC_OIDC_BRIDGE_ENDPOINT` con los valores reales de este User Pool y del puente. Publica el sitio (Ruta A o B de arriba) y, ya con su URL de CloudFront/Amplify, vuelve a `update-user-pool-client` para agregar `https://<dominio-del-sitio>/app.html` a `--callback-urls`/`--logout-urls` (otra vez, read-modify-write completo).
 
+## Progreso en la nube: sync-api
+
+Esto publica el spec `cloud-sync`: `sync-api/`, el servicio que guarda tareas/rondas/timer/ajustes por persona (ver `sync-api/README.md`). Mismo patrón de despliegue que el puente (Lambda Web Function + GitHub Actions con OIDC federation), pero **ninguna de sus variables es secreta** — el JWKS de Cognito que valida es público por diseño — así que todo va como GitHub Variables, sin Secrets.
+
+### 1. Tabla de DynamoDB y roles (una sola vez)
+
+```bash
+aws dynamodb create-table \
+  --table-name focus-garden-cloud-sync \
+  --attribute-definitions AttributeName=sub,AttributeType=S \
+  --key-schema AttributeName=sub,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+```
+
+Sin TTL (a diferencia de la tabla del puente): es dato durable, no efímero. Crea un rol de **ejecución** nuevo (`AWSLambdaBasicExecutionRole` + `dynamodb:GetItem`/`PutItem` solo sobre esta tabla) — guarda su ARN en la variable `SYNC_API_EXECUTION_ROLE_ARN` — y un rol de **despliegue** nuevo para GitHub Actions (mismo proveedor OIDC de IAM del paso 1 de la sección de Cognito, permisos acotados a `lambda-web:*` sobre `focus-garden-sync-api`) — guarda su ARN en `SYNC_API_DEPLOY_ROLE_ARN`.
+
+### 2. Variables de GitHub (ninguna es secreta)
+
+| Nombre | Valor |
+|--------|-------|
+| `SYNC_API_DEPLOY_ROLE_ARN` | ARN del rol de despliegue de arriba |
+| `SYNC_API_EXECUTION_ROLE_ARN` | ARN del rol de ejecución de arriba |
+| `SYNC_API_COGNITO_USER_POOL_ID` | El mismo User Pool que ya usa el frontend |
+| `SYNC_API_COGNITO_CLIENT_ID` | El mismo App Client que ya usa el frontend |
+| `ALLOWED_ORIGINS` | Orígenes permitidos, separados por comas (puede reutilizar el mismo valor que el puente) |
+| `SYNC_TABLE_NAME` | Nombre de la tabla del paso 1 |
+
+### 3. Desplegar
+
+El workflow `.github/workflows/deploy-sync-api.yml` corre `aws lambda-web deploy` en cada push a `main` que toque `sync-api/**` (o manualmente desde Actions). Anota la URL que imprime el primer deploy: es `PUBLIC_SYNC_API_ENDPOINT`.
+
+### 4. Conectar con el frontend
+
+Agrega `PUBLIC_SYNC_API_ENDPOINT` a `exercise/.env` con la URL del paso 3 y vuelve a publicar el sitio (Ruta A o B de arriba).
+
 ## Limpieza (importante en un taller)
 
 Pedir confirmación y eliminar lo creado para no dejar recursos:
@@ -150,6 +185,9 @@ aws lambda-web delete-web-function --function-name focus-garden-oidc-bridge
 aws dynamodb delete-table --table-name focus-garden-oidc-bridge-codes
 aws cognito-idp delete-user-pool-domain --user-pool-id <pool-id> --domain focus-garden
 aws cognito-idp delete-user-pool --user-pool-id <pool-id>
+# Progreso en la nube: sync-api y su tabla
+aws lambda-web delete-web-function --function-name focus-garden-sync-api
+aws dynamodb delete-table --table-name focus-garden-cloud-sync
 ```
 
 No olvides borrar también las OAuth Apps de Google/Meta/Amazon/GitHub si ya no se van a usar, y los GitHub Secrets/Variables del repositorio.

@@ -4,6 +4,8 @@
 import { store } from '../core/store.js';
 import { chime, haptic, keepAwake } from '../core/feedback.js';
 import { startMusic, duckMusic } from '../core/lofi.js';
+import { refreshIfNeeded } from '../core/auth.js';
+import { startCloudSync, stopCloudSync } from '../core/cloud-sync.js';
 import { esc, formatClock } from '../ui/util.js';
 import { TABS } from '../ui/tabs.js';
 import { mountTasksView } from './tasks-view.js';
@@ -140,6 +142,14 @@ export function mountAppShell() {
   document.addEventListener('app:navigate', (e) => go(e.detail.tab));
   window.addEventListener('hashchange', applyRoute);
   document.addEventListener('app:toast', (e) => showToast(e.detail));
+  // cloud-sync.js arranca/para con cada cambio de sesión (login, logout, o la que ya había al
+  // abrir la app). refreshIfNeeded restaura/renueva la sesión guardada sin forzar un redirect.
+  document.addEventListener('app:auth', (e) => {
+    const session = e.detail?.session;
+    if (session) startCloudSync(session);
+    else stopCloudSync();
+  });
+  refreshIfNeeded().then((session) => { if (session) startCloudSync(session); });
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) keepAwake(store.state.timer.status === 'running');
   });

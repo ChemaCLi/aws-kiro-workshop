@@ -1,0 +1,22 @@
+{
+  "name": "sync-api",
+  "version": "1.0.0",
+  "description": "Servicio de sincronizacion en la nube de Focus Garden: guarda y entrega tareas, rondas, timer y ajustes por usuario de Cognito, indexados por su sub.",
+  "type": "module",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1161.0",
+    "@aws-sdk/lib-dynamodb": "3.1161.0",
+    "express": "5.3.0",
+    "jose": "6.2.14"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

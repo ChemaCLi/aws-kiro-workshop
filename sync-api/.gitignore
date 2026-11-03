@@ -1,0 +1,6 @@
+# Dependencias instaladas por npm (express, jose, SDK de DynamoDB). Se reinstalan con npm install.
+node_modules/
+
+# Entorno local. El .env.example sí se versiona; ningún valor de este servicio es secreto, pero
+# .env es para configuración local, no para el repositorio.
+.env

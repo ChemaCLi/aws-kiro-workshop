@@ -95,6 +95,17 @@ La cuenta es **opcional**: sin ella la app funciona igual, con los datos en el d
 | C6 | Usar la app sin cuenta | Todo sigue funcionando sin registrarse; crear cuenta no toca los datos locales |
 | C7 | Seguir sin cuentas si no hay red o SDK | Sin conexión o sin el SDK de cuentas, los controles de cuenta se muestran deshabilitados con aviso y el resto de la app sigue igual |
 
+### Guardar mi progreso en la nube (módulo [cloud-sync](modules/cloud-sync/README.md))
+
+Solo corre con una cuenta iniciada; sin sesión no cambia nada. No es tiempo real: sincroniza al iniciar sesión y en cada cambio, no mientras dos dispositivos están abiertos a la vez (eso es `multi-device-sessions`, todavía sin construir).
+
+| # | Caso de uso | Cómo se hace |
+|---|-------------|--------------|
+| S1 | Ver mis tareas y mi reloj en otro dispositivo | Al iniciar sesión, si hay progreso guardado en la nube y es más reciente que el de este dispositivo, lo reemplaza (tareas, rondas, timer y ajustes) |
+| S2 | No perder mi progreso al cambiar de dispositivo | Cada cambio local (completar una tarea, correr una ronda, ajustar algo) se sube a la nube con un pequeño retraso, más un envío inmediato al salir de la app |
+| S3 | Que gane lo más reciente si edito en dos dispositivos | Último cambio gana, comparando la marca de tiempo del servidor; nunca se descarta progreso real por error (si solo un lado tiene datos, gana el que tiene datos) |
+| S4 | Seguir usando la app sin cuenta, sin que nada cambie | Sin sesión no hay ninguna llamada de red de sincronización; cerrar sesión deja de sincronizar sin tocar los datos locales |
+
 ### Transversales
 
 - Dos páginas: la landing (`index.html`) y la app (`app.html`, una SPA).

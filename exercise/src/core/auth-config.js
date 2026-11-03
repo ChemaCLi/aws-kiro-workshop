@@ -29,4 +29,5 @@ export const AUTH_CONFIG = {
     GitHub: 'GitHubBridge',
   },
   oidcBridgeEndpoint: import.meta.env.PUBLIC_OIDC_BRIDGE_ENDPOINT || 'https://oidc-bridge.example.com',
+  syncApiEndpoint: import.meta.env.PUBLIC_SYNC_API_ENDPOINT || 'https://sync-api.example.com',
 };

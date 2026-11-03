@@ -25,18 +25,30 @@ export const freshState = (settings = {}) => {
   };
 };
 
+/**
+ * Normaliza un objeto crudo (de `localStorage` o de la nube) a la forma válida del estado,
+ * igual que `load()` hacía en línea. `updatedAt` (epoch ms de la última vez que este estado se
+ * guardó de verdad) se preserva tal cual si viene; si falta —datos de antes de cloud-sync, o un
+ * objeto incompleto— se asume `0` (el más viejo posible), nunca `Date.now()`: solo `#commit()`
+ * decide cuándo algo "acaba de cambiar".
+ */
+function normalizeState(raw) {
+  const p = raw || {};
+  const base = freshState(p.settings);
+  return {
+    tasks: Array.isArray(p.tasks) ? p.tasks : [],
+    rounds: Array.isArray(p.rounds) ? p.rounds : [],
+    settings: base.settings,
+    timer: { ...base.timer, ...(p.timer ?? {}) },
+    updatedAt: typeof p.updatedAt === 'number' ? p.updatedAt : 0,
+  };
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return freshState();
-    const p = JSON.parse(raw);
-    const base = freshState(p.settings);
-    return {
-      tasks: Array.isArray(p.tasks) ? p.tasks : [],
-      rounds: Array.isArray(p.rounds) ? p.rounds : [],
-      settings: base.settings,
-      timer: { ...base.timer, ...(p.timer ?? {}) },
-    };
+    return normalizeState(JSON.parse(raw));
   } catch {
     return freshState();
   }
@@ -206,6 +218,19 @@ class Store extends EventTarget {
     this.#commit();
   }
 
+  /**
+   * Reemplaza todo el estado (por ejemplo, al traer el guardado de la nube en `cloud-sync.js`):
+   * normaliza igual que `load()` y pasa por `#commit()` para persistir en `localStorage` y
+   * disparar `'change'`, a diferencia de asignar `store.state` directamente (que no hace
+   * ninguna de las dos cosas).
+   */
+  replaceState(next) {
+    this.state = normalizeState(next);
+    const t = this.state.timer;
+    if (t.taskId && !this.taskById(t.taskId)) this.#resetTimer(false);
+    this.#commit();
+  }
+
   /** Datos de ejemplo para enseñar las gráficas y el jardín sin esperar. */
   seedDemo() {
     const now = Date.now();
@@ -247,6 +272,7 @@ class Store extends EventTarget {
   }
 
   #commit() {
+    this.state.updatedAt = Date.now(); // única fuente de verdad de "cuándo cambió" (cloud-sync.js la usa)
     try { localStorage.setItem(KEY, JSON.stringify(this.state)); } catch { /* modo privado */ }
     if (this.#queued) return;
     this.#queued = true;

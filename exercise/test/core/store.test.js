@@ -2,7 +2,7 @@
 // propiedad-4-reset-seed.md y propiedad-5-alternar-ajustes.md.
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { forAll } from '../support/forAll.js';
-import { hasLocalData, DURATIONS } from '../../src/core/rules.js';
+import { hasLocalData, DURATIONS, DEFAULT_MINUTES } from '../../src/core/rules.js';
 import { store, freshState } from '../../src/core/store.js';
 
 const STORAGE_KEY = 'jardin-movil:v1';
@@ -244,5 +244,60 @@ describe('Feature: landing-and-settings, Property 5: alternar un ajuste dos vece
       initial: { music: randomBoolean(), sound: randomBoolean(), demo: randomBoolean(), minutes: pick(DURATIONS) },
     });
     forAll(200, generate, check);
+  });
+});
+
+describe('Feature: cloud-sync, Store.replaceState persiste y notifica', () => {
+  const makeCloudState = (overrides = {}) => ({
+    tasks: [{ id: 't-1', title: 'Desde la nube', type: 'trabajo', createdAt: Date.now() - 1000, doneAt: null }],
+    rounds: [],
+    timer: { taskId: null, status: 'idle', totalMs: 1500000, remainingMs: 1500000, endsAt: null },
+    settings: { demo: false, sound: true, music: false, minutes: 25 },
+    updatedAt: Date.now() - 1000,
+    ...overrides,
+  });
+
+  test('refleja tasks/rounds/settings exactos y los persiste en localStorage', () => {
+    const cloud = makeCloudState();
+    store.replaceState(cloud);
+    expect(store.state.tasks).toEqual(cloud.tasks);
+    expect(store.state.rounds).toEqual(cloud.rounds);
+    expect(store.state.settings).toEqual(cloud.settings);
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    expect(saved.tasks).toEqual(cloud.tasks);
+  });
+
+  test('dispara exactamente un evento change (coalescido, igual que cualquier otra mutación)', async () => {
+    let calls = 0;
+    const unsubscribe = store.subscribe(() => { calls += 1; });
+    calls = 0; // ignorar la llamada inmediata que hace subscribe() al suscribirse
+    store.replaceState(makeCloudState());
+    await Promise.resolve(); // #commit dispara 'change' en un microtask
+    expect(calls).toBe(1);
+    unsubscribe();
+  });
+
+  test('un timer con taskId que no existe en tasks se reinicia, igual que al cargar', () => {
+    const cloud = makeCloudState({
+      timer: { taskId: 'inexistente', status: 'running', totalMs: 1500000, remainingMs: 1500000, endsAt: Date.now() + 1500000 },
+    });
+    store.replaceState(cloud);
+    expect(store.state.timer.status).toBe('idle');
+    expect(store.state.timer.taskId).toBeNull();
+  });
+
+  test('normaliza datos incompletos igual que load(): minutos inválidos, timer parcial, arrays ausentes', () => {
+    store.replaceState({ settings: { minutes: 999 }, timer: { status: 'paused' } });
+    expect(store.state.tasks).toEqual([]);
+    expect(store.state.rounds).toEqual([]);
+    expect(store.state.settings.minutes).toBe(DEFAULT_MINUTES);
+    expect(store.state.timer.status).toBe('paused');
+    expect(store.state.timer.taskId).toBeNull();
+  });
+
+  test('updatedAt queda en "ahora" (lo pone #commit, no el valor recibido)', () => {
+    const before = Date.now();
+    store.replaceState(makeCloudState({ updatedAt: before - 1_000_000 }));
+    expect(store.state.updatedAt).toBeGreaterThanOrEqual(before);
   });
 });

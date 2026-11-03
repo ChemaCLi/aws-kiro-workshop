@@ -647,6 +647,10 @@ export async function signInWithPassword({ email, password }) {
 
   const session = sessionFromAuthResult(result.AuthenticationResult, email);
   saveSession(session);
+  // Mismo evento que ya emite el flujo OAuth (`handleRedirect`): sin esto, nada fuera de
+  // account-view se enteraba de un inicio de sesión por contraseña (p. ej. cloud-sync.js, que
+  // necesita arrancar justo aquí, no solo en el redirect social).
+  emitAuthChange(session);
   return { session, route: postSignInRoute(session) };
 }
 
@@ -685,6 +689,8 @@ function sessionFromAuthResult(authResult, email) {
     refreshExpiresAt: now + REFRESH_TOKEN_TTL_MS,
     displayName: typeof claims.name === 'string' ? claims.name : '',
     email: email || '',
+    // Mismo id estable que sessionFromTokens: cloud-sync.js indexa por aquí, no por correo.
+    sub: typeof claims.sub === 'string' ? claims.sub : '',
   };
 }
 
@@ -1043,6 +1049,9 @@ function sessionFromTokens(tokens, idToken) {
     // La Display_Name y el correo vienen de los claims del ID token ya validado.
     displayName: typeof claims.name === 'string' ? claims.name : '',
     email: typeof claims.email === 'string' ? claims.email : '',
+    // El id estable del usuario en Cognito (nunca cambia, a diferencia del correo): lo usa
+    // cloud-sync.js para indexar el progreso guardado en la nube por persona, no por correo.
+    sub: typeof claims.sub === 'string' ? claims.sub : '',
   };
 }
 

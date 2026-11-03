@@ -1,0 +1,66 @@
+name: Deploy sync-api
+
+# Publica sync-api/ como una Lambda Web Function cada vez que cambia. Ninguna variable de este
+# servicio es secreta (ver sync-api/README.md): el JWKS de Cognito que valida es público por
+# diseño de OIDC. Aun así se pasan como GitHub Variables, no hardcodeadas, para no repetir los
+# mismos valores en cada despliegue manual.
+#
+# Requiere, ya creados a mano una sola vez (ver .kiro/skills/deploy-to-aws/SKILL.md):
+#   - El mismo proveedor OIDC de GitHub en IAM que ya usa deploy-oidc-bridge.yml, y un rol de
+#     despliegue NUEVO y acotado a este repo, con permisos solo para crear/actualizar esta Web
+#     Function. Su ARN va en la variable de repositorio SYNC_API_DEPLOY_ROLE_ARN. Nunca se
+#     guardan llaves de AWS de larga duración en este repo.
+#   - La tabla de DynamoDB (ver sync-api/README.md, "Tabla de DynamoDB") y un rol de EJECUCIÓN
+#     de la Lambda (distinto del rol de despliegue de arriba) con permiso básico de CloudWatch
+#     Logs + dynamodb:GetItem y dynamodb:PutItem solo sobre esa tabla. Su ARN va en la variable
+#     de repositorio SYNC_API_EXECUTION_ROLE_ARN.
+#   - GitHub Variables (ninguna es secreta, ver sync-api/README.md):
+#       SYNC_API_COGNITO_USER_POOL_ID  el mismo User Pool que usa el frontend
+#       SYNC_API_COGNITO_CLIENT_ID     el mismo App Client que usa el frontend
+#       ALLOWED_ORIGINS                orígenes permitidos, separados por comas
+#       SYNC_TABLE_NAME                nombre de la tabla de DynamoDB de arriba
+#       SYNC_API_EXECUTION_ROLE_ARN    ARN del rol de ejecución de arriba
+#       SYNC_API_DEPLOY_ROLE_ARN       ARN del rol de despliegue de arriba
+#       AWS_REGION                     región de despliegue (us-east-1 por defecto del proyecto)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sync-api/**'
+      - '.github/workflows/deploy-sync-api.yml'
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # para la federación OIDC con AWS (sts:AssumeRoleWithWebIdentity)
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales de AWS (OIDC, sin llaves guardadas)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.SYNC_API_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Instalar dependencias de producción
+        working-directory: sync-api
+        run: npm install --omit=dev
+
+      - name: Desplegar a Lambda Web Functions
+        working-directory: sync-api
+        run: |
+          aws lambda-web deploy \
+            --name focus-garden-sync-api \
+            --code . \
+            --create \
+            --execution-role-arn "${{ vars.SYNC_API_EXECUTION_ROLE_ARN }}" \
+            --env COGNITO_USER_POOL_ID="${{ vars.SYNC_API_COGNITO_USER_POOL_ID }}" \
+            --env COGNITO_REGION="${{ vars.AWS_REGION || 'us-east-1' }}" \
+            --env COGNITO_CLIENT_ID="${{ vars.SYNC_API_COGNITO_CLIENT_ID }}" \
+            --env ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}" \
+            --env SYNC_TABLE_NAME="${{ vars.SYNC_TABLE_NAME }}"
