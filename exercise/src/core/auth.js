@@ -661,8 +661,11 @@ const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
  * `saveSession`/`loadSession` (epoch ms absolutos), siguiendo la regla del proyecto de guardar
  * expiraciones absolutas en vez de acumular tiempos relativos.
  *
- * La Display_Name no viene en esta respuesta (está en los claims del ID token, que se validan
- * aparte); se deja vacía para que `postSignInRoute` lleve al Name_Prompt hasta que se resuelva.
+ * La Display_Name viaja en el claim `name` del ID token (lo mismo que `saveDisplayName` guarda
+ * con `UpdateUserAttributes`), así que se decodifica igual que en `sessionFromTokens`: sin
+ * verificar la firma, porque este flujo por contraseña ya confía en que Cognito emitió los
+ * tokens (ver el comentario de la función). Sin esto, `postSignInRoute` mandaba siempre al
+ * Name_Prompt, incluso con la Display_Name ya guardada de un inicio de sesión anterior.
  *
  * @param {{ IdToken?: string, AccessToken?: string, RefreshToken?: string, ExpiresIn?: number }} authResult
  * @param {string} email correo con el que se inició sesión, para la etiqueta del Account_Slot.
@@ -672,13 +675,15 @@ function sessionFromAuthResult(authResult, email) {
   const result = authResult || {};
   const now = Date.now();
   const accessTtlMs = (typeof result.ExpiresIn === 'number' ? result.ExpiresIn : 0) * 1000;
+  const idToken = result.IdToken || '';
+  const claims = decodeJwtClaims(idToken) || {};
   return {
-    idToken: result.IdToken || '',
+    idToken,
     accessToken: result.AccessToken || '',
     refreshToken: result.RefreshToken || '',
     accessExpiresAt: now + accessTtlMs,
     refreshExpiresAt: now + REFRESH_TOKEN_TTL_MS,
-    displayName: '',
+    displayName: typeof claims.name === 'string' ? claims.name : '',
     email: email || '',
   };
 }
