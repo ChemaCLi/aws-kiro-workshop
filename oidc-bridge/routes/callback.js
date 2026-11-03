@@ -46,7 +46,7 @@ export function createCallbackRouter() {
       const identity = await fetchGithubIdentity(accessToken);
 
       // Code efímero del puente: Cognito lo canjeará en /token por el ID token.
-      const bridgeCode = issueCode(identity, pending.cognitoRedirectUri);
+      const bridgeCode = await issueCode(identity, pending.cognitoRedirectUri);
 
       // Vuelta a Cognito con su propio state y el code del puente.
       const redirectBack = new URL(pending.cognitoRedirectUri);

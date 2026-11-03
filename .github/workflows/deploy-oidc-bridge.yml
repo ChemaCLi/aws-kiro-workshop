@@ -1,0 +1,72 @@
+name: Deploy oidc-bridge
+
+# Publica oidc-bridge/ como una Lambda Web Function cada vez que cambia. No usa AWS Secrets
+# Manager: los secretos viven en GitHub Secrets y llegan a la función como variables de
+# entorno en el propio paso de despliegue (ver docs/decisions y el plan de despliegue).
+#
+# Requiere, ya creados a mano una sola vez (ver .kiro/skills/deploy-to-aws/SKILL.md):
+#   - Un proveedor OIDC de GitHub en IAM + un rol de despliegue de confianza acotado a este
+#     repo, con permisos solo para crear/actualizar esta Web Function. Su ARN va en la
+#     variable de repositorio AWS_DEPLOY_ROLE_ARN (Settings > Secrets and variables > Actions
+#     > Variables). Nunca se guardan llaves de AWS de larga duración en este repo.
+#   - La tabla de DynamoDB del code-store (ver oidc-bridge/README.md, "Tabla de DynamoDB para
+#     los authorization code") y un rol de EJECUCIÓN de la Lambda (distinto del rol de
+#     despliegue de arriba) con permiso básico de CloudWatch Logs + dynamodb:PutItem y
+#     dynamodb:DeleteItem solo sobre esa tabla. Su ARN va en la variable de repositorio
+#     OIDC_BRIDGE_EXECUTION_ROLE_ARN. Se pasa explícito en --execution-role-arn porque el rol
+#     que `aws lambda-web deploy` crearía solo no tendría acceso a DynamoDB.
+#   - GitHub Secrets (sensibles, nunca con prefijo GITHUB_, reservado por GitHub Actions):
+#       OIDC_BRIDGE_GH_CLIENT_SECRET   client secret de la OAuth App de GitHub
+#       OIDC_SIGNING_KEY               llave privada RS256 (PEM en una línea, con \n literales)
+#   - GitHub Variables (públicas, no secretas):
+#       OIDC_BRIDGE_GH_CLIENT_ID       client id de la OAuth App de GitHub
+#       OIDC_KEY_ID                    kid de la llave de firma
+#       ALLOWED_ORIGINS                orígenes permitidos, separados por comas
+#       ISSUER                         URL pública del puente (la que da este mismo deploy)
+#       CODE_STORE_TABLE_NAME          nombre de la tabla de DynamoDB de arriba
+#       OIDC_BRIDGE_EXECUTION_ROLE_ARN ARN del rol de ejecución de arriba
+#       AWS_REGION                     región de despliegue (us-east-1 por defecto del proyecto)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'oidc-bridge/**'
+      - '.github/workflows/deploy-oidc-bridge.yml'
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # para la federación OIDC con AWS (sts:AssumeRoleWithWebIdentity)
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales de AWS (OIDC, sin llaves guardadas)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Instalar dependencias de producción
+        working-directory: oidc-bridge
+        run: npm install --omit=dev
+
+      - name: Desplegar a Lambda Web Functions
+        working-directory: oidc-bridge
+        run: |
+          aws lambda-web deploy \
+            --name focus-garden-oidc-bridge \
+            --code . \
+            --create \
+            --execution-role-arn "${{ vars.OIDC_BRIDGE_EXECUTION_ROLE_ARN }}" \
+            --env GITHUB_CLIENT_ID="${{ vars.OIDC_BRIDGE_GH_CLIENT_ID }}" \
+            --env GITHUB_CLIENT_SECRET="${{ secrets.OIDC_BRIDGE_GH_CLIENT_SECRET }}" \
+            --env OIDC_SIGNING_KEY="${{ secrets.OIDC_SIGNING_KEY }}" \
+            --env OIDC_KEY_ID="${{ vars.OIDC_KEY_ID }}" \
+            --env ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}" \
+            --env ISSUER="${{ vars.ISSUER }}" \
+            --env CODE_STORE_TABLE_NAME="${{ vars.CODE_STORE_TABLE_NAME }}"

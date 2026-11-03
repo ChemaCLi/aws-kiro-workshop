@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publica Focus Garden en AWS Amplify subiendo un zip (sin Git, sin build).
+# Construye Focus Garden (Astro) y lo publica en AWS Amplify subiendo un zip de dist/, sin Git.
 # Uso: bash deploy-amplify.sh [nombre-app] [región]
 # La primera vez crea la app; las siguientes actualizan la misma (id guardado en .amplify-app-id).
 set -euo pipefail
@@ -14,12 +14,15 @@ if [[ -z "$REGION" ]]; then
   echo "Indica la región: bash deploy-amplify.sh $APP_NAME us-east-1" >&2
   exit 1
 fi
-[[ -f index.html ]] || { echo "Ejecuta el script desde la carpeta del proyecto (donde está index.html)." >&2; exit 1; }
+[[ -f package.json ]] || { echo "Ejecuta el script desde la carpeta del proyecto (donde está package.json)." >&2; exit 1; }
 aws sts get-caller-identity >/dev/null || { echo "No hay credenciales de AWS válidas." >&2; exit 1; }
 
-echo "→ Empaquetando solo los archivos publicables"
+echo "→ Compilando (npm run build)"
+npm run build
+
+echo "→ Empaquetando dist/"
 rm -f "$ZIP_FILE"
-zip -qr "$ZIP_FILE" index.html app.html manifest.webmanifest icon.svg melodies src -x "*.DS_Store"
+(cd dist && zip -qr "../$ZIP_FILE" . -x "*.DS_Store")
 
 if [[ -f "$ID_FILE" ]]; then
   APP_ID="$(cat "$ID_FILE")"

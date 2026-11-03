@@ -11,6 +11,8 @@
     "test": "node --test"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1161.0",
+    "@aws-sdk/lib-dynamodb": "3.1161.0",
     "express": "5.3.0",
     "jose": "6.2.14"
   },

@@ -9,10 +9,15 @@
 // para simular el canje code→token y el perfil /user, /user/emails sin red. La
 // clave de firma RS256 es de PRUEBA: se genera en el propio test con jose, así
 // no hay secretos de verdad y el id_token se puede verificar contra su pública.
+// El code-store usa DynamoDB en producción (ver lib/code-store.js); aquí se
+// sustituye por un doble en memoria con setCodeStoreClient, igual que el fetch
+// de GitHub: nada de esto debe tocar un servicio real.
 
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPair, exportPKCS8, jwtVerify } from 'jose';
+import { PutCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import { setCodeStoreClient } from '../lib/code-store.js';
 
 // --- Configuración de entorno de PRUEBA (debe estar antes de crear la app) ---
 
@@ -38,6 +43,33 @@ let testPublicKey;
  * Se corre una vez antes de todas las pruebas; genera la clave aquí para no
  * incrustar material criptográfico en el repo.
  */
+/**
+ * Doble en memoria del cliente de DynamoDB que usa `lib/code-store.js`. Soporta solo los dos
+ * comandos que el código real emite (`PutCommand`, `DeleteCommand`); cualquier otro indicaría
+ * que `code-store.js` cambió y el doble ya no lo cubre. `DeleteCommand` imita `ReturnValues:
+ * 'ALL_OLD'` devolviendo y borrando en la misma llamada, como DynamoDB de verdad.
+ *
+ * @returns {{ send: (command: unknown) => Promise<unknown> }}
+ */
+function makeFakeDynamoClient() {
+  const items = new Map();
+  return {
+    async send(command) {
+      if (command instanceof PutCommand) {
+        items.set(command.input.Item.code, command.input.Item);
+        return {};
+      }
+      if (command instanceof DeleteCommand) {
+        const key = command.input.Key.code;
+        const item = items.get(key);
+        items.delete(key);
+        return { Attributes: item };
+      }
+      throw new Error(`Comando de DynamoDB no soportado en el doble de prueba: ${command.constructor.name}`);
+    },
+  };
+}
+
 before(async () => {
   const { privateKey, publicKey } = await generateKeyPair('RS256', { extractable: true });
   const pkcs8 = await exportPKCS8(privateKey);
@@ -50,6 +82,8 @@ before(async () => {
   process.env.ISSUER = TEST_ISSUER;
   process.env.ALLOWED_ORIGINS = ALLOWED_ORIGIN;
   process.env.PORT = '0';
+
+  setCodeStoreClient(makeFakeDynamoClient());
 
   ({ createApp } = await import('../server.js'));
 });

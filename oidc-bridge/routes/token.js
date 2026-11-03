@@ -64,7 +64,7 @@ export function createTokenRouter() {
       }
 
       const code = typeof req.body?.code === 'string' ? req.body.code : '';
-      const grant = consumeCode(code);
+      const grant = await consumeCode(code);
       if (!grant) {
         // Code desconocido, ya usado o caducado: grant inválido.
         res.status(400).json({ error: 'invalid_grant' });

@@ -47,7 +47,8 @@ Se declaran en `.env` (copiado de `.env.example`). Ningún valor tiene valores r
 | `OIDC_KEY_ID` | Identificador de la clave de firma (`kid`). Cualquier cadena estable que elijas; se publica en el JWKS y va en la cabecera de cada token para que Cognito sepa qué clave usar. |
 | `ALLOWED_ORIGINS` | Orígenes permitidos, separados por comas. Debe incluir el origen del redirect de Cognito. La coincidencia es **exacta**: un subdominio o un prefijo no cuela. Ejemplo: `https://focus-garden.auth.us-east-1.amazoncognito.com`. |
 | `ISSUER` | URL pública base del puente, **sin barra final** (p. ej. `https://oidc-bridge.example.com`). Es el `iss` de los tokens y la base de la que se derivan las URLs del descubrimiento. Debe ser exactamente el issuer que registres en Cognito. |
-| `PORT` | Puerto en el que escucha Express. Por defecto `8787` si se omite. |
+| `PORT` | Puerto en el que escucha Express. Por defecto `8787` si se omite. No aplica cuando el puente corre como Lambda Web Function (Lambda maneja el puerto). |
+| `CODE_STORE_TABLE_NAME` | Nombre de la tabla de DynamoDB donde vive el authorization code efímero del puente (ver abajo). Por defecto `focus-garden-oidc-bridge-codes` si se omite. |
 
 ## Generar la clave de firma RS256
 
@@ -69,13 +70,41 @@ Copia esa salida como valor de `OIDC_SIGNING_KEY` en `.env`. El puente deriva la
 
 > No subas la clave privada ni el `.env` al repositorio. `.env` queda fuera del control de versiones.
 
+## Tabla de DynamoDB para los authorization code
+
+Entre `/callback` (donde el puente ya conoce la identidad de GitHub) y `/token` (donde Cognito canjea el code por el ID token firmado) hay que recordar a qué identidad corresponde cada code. Ese code **no vive en memoria del proceso**: cuando el puente corre como Lambda Web Function, cada entorno de ejecución tiene su propia memoria, y nada garantiza que `/callback` y el `/token` que le sigue segundos después caigan en la misma instancia. `lib/code-store.js` usa una tabla de DynamoDB compartida en su lugar.
+
+Crearla una sola vez (el nombre debe coincidir con `CODE_STORE_TABLE_NAME`):
+
+```bash
+aws dynamodb create-table \
+  --table-name focus-garden-oidc-bridge-codes \
+  --attribute-definitions AttributeName=code,AttributeType=S \
+  --key-schema AttributeName=code,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+
+aws dynamodb update-time-to-live \
+  --table-name focus-garden-oidc-bridge-codes \
+  --time-to-live-specification "Enabled=true,AttributeName=ttl"
+```
+
+`PAY_PER_REQUEST` (bajo demanda) evita pagar capacidad reservada sin usar: para el tráfico de un workshop el costo es, en la práctica, $0. El TTL en el atributo `ttl` limpia los code que nadie canjeó, pero no es instantáneo (hasta 48 h) — `consumeCode` igual valida la expiración a mano en cada canje, así que el TTL es solo limpieza de respaldo, nunca la garantía de seguridad.
+
+El rol de ejecución de la Lambda necesita permiso para `dynamodb:PutItem` y `dynamodb:DeleteItem` sobre esta tabla (además del permiso básico de CloudWatch Logs). Ver `.kiro/skills/deploy-to-aws/SKILL.md` para el rol completo.
+
 ## Correr el puente en local
 
-Requiere Node 20 o superior (usa `fetch` nativo e `import.meta.main`).
+Requiere Node 20 o superior (usa `fetch` nativo e `import.meta.main`) y una tabla de DynamoDB
+alcanzable (ver "Tabla de DynamoDB para los authorization code" abajo): el code efímero entre
+`/callback` y `/token` ya no vive en memoria del proceso, así que hace falta algo con qué hablar
+incluso en local. La opción más simple para desarrollar sin tocar una cuenta de AWS real es
+[DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
+(`docker run -p 8000:8000 amazon/dynamodb-local`) con `AWS_ENDPOINT_URL_DYNAMODB=http://localhost:8000`
+en el `.env` (el SDK de AWS lo respeta automáticamente, sin cambiar código).
 
 ```bash
 cd oidc-bridge
-npm install            # instala express y jose
+npm install            # instala express, jose y el SDK de DynamoDB
 cp .env.example .env   # luego rellena cada valor en .env
 npm start              # arranca en el puerto de PORT (8787 por defecto)
 ```

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publica Focus Garden en un bucket S3 privado con CloudFront (HTTPS).
+# Construye Focus Garden (Astro) y lo publica en un bucket S3 privado con CloudFront (HTTPS).
 # Uso: bash deploy-s3-cloudfront.sh <nombre-stack> [región]
 # Volver a ejecutarlo actualiza el sitio.
 set -euo pipefail
@@ -12,8 +12,12 @@ if [[ -z "$REGION" ]]; then
   echo "Indica la región: bash deploy-s3-cloudfront.sh $STACK us-east-1" >&2
   exit 1
 fi
-[[ -f index.html ]] || { echo "Ejecuta el script desde la carpeta del proyecto (donde está index.html)." >&2; exit 1; }
+[[ -f package.json ]] || { echo "Ejecuta el script desde la carpeta del proyecto (donde está package.json)." >&2; exit 1; }
 aws sts get-caller-identity >/dev/null || { echo "No hay credenciales de AWS válidas." >&2; exit 1; }
+
+echo "→ Compilando (npm run build)"
+npm run build
+[[ -f dist/index.html ]] || { echo "El build no generó dist/index.html." >&2; exit 1; }
 
 echo "→ Desplegando infraestructura ($STACK en $REGION)"
 aws cloudformation deploy --stack-name "$STACK" --template-file "$TEMPLATE" --region "$REGION" --no-fail-on-empty-changeset
@@ -26,17 +30,12 @@ BUCKET="$(output BucketName)"
 DISTRIBUTION="$(output DistributionId)"
 URL="$(output SiteUrl)"
 
-# sync sube todo con el tipo de contenido que detecta; luego se fijan los que importan.
-echo "→ Subiendo archivos a s3://$BUCKET"
-aws s3 sync . "s3://$BUCKET" --region "$REGION" --delete \
-  --exclude "*" --include "index.html" --include "app.html" --include "manifest.webmanifest" --include "icon.svg" \
-  --include "melodies/*" --include "src/*"
+# sync sube todo con el tipo de contenido que detecta por extensión; .webmanifest se corrige aparte.
+echo "→ Subiendo dist/ a s3://$BUCKET"
+aws s3 sync dist/ "s3://$BUCKET" --region "$REGION" --delete
 
 echo "→ Ajustando tipos de contenido"
-aws s3 cp manifest.webmanifest "s3://$BUCKET/manifest.webmanifest" --region "$REGION" --content-type "application/manifest+json" >/dev/null
-aws s3 cp icon.svg "s3://$BUCKET/icon.svg" --region "$REGION" --content-type "image/svg+xml" >/dev/null
-aws s3 cp melodies "s3://$BUCKET/melodies" --recursive --region "$REGION" --content-type "application/json" --exclude "*" --include "*.json" >/dev/null
-aws s3 cp src "s3://$BUCKET/src" --recursive --region "$REGION" --content-type "text/javascript" --exclude "*" --include "*.js" >/dev/null
+aws s3 cp dist/manifest.webmanifest "s3://$BUCKET/manifest.webmanifest" --region "$REGION" --content-type "application/manifest+json" >/dev/null
 
 echo "→ Invalidando la caché de CloudFront"
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" >/dev/null
