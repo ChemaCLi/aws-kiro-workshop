@@ -97,7 +97,7 @@ La cuenta es **opcional**: sin ella la app funciona igual, con los datos en el d
 
 ### Guardar mi progreso en la nube (módulo [cloud-sync](modules/cloud-sync/README.md))
 
-Solo corre con una cuenta iniciada; sin sesión no cambia nada. No es tiempo real: sincroniza al iniciar sesión y en cada cambio, no mientras dos dispositivos están abiertos a la vez (eso es `multi-device-sessions`, todavía sin construir).
+Solo corre con una cuenta iniciada; sin sesión no cambia nada. No es tiempo real: sincroniza al iniciar sesión y en cada cambio, no mientras dos dispositivos están abiertos a la vez (eso es `multi-device-sessions`, ver abajo).
 
 | # | Caso de uso | Cómo se hace |
 |---|-------------|--------------|
@@ -105,6 +105,17 @@ Solo corre con una cuenta iniciada; sin sesión no cambia nada. No es tiempo rea
 | S2 | No perder mi progreso al cambiar de dispositivo | Cada cambio local (completar una tarea, correr una ronda, ajustar algo) se sube a la nube con un pequeño retraso, más un envío inmediato al salir de la app |
 | S3 | Que gane lo más reciente si edito en dos dispositivos | Último cambio gana, comparando la marca de tiempo del servidor; nunca se descarta progreso real por error (si solo un lado tiene datos, gana el que tiene datos) |
 | S4 | Seguir usando la app sin cuenta, sin que nada cambie | Sin sesión no hay ninguna llamada de red de sincronización; cerrar sesión deja de sincronizar sin tocar los datos locales |
+
+### Ver el mismo reloj en dos dispositivos a la vez (módulo [multi-device-sessions](modules/multi-device-sessions/README.md))
+
+Solo corre con una cuenta iniciada y más de un dispositivo conectado a la vez. Es en vivo, por WebSocket — a diferencia de `cloud-sync`, que guarda con un pequeño retraso. Acotado al timer del pomodoro; la UI de "Mis sesiones" (ver/cerrar sesiones remotas) sigue "Próximamente".
+
+| # | Caso de uso | Cómo se hace |
+|---|-------------|--------------|
+| M1 | Ver correr el mismo reloj en dos pantallas | El primer dispositivo conectado es "master" y manda el timer en vivo; los demás ("slave") lo reciben y lo muestran sin recargar |
+| M2 | Que solo un dispositivo mande el tiempo, nunca los dos a la vez | Solo se acepta un cambio de timer del dispositivo master registrado; cualquier otro se ignora, así nunca hay dos relojes corriendo distinto |
+| M3 | Retomar si el dispositivo que llevaba el conteo se desconecta | Aviso "Tenías una sesión activa, ¿la quieres reanudar?"; al aceptar, ese dispositivo pasa a ser el master |
+| M4 | Que la conexión no se corte sola por estar quieta | Un ping periódico mantiene la conexión viva; si igual se corta (inactividad, red, el máximo de 2 h de la conexión), se reconecta sola |
 
 ### Transversales
 

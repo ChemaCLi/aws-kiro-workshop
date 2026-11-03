@@ -301,3 +301,54 @@ describe('Feature: cloud-sync, Store.replaceState persiste y notifica', () => {
     expect(store.state.updatedAt).toBeGreaterThanOrEqual(before);
   });
 });
+
+describe('Feature: multi-device-sessions, Store.applyRemoteTimer solo toca el timer', () => {
+  function seedTask() {
+    store.reset();
+    const task = store.addTask({ title: 'Tarea para live-sync', type: 'trabajo' });
+    return task;
+  }
+
+  test('reemplaza el timer y deja tasks/rounds/settings intactos', () => {
+    const task = seedTask();
+    const tasksBefore = store.state.tasks;
+    const settingsBefore = store.state.settings;
+
+    store.applyRemoteTimer({ taskId: task.id, status: 'running', totalMs: 1500000, remainingMs: 1500000, endsAt: Date.now() + 1500000 });
+
+    expect(store.state.timer.taskId).toBe(task.id);
+    expect(store.state.timer.status).toBe('running');
+    expect(store.state.tasks).toEqual(tasksBefore);
+    expect(store.state.settings).toEqual(settingsBefore);
+  });
+
+  test('persiste en localStorage y dispara change', async () => {
+    const task = seedTask();
+    let calls = 0;
+    const unsubscribe = store.subscribe(() => { calls += 1; });
+    calls = 0;
+
+    store.applyRemoteTimer({ taskId: task.id, status: 'paused', totalMs: 1500000, remainingMs: 900000, endsAt: null });
+    await Promise.resolve();
+
+    expect(calls).toBe(1);
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    expect(saved.timer.status).toBe('paused');
+    expect(saved.timer.remainingMs).toBe(900000);
+    unsubscribe();
+  });
+
+  test('si el taskId no existe en este dispositivo, se reinicia en vez de quedar inconsistente', () => {
+    seedTask();
+    store.applyRemoteTimer({ taskId: 'no-existe-aqui', status: 'running', totalMs: 1500000, remainingMs: 1500000, endsAt: Date.now() + 1500000 });
+    expect(store.state.timer.status).toBe('idle');
+    expect(store.state.timer.taskId).toBeNull();
+  });
+
+  test('normaliza un timer parcial o vacío igual que replaceState', () => {
+    seedTask();
+    store.applyRemoteTimer({ status: 'idle' });
+    expect(store.state.timer.taskId).toBeNull();
+    expect(store.state.timer.endsAt).toBeNull();
+  });
+});

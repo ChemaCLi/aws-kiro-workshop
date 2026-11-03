@@ -1,0 +1,19 @@
+{
+  "name": "live-sync-api",
+  "version": "1.0.0",
+  "description": "Sincronizacion en vivo del pomodoro de Focus Garden entre dispositivos conectados a la vez (modelo master/slave), via API Gateway WebSocket. Dos funciones Lambda (Event Functions, no Web Functions): el authorizer de $connect y el router del resto de las rutas.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "3.1161.0",
+    "@aws-sdk/client-dynamodb": "3.1161.0",
+    "@aws-sdk/lib-dynamodb": "3.1161.0",
+    "jose": "6.2.14"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

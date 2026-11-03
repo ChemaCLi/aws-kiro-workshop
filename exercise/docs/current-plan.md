@@ -10,14 +10,16 @@ Este documento guarda el requerimiento original y el plan para construirlo en va
 
 > **Decisión (2026-11-03): spec 3 (`cloud-sync`) implementado directo a código, sin `requirements.md`/`design.md`/`tasks.md`.** Base de datos DynamoDB, un ítem por persona indexado por `sub`, último cambio gana por `updatedAt`. Nuevo servicio `sync-api/`. El spec 4 (`multi-device-sessions`, sincronización en vivo con master/slave) queda explícitamente fuera de este cambio. Detalle en [`docs/decisions/0003-cloud-sync-mvp.md`](decisions/0003-cloud-sync-mvp.md).
 
+> **Decisión (2026-11-03): spec 4 (`multi-device-sessions`) implementado, acotado al timer en vivo por WebSocket.** Nuevo servicio `live-sync-api/` (API Gateway WebSocket + Event Functions, primera vez que el proyecto usa este form factor). Master/slave: el primero en conectar manda el timer, los demás lo reciben; aviso de reanudar si el master se desconecta. La UI de "Mis sesiones" queda fuera de esta entrega — sigue "Próximamente". Detalle en [`docs/decisions/0004-multi-device-sessions-websocket.md`](decisions/0004-multi-device-sessions-websocket.md).
+
 ## Estado
 
 | # | Spec | Estado |
 |---|------|--------|
 | 1 | `landing-and-settings` | ✅ **Completado** (2026-10-31). Todas las tareas de `tasks.md` cerradas, con la landing rediseñada como página aparte. QA: propiedades en Node y una pasada en navegador; queda como seguimiento una pasada de `qa-tester` con navegador para sonido, vibración y gestos (ver `docs/qa-reports/2026-10-31-landing-and-settings.md`). |
 | 2 | `accounts-auth` | ✅ **Completado** (2026-11-01); **desplegado parcialmente** (2026-11-03): correo y contraseña funcionando en AWS real, Google/Meta/Amazon/GitHub en pausa (ver decisión 0002 arriba). Spec en `.kiro/specs/accounts-auth/` (`requirements.md`, `design.md`, `tasks.md`). QA: ver `docs/qa-reports/2026-11-01-accounts-auth.md`. |
-| 3 | `cloud-sync` | ✅ **Implementado en código** (2026-11-03), directo a implementación (ver decisión 0003 arriba). Servicio nuevo `sync-api/`. **Pendiente de desplegar**: tabla de DynamoDB, roles IAM y primer despliegue de la Lambda (mismo patrón manual que `oidc-bridge`). |
-| 4 | `multi-device-sessions` | Sin spec. Es el siguiente paso. |
+| 3 | `cloud-sync` | ✅ **Completado e implementado** (2026-11-03), directo a implementación (ver decisión 0003 arriba). Servicio `sync-api/`, desplegado y probado en AWS real. |
+| 4 | `multi-device-sessions` | ✅ **Implementado en código** (2026-11-03), acotado al timer en vivo (ver decisión 0004 arriba). Servicio nuevo `live-sync-api/`. **Pendiente de desplegar**: tablas, rol y las dos Lambdas + la API WebSocket (mismo patrón manual que `oidc-bridge`/`sync-api`). "Mis sesiones" queda fuera, a futuro. |
 
 El spec 1 vive en `.kiro/specs/landing-and-settings/` (`requirements.md`, `design.md`, `tasks.md`). Cada spec siguiente se crea cuando termine el anterior, no antes.
 
@@ -126,14 +128,15 @@ Nota técnica: los navegadores no reciben webhooks. El canal en tiempo real debe
 ## Cómo retomar
 
 1. Los specs 1 y 2 están implementados (tareas en `.kiro/specs/landing-and-settings/tasks.md` y `.kiro/specs/accounts-auth/tasks.md`). Del spec 1 queda la pasada de `qa-tester` con navegador automatizado; del spec 2, correo y contraseña ya está desplegado y probado en AWS real, y los cuatro proveedores sociales quedaron en pausa (decisión 0002 arriba) hasta retomarlos.
-2. El spec 3 (`cloud-sync`) está implementado en código (decisión 0003 arriba), directo a implementación. **Falta desplegarlo**: crear la tabla de DynamoDB y los roles IAM de `sync-api/` (mismo patrón manual que se usó para `oidc-bridge`, ver `.kiro/skills/deploy-to-aws/SKILL.md`), el primer despliegue de la Lambda, y fijar `PUBLIC_SYNC_API_ENDPOINT` en `exercise/.env` antes de volver a publicar el sitio.
-3. El siguiente paso de código **es el spec 4** (`multi-device-sessions`): sincronización en vivo entre dispositivos abiertos a la vez (master/slave) y la sección "Mis sesiones". Queda la pregunta abierta de WebSocket vs. polling.
-4. Retomar los proveedores sociales en pausa (pasos en la decisión 0002) cuando convenga; no bloquea el spec 4.
-5. Al terminar cada spec, actualizar el estado de la tabla de este documento y `docs/features.md`.
+2. El spec 3 (`cloud-sync`) está completo: implementado, desplegado y probado en AWS real.
+3. El spec 4 (`multi-device-sessions`) está implementado en código, acotado al timer en vivo (decisión 0004 arriba). **Falta desplegarlo**: las dos tablas, el rol IAM y las dos Lambdas de `live-sync-api/`, más la API Gateway WebSocket con sus rutas y el authorizer (mismo patrón manual que `oidc-bridge`/`sync-api`, ver `.kiro/skills/deploy-to-aws/SKILL.md`), y fijar `PUBLIC_LIVE_SYNC_ENDPOINT` en `exercise/.env` antes de volver a publicar el sitio.
+4. Queda pendiente, como paso pequeño y no bloqueante: la UI de "Mis sesiones" en Ajustes (listar/nombrar/cerrar sesiones remotas) — el modelo de conexiones de `live-sync-api/` ya tiene lo necesario.
+5. Retomar los proveedores sociales en pausa (pasos en la decisión 0002) cuando convenga; no bloquea nada de lo anterior.
+6. Al terminar cada spec, actualizar el estado de la tabla de este documento y `docs/features.md`.
 
 ## Preguntas abiertas
 
 - ~~¿Qué significa "AWS account" como método de inicio de sesión?~~ **Resuelta:** se interpretó como Login with Amazon, ya decidido e implementado en el spec 2 `accounts-auth`.
 - ~~¿DynamoDB está bien como base de datos, o prefieres MongoDB a pesar del costo y la administración?~~ **Resuelta:** DynamoDB, decidido e implementado en el spec 3 `cloud-sync` (ver decisión 0003).
 - ~~¿Cómo se resuelven los conflictos de datos entre dispositivos (gana el último cambio, o se pregunta)?~~ **Resuelta:** último cambio gana por `updatedAt`, implementado en el spec 3 (ver decisión 0003).
-- ¿El canal en tiempo real será WebSocket o polling? Sigue abierta, para el spec 4 (`multi-device-sessions`).
+- ~~¿El canal en tiempo real será WebSocket o polling?~~ **Resuelta:** WebSocket, decidido e implementado en el spec 4 `multi-device-sessions` (ver decisión 0004).

@@ -231,6 +231,22 @@ class Store extends EventTarget {
     this.#commit();
   }
 
+  /**
+   * Aplica un timer recibido en vivo de otro dispositivo (`live-sync.js`, cuando este
+   * dispositivo es slave): a diferencia de `replaceState`, solo reemplaza `timer` y deja
+   * `tasks`/`rounds`/`settings` intactos (esas ya llegan por `cloud-sync.js`; el WebSocket solo
+   * manda el timer). Normaliza igual que `load()`/`replaceState` sobre un timer base fresco, y
+   * si el `taskId` que trae no existe en este dispositivo (la tarea aún no sincronizó), se
+   * reinicia en vez de quedar en un estado inconsistente.
+   */
+  applyRemoteTimer(timer) {
+    const base = freshState(this.state.settings).timer;
+    this.state.timer = { ...base, ...(timer ?? {}) };
+    const t = this.state.timer;
+    if (t.taskId && !this.taskById(t.taskId)) this.#resetTimer(false);
+    this.#commit();
+  }
+
   /** Datos de ejemplo para enseñar las gráficas y el jardín sin esperar. */
   seedDemo() {
     const now = Date.now();

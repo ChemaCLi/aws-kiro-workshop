@@ -1,0 +1,9 @@
+# Dependencias instaladas por npm. Se reinstalan con npm install.
+node_modules/
+
+# Entorno local. Ningún valor de este servicio es secreto, pero .env es para configuración
+# local, no para el repositorio.
+.env
+
+# Paquete de despliegue generado por el script de aprovisionamiento.
+function.zip

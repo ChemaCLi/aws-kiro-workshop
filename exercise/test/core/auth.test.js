@@ -181,7 +181,7 @@ describe('Feature: accounts-auth, Property 5: El state es fresco y suficientemen
 
 describe('Feature: accounts-auth, Property 6: Auth_Config solo contiene valores públicos', () => {
   // Validates: Requirements 5.6, 9.1, 9.2, 12.4
-  const ALLOWED_KEYS = ['userPoolId', 'clientId', 'region', 'cognitoDomain', 'redirectUri', 'scopes', 'providers', 'oidcBridgeEndpoint', 'syncApiEndpoint'];
+  const ALLOWED_KEYS = ['userPoolId', 'clientId', 'region', 'cognitoDomain', 'redirectUri', 'scopes', 'providers', 'oidcBridgeEndpoint', 'syncApiEndpoint', 'liveSyncEndpoint'];
   const SECRET_KEY_RE = /(secret|client[_-]?secret|private[_-]?key|api[_-]?key|password|passwd|credential|access[_-]?key)/i;
   const PRIVATE_KEY_MARKER_RE = /-----BEGIN [A-Z ]*PRIVATE KEY-----/;
   const CLIENT_SECRET_PARAM_RE = /client_secret\s*=/i;
@@ -228,6 +228,7 @@ describe('Feature: accounts-auth, Property 6: Auth_Config solo contiene valores 
     providers: { Google: 'Google', GitHub: 'GitHubBridge' },
     oidcBridgeEndpoint: 'https://oidc-bridge.example.com',
     syncApiEndpoint: 'https://sync-api.example.com',
+    liveSyncEndpoint: 'wss://live-sync.example.com',
   });
   const SECRET_INJECTIONS = [
     (cfg) => { cfg.clientSecret = randomOpaque(40); },
@@ -246,6 +247,8 @@ describe('Feature: accounts-auth, Property 6: Auth_Config solo contiene valores 
     expect(looksLikeSecret(AUTH_CONFIG.oidcBridgeEndpoint)).toBe(false);
     expect(AUTH_CONFIG.syncApiEndpoint).toMatch(/^https?:\/\//);
     expect(looksLikeSecret(AUTH_CONFIG.syncApiEndpoint)).toBe(false);
+    expect(AUTH_CONFIG.liveSyncEndpoint).toMatch(/^wss?:\/\//);
+    expect(looksLikeSecret(AUTH_CONFIG.liveSyncEndpoint)).toBe(false);
   });
 
   test('el detector de secretos no da falsos positivos ni negativos en 200 configs generadas', () => {

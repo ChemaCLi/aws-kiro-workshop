@@ -170,6 +170,26 @@ El workflow `.github/workflows/deploy-sync-api.yml` corre `aws lambda-web deploy
 
 Agrega `PUBLIC_SYNC_API_ENDPOINT` a `exercise/.env` con la URL del paso 3 y vuelve a publicar el sitio (Ruta A o B de arriba).
 
+## Sincronización en vivo: live-sync-api
+
+Esto publica el spec `multi-device-sessions`: `live-sync-api/`, el timer en vivo entre dispositivos abiertos a la vez (ver `live-sync-api/README.md`). A diferencia de `oidc-bridge`/`sync-api` (Lambda **Web Functions**, desplegadas con `aws lambda-web`), esto son dos Lambda **Event Functions** clásicas detrás de una **API Gateway WebSocket API** — se despliegan con `aws lambda create-function`/`update-function-code` (zip directo, sin bucket intermedio) y se conectan a mano con `aws apigatewayv2`. No hay workflow de GitHub Actions para esto todavía (es más piezas que wirear que un solo `aws lambda-web deploy`); se aprovisiona y se actualiza a mano.
+
+### Orden (evita una dependencia circular)
+
+El rol de ejecución necesita el ARN de la API (para `execute-api:ManageConnections`), pero la API necesita los ARN de las Lambdas (para sus integraciones), que necesitan el rol. Se resuelve así:
+
+1. **Tablas** `focus-garden-connections` (con GSI `sub-index` y TTL a 2 h) y `focus-garden-live-timer` (sin TTL) — comandos exactos en `live-sync-api/README.md`.
+2. **Rol de ejecución** `focus-garden-live-sync-exec`: `AWSLambdaBasicExecutionRole` + CRUD en las dos tablas + `execute-api:ManageConnections` con un **wildcard** de recurso (`arn:aws:execute-api:<region>:<cuenta>:*/*/POST/@connections/*`, acotado a la cuenta/región y a esa sola acción, no a una API en concreto, porque la API todavía no existe en este paso).
+3. **Las dos funciones** (`router.handler` y `authorizer.handler`, mismo zip, mismo rol): `npm install --omit=dev`, `zip -r function.zip .` y `aws lambda create-function`/`update-function-code`.
+4. **La API WebSocket**: `aws apigatewayv2 create-api --protocol-type WEBSOCKET --route-selection-expression '$request.body.action'`, una integración `AWS_PROXY` hacia el router (reutilizada por todas las rutas), un `create-authorizer` tipo `REQUEST` con `--identity-source 'route.request.querystring.token'` hacia el authorizer, las rutas `$connect` (con el authorizer), `$disconnect`, `$default`, `state-update`, `claim-master`, `ping`, los `aws lambda add-permission` para que API Gateway invoque ambas funciones, y `create-stage --auto-deploy`.
+5. **Fijar `APIGW_MANAGEMENT_ENDPOINT`** en el router (`https://<api-id>.execute-api.<region>.amazonaws.com/<stage>`) con `update-function-configuration`, ya que solo se conoce al final.
+
+El script completo de los 5 pasos está documentado paso a paso (y listo para copiar) en `live-sync-api/README.md`.
+
+### Conectar con el frontend
+
+Agrega `PUBLIC_LIVE_SYNC_ENDPOINT` a `exercise/.env` con la URL `wss://<api-id>.execute-api.<region>.amazonaws.com/<stage>` del paso 4 y vuelve a publicar el sitio.
+
 ## Limpieza (importante en un taller)
 
 Pedir confirmación y eliminar lo creado para no dejar recursos:
@@ -188,6 +208,12 @@ aws cognito-idp delete-user-pool --user-pool-id <pool-id>
 # Progreso en la nube: sync-api y su tabla
 aws lambda-web delete-web-function --function-name focus-garden-sync-api
 aws dynamodb delete-table --table-name focus-garden-cloud-sync
+# Sincronización en vivo: la API WebSocket, las dos Lambdas y sus tablas
+aws apigatewayv2 delete-api --api-id <api-id>
+aws lambda delete-function --function-name focus-garden-live-sync-router
+aws lambda delete-function --function-name focus-garden-live-sync-authorizer
+aws dynamodb delete-table --table-name focus-garden-connections
+aws dynamodb delete-table --table-name focus-garden-live-timer
 ```
 
 No olvides borrar también las OAuth Apps de Google/Meta/Amazon/GitHub si ya no se van a usar, y los GitHub Secrets/Variables del repositorio.

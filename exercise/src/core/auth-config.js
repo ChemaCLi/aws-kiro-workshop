@@ -30,4 +30,5 @@ export const AUTH_CONFIG = {
   },
   oidcBridgeEndpoint: import.meta.env.PUBLIC_OIDC_BRIDGE_ENDPOINT || 'https://oidc-bridge.example.com',
   syncApiEndpoint: import.meta.env.PUBLIC_SYNC_API_ENDPOINT || 'https://sync-api.example.com',
+  liveSyncEndpoint: import.meta.env.PUBLIC_LIVE_SYNC_ENDPOINT || 'wss://live-sync.example.com',
 };
