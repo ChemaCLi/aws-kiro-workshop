@@ -40,9 +40,20 @@ import { icon } from '../ui/icons.js';
   <script>
     import { store } from '../core/store.js';
     import { startTicker } from '../core/ticker.js';
+    import { consumeGuestEntry } from '../core/guest-entry.js';
     import { mountAppShell } from '../views/app-shell.js';
+    import { navigate, toast } from '../ui/util.js';
 
     startTicker(store);
     mountAppShell();
+
+    // Quien eligió "Entrar sin cuenta" en la landing ve este aviso una sola vez, ya dentro de
+    // la app (el toast vive en el shell de la app, no en la landing).
+    if (consumeGuestEntry()) {
+      toast('Puedes crear tu cuenta desde Ajustes para guardar tu progreso', {
+        action: { label: 'Ajustes', run: () => navigate('settings') },
+        duration: 5000,
+      });
+    }
   </script>
 </BaseLayout>

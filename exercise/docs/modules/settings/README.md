@@ -19,7 +19,7 @@ Entrar y salir son navegaciones reales, así que los botones atrás y adelante d
 - **Cielo por franja del día**: la franja se calcula con la hora local mediante `timePeriodFor(date)` (`rules.js`): `morning` 06:00–11:59, `midday` 12:00–15:59, `afternoon` 16:00–19:59 y `night` 20:00–05:59. Cada franja tiene su cielo CSS (`.hero-sky[data-period]`), su astro (sol o luna) y su luz 3D (`GARDEN_LOOKS`). De noche el texto cambia a colores claros y aparecen estrellas que titilan y una estrella fugaz ocasional. En teléfono el astro es más pequeño y se acomoda en la esquina para no tapar el título. La franja se recalcula cada 60 s y al volver a la pestaña (`visibilitychange`); solo se toca la escena si cambió. El jardín muestra las plantas reales (`heroPlots`, mismas reglas que `3d-world`) o, si no hay ninguna tarea terminada con rondas, las plantas de inicio `LANDING_STARTER_PLOTS`.
 - **Secciones**: *Cómo funciona* (tres pasos y la escalera de plantas, generada con `PLANTS`), *Funciones* (seis tarjetas; los chips de tipo salen de `TASK_TYPES`), *Open source* (stack, comandos para correrlo y enlace al repositorio en GitHub) y una llamada final.
 - **Botones de entrada**: los del hero y la llamada final dicen **"Continuar mi jardín"** si hay datos locales (`store.hasLocalData()`: al menos una tarea o una ronda) y **"Empezar mi jardín"** si no; sin datos, el hero muestra además la nota "Tus datos se guardan solo en este dispositivo. Ideal para probar." El de la barra superior dice siempre "Entrar".
-- **Recordatorio de la cuenta**: al pulsar cualquier botón de entrada aparece la hoja "Antes de empezar" ("Puedes crear una cuenta desde los ajustes si así lo deseas") con el botón "Entendido", que recibe el foco. Sale **cada vez que se entra a la app desde la landing**, con "Continuar" o sin datos. Cualquier forma de cerrarla (botón, Escape, fondo, arrastre) abre la app en Tareas (`app.html`).
+- **Elección al entrar** *(actualizado 2026-11-03, ver `docs/decisions/0002-pausar-proveedores-sociales.md`)*: al pulsar cualquier botón de entrada aparece la hoja "¿Cómo quieres entrar?" con dos botones: "Iniciar sesión" (recibe el foco) y "Entrar sin cuenta". Sale **cada vez que se entra a la app desde la landing**, con "Continuar" o sin datos. "Iniciar sesión" abre `app.html#/cuenta`; "Entrar sin cuenta" (o cerrar la hoja por cualquier otra vía: Escape, fondo, arrastre) abre `app.html` en Tareas y, ya dentro, muestra un toast con la acción "Ajustes" explicando que la cuenta se puede crear después.
 - **"Mantén vivo tu jardín, lleva tu progreso contigo"**: abre la hoja **Próximamente** ("Las cuentas llegan pronto…") con un botón "Entendido" que solo la cierra; la landing sigue abierta. No navega ni hace ninguna petición de red.
 - **Degradación elegante**: el texto y los botones se pintan antes de que Three.js termine de cargar (`import()` dinámico, el mismo de `3d-world`). Si Three.js o WebGL fallan, el hero pinta una isla de CSS y emojis (astro de la franja y hasta 12 plantas) y todo lo demás sigue funcionando. Con movimiento reducido (`prefers-reduced-motion: reduce`) la escena no rota ni anima transiciones (`freezeWhenReducedMotion`) y se apagan el parpadeo de las estrellas, la estrella fugaz, los chips flotantes y el desplazamiento suave. Si el navegador restaura la landing desde su caché al volver con "atrás" (`pageshow` con `persisted`), se recarga para leer los datos guardados más recientes.
 - **Salir de la app**: botón con ícono de salida arriba a la derecha en **Tareas** y fila "Salir a la página de inicio" al final de **Ajustes**. Ambos son enlaces a `index.html`; los datos y una ronda en curso se conservan (el reloj usa `endsAt`).
@@ -93,16 +93,17 @@ Antes de empezar: servir la carpeta de la app con un servidor estático y abrir 
 
 **Esperado:** sin datos, el hero y la llamada final dicen "Empezar mi jardín" y la nota "Tus datos se guardan solo en este dispositivo. Ideal para probar." está visible; con tareas o rondas dicen "Continuar mi jardín" y la nota desaparece; el botón de la barra superior dice siempre "Entrar"; tras borrar los datos vuelve a "Empezar mi jardín".
 
-#### Caso 5 — Recordatorio de la cuenta al entrar (Requisito 5)
+#### Caso 5 — Elegir cómo entrar (Requisito 5)
 
-1. Con `localStorage` vacío, tocar "Empezar mi jardín". Comprobar el texto, el botón y el foco; inspeccionar `role="dialog"`. Tocar "Entendido".
-2. Volver a la landing con "atrás", tocar de nuevo el botón principal: debe salir otra vez.
-3. Cargar datos de ejemplo, volver a la landing y tocar "Continuar mi jardín".
-4. Repetir con el botón "Entrar" de la barra superior y con el de la llamada final.
-5. Abrir la hoja y cerrarla con Escape, tocando el fondo y arrastrándola hacia abajo (una vez por vía).
-6. Tocar rápido dos veces el botón principal.
+1. Con `localStorage` vacío, tocar "Empezar mi jardín". Comprobar el título, los dos botones y el foco; inspeccionar `role="dialog"`. Tocar "Iniciar sesión".
+2. Comprobar que se abrió `app.html#/cuenta` (la página de cuenta), no Tareas.
+3. Volver a la landing con "atrás", tocar de nuevo el botón principal y esta vez tocar "Entrar sin cuenta".
+4. Comprobar que se abrió `app.html` en Tareas y que aparece un toast con la acción "Ajustes"; tocar "Ajustes" y comprobar que navega a la pestaña Ajustes.
+5. Cargar datos de ejemplo, volver a la landing y tocar "Continuar mi jardín"; repetir con el botón "Entrar" de la barra superior y con el de la llamada final.
+6. Abrir la hoja y cerrarla con Escape, tocando el fondo y arrastrándola hacia abajo (una vez por vía): cada una debe comportarse como "Entrar sin cuenta" (abre Tareas con el toast).
+7. Tocar rápido dos veces el botón principal.
 
-**Esperado:** aparece una hoja con `role="dialog"`, el título "Antes de empezar", el texto "Puedes crear una cuenta desde los ajustes si así lo deseas" y un botón "Entendido" con el foco inicial; sale **siempre** que se entra desde la landing, con "Continuar mi jardín", con "Empezar mi jardín" y con los otros dos botones de entrada; mientras está abierta la landing sigue a la vista y no se navega; cerrarla por cualquier vía abre `app.html` en la pestaña Tareas; un doble toque no abre dos hojas.
+**Esperado:** aparece una hoja con `role="dialog"`, el título "¿Cómo quieres entrar?", los botones "Iniciar sesión" (con el foco inicial) y "Entrar sin cuenta"; sale **siempre** que se entra desde la landing, con "Continuar mi jardín", con "Empezar mi jardín" y con los otros dos botones de entrada; "Iniciar sesión" abre la página de cuenta; "Entrar sin cuenta" o cualquier otra forma de cerrar la hoja abre Tareas con el toast de Ajustes; un doble toque no abre dos hojas.
 
 #### Caso 6 — Botón de crear cuenta (Requisito 6)
 

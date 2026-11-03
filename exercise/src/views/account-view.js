@@ -33,12 +33,11 @@ const PASSWORD_POLICY = {
 
 // Proveedores sociales en el orden en que se muestran. Cada clave coincide con
 // `AUTH_CONFIG.providers`; el ícono y la etiqueta son para el botón accesible.
-const PROVIDERS = [
-  { id: 'Google', icon: 'google', label: 'Google' },
-  { id: 'Meta', icon: 'meta', label: 'Meta' },
-  { id: 'Amazon', icon: 'amazon', label: 'Amazon' },
-  { id: 'GitHub', icon: 'github', label: 'GitHub' },
-];
+// Vacío a propósito: Google, Meta, Amazon y GitHub quedaron en pausa (ver
+// `exercise/docs/decisions/0002-pausar-proveedores-sociales.md`) mientras se avanza con
+// guardado en la nube y sincronización multidispositivo. Solo correo y contraseña por ahora;
+// basta con devolver esta lista a sus cuatro proveedores para retomarlos.
+const PROVIDERS = [];
 
 // Avisos de "no disponible" por motivo que devuelve `signInWithProvider`, para explicar por
 // qué un método quedó inactivo sin romper los demás (req. 5.5, 10).
@@ -128,8 +127,9 @@ export function mountAccountView(root) {
         ${items}</ul>`;
   }
 
-  /** Los cuatro botones de proveedor, cada uno con `aria-label` por ser de solo ícono + nombre. */
+  /** Los botones de proveedor, cada uno con `aria-label` por ser de solo ícono + nombre. */
   function providersBlock() {
+    if (!PROVIDERS.length) return ''; // en pausa: ver el comentario junto a PROVIDERS arriba
     const buttons = PROVIDERS.map((p) => `
       <button type="button" data-provider="${p.id}" aria-label="Continuar con ${esc(p.label)}" ${available ? '' : 'disabled'}
         class="press flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-paper py-3 font-bold

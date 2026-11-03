@@ -264,8 +264,9 @@ const stars = starField();
   <script>
     import { heroPlots, timePeriodFor } from '../core/rules.js';
     import { store } from '../core/store.js';
+    import { markGuestEntry } from '../core/guest-entry.js';
     import { mountHeroGarden } from '../views/hero-garden.js';
-    import { openAccountReminderSheet } from '../views/landing-sheets.js';
+    import { openEnterChoiceSheet } from '../views/landing-sheets.js';
 
     const APP_URL = './app.html';
 
@@ -299,15 +300,21 @@ const stars = starField();
       heroGarden.setPlots(heroPlots(store.state));
     }
 
-    /** Entrar siempre pasa por el recordatorio de la cuenta; al cerrarlo se abre la app en otra página. */
+    /** Entrar siempre pregunta primero: iniciar sesión, o seguir sin cuenta (con su aviso en la app). */
     function enterApp() {
       if (isEntering) return;
       isEntering = true;
-      openAccountReminderSheet({ onDone: () => location.assign(APP_URL) });
+      openEnterChoiceSheet({
+        onSignIn: () => location.assign(`${APP_URL}#/cuenta`),
+        onGuest: () => {
+          markGuestEntry();
+          location.assign(APP_URL);
+        },
+      });
     }
 
     // El Create_Account_Button (data-act="account") es un enlace directo a app.html#/cuenta, así
-    // que solo se intercepta "Entrar" para pasar por el recordatorio antes de abrir la app.
+    // que solo se intercepta "Entrar" para preguntar antes de abrir la app.
     document.addEventListener('click', (event) => {
       if (event.target.closest('[data-enter]')) enterApp();
     });

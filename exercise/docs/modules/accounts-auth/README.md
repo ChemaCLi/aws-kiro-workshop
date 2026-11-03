@@ -4,6 +4,8 @@
 
 Módulo de **autenticación opcional** con Amazon Cognito (spec `accounts-auth`, el segundo de la evolución hacia cuentas y sincronización; ver `docs/current-plan.md`). Agrega, por primera vez en el proyecto, una página propia de registro e inicio de sesión dentro de la app y un pequeño backend aparte. **La cuenta es opcional**: quien no quiera cuenta sigue usando la app igual que siempre, sin registrarse. Este spec construye solo la autenticación (registro, inicio y cierre de sesión); el guardado en la nube es del spec `cloud-sync` y la sección "Mis sesiones" es del spec `multi-device-sessions`.
 
+> **En pausa (2026-11-03):** Google, Meta, Login with Amazon y GitHub están implementados y desplegados (el puente OIDC y su infraestructura en AWS siguen corriendo), pero sus botones están **ocultos** en `account-view.js` (`PROVIDERS = []`) mientras se crean sus credenciales reales en cada proveedor. Solo correo y contraseña está activo ahora mismo. Ver [`docs/decisions/0002-pausar-proveedores-sociales.md`](../../decisions/0002-pausar-proveedores-sociales.md). Los casos 4, 5 y 11 de abajo describen el comportamiento **diseñado**, que sigue vigente en el código; para verlos en la UI real hay que devolver `PROVIDERS` a sus cuatro entradas primero.
+
 ### Tensión con los principios del proyecto
 
 Este módulo contradice el principio de producto 6 ("datos locales, sin cuentas ni servidor") y el stack de `tech.md` ("sin backend, sin build"). Se resuelve así: las cuentas son **opcionales**, **los datos locales siguen intactos** (la clave `jardin-movil:v1` no cambia de forma en este spec; la posible migración a la nube es del spec `cloud-sync`) y el único backend que se agrega es el puente de GitHub. Crear una cuenta o iniciar sesión **no toca** `localStorage`.

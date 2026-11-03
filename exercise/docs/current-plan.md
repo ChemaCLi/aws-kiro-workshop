@@ -2,17 +2,19 @@
 
 Este documento guarda el requerimiento original y el plan para construirlo en varios specs progresivos. Léelo antes de retomar el trabajo.
 
-Última actualización: 2026-11-01.
+Última actualización: 2026-11-03.
 
 > **Decisión (2026-11-01): se migrará la app a Astro.** El desarrollo con Web Components nativos se complicó demasiado. La migración queda pendiente y la hará la persona dueña del proyecto en otro IDE. Detalle, qué se conserva y qué cambia en [`docs/decisions/0001-migrar-a-astro.md`](decisions/0001-migrar-a-astro.md). Los specs 3 (`cloud-sync`) y 4 (`multi-device-sessions`) deben plantearse sobre el stack nuevo, no sobre Web Components.
+
+> **Decisión (2026-11-03): se pausan Google, Meta, Amazon y GitHub; solo correo y contraseña por ahora.** El primer despliegue real a AWS dejó funcionando el sitio, Cognito con correo/contraseña y el puente OIDC de GitHub en Lambda, pero conectar los cuatro proveedores sociales con credenciales reales de terceros es trabajo independiente que se retoma más adelante. Mientras tanto se avanza con los specs 3 y 4. Detalle en [`docs/decisions/0002-pausar-proveedores-sociales.md`](decisions/0002-pausar-proveedores-sociales.md).
 
 ## Estado
 
 | # | Spec | Estado |
 |---|------|--------|
 | 1 | `landing-and-settings` | ✅ **Completado** (2026-10-31). Todas las tareas de `tasks.md` cerradas, con la landing rediseñada como página aparte. QA: propiedades en Node y una pasada en navegador; queda como seguimiento una pasada de `qa-tester` con navegador para sonido, vibración y gestos (ver `docs/qa-reports/2026-10-31-landing-and-settings.md`). |
-| 2 | `accounts-auth` | ✅ **Completado** (2026-11-01). Spec en `.kiro/specs/accounts-auth/` (`requirements.md`, `design.md`, `tasks.md`). Autenticación opcional con Amazon Cognito (usuario/contraseña, Google, Meta, Login with Amazon y GitHub vía el puente OIDC `oidc-bridge/`); los datos locales siguen intactos. QA: ver `docs/qa-reports/2026-11-01-accounts-auth.md`, con el puente OIDC probado (14/14); los flujos que requieren Cognito real y navegador quedan pendientes de una pasada con el backend configurado. |
-| 3 | `cloud-sync` | Sin spec. Solo está descrito aquí. |
+| 2 | `accounts-auth` | ✅ **Completado** (2026-11-01); **desplegado parcialmente** (2026-11-03): correo y contraseña funcionando en AWS real, Google/Meta/Amazon/GitHub en pausa (ver decisión 0002 arriba). Spec en `.kiro/specs/accounts-auth/` (`requirements.md`, `design.md`, `tasks.md`). QA: ver `docs/qa-reports/2026-11-01-accounts-auth.md`. |
+| 3 | `cloud-sync` | Sin spec. Es el siguiente paso. |
 | 4 | `multi-device-sessions` | Sin spec. Solo está descrito aquí. |
 
 El spec 1 vive en `.kiro/specs/landing-and-settings/` (`requirements.md`, `design.md`, `tasks.md`). Cada spec siguiente se crea cuando termine el anterior, no antes.
@@ -45,7 +47,7 @@ Texto de la persona dueña del proyecto, ordenado por tema y sin cambiar su inte
 - Dos botones:
   - "Iniciar sin cuenta", con un texto chico que explique que los datos se guardan localmente (ideal para probar).
   - Crear cuenta, con un mensaje como "Mantén vivo tu jardín, lleva tu progreso contigo".
-- Si elige iniciar sin cuenta, al entrar a la app mostrar una modal: "Puedes crear una cuenta desde los ajustes si así lo deseas". (Decisión posterior: la modal sale en cada entrada, también con "Continuar".)
+- Si elige iniciar sin cuenta, al entrar a la app mostrar una modal: "Puedes crear una cuenta desde los ajustes si así lo deseas". (Decisión posterior 2026-11-01: la modal salía en cada entrada, también con "Continuar". Decisión posterior 2026-11-03: en vez de un solo aviso, "Entrar" pregunta primero si se quiere iniciar sesión o entrar sin cuenta; el aviso de Ajustes ahora es un toast dentro de la app, solo al elegir "Entrar sin cuenta" — ver `docs/decisions/0002-pausar-proveedores-sociales.md`.)
 - Botón de ajustes (engrane) en la barra. Mover ahí los ajustes de música y demás.
 - Si elige crear cuenta, llevar a una página de registro con las opciones de creación de cuenta.
 
@@ -121,10 +123,11 @@ Nota técnica: los navegadores no reciben webhooks. El canal en tiempo real debe
 
 ## Cómo retomar
 
-1. Los specs 1 y 2 están implementados (tareas en `.kiro/specs/landing-and-settings/tasks.md` y `.kiro/specs/accounts-auth/tasks.md`). Del spec 1 queda la pasada de `qa-tester` con navegador automatizado; del spec 2 quedan los flujos que requieren Cognito real y navegador, pendientes de una pasada con el backend configurado.
-2. Antes del spec 3, leer la decisión de migrar a Astro (nota al inicio de este documento): el spec debe escribirse sobre el stack nuevo. El siguiente paso es el spec 3 (`cloud-sync`): crearlo como Quick Spec o Requirements-first. Antes, responder las preguntas abiertas que siguen (DynamoDB vs. MongoDB y la resolución de conflictos) y actualizar los steerings si hace falta.
+1. Los specs 1 y 2 están implementados (tareas en `.kiro/specs/landing-and-settings/tasks.md` y `.kiro/specs/accounts-auth/tasks.md`). Del spec 1 queda la pasada de `qa-tester` con navegador automatizado; del spec 2, correo y contraseña ya está desplegado y probado en AWS real, y los cuatro proveedores sociales quedaron en pausa (decisión 0002 arriba) hasta retomarlos.
+2. El siguiente paso **es el spec 3** (`cloud-sync`): crearlo como Quick Spec o Requirements-first, sobre el stack Astro ya migrado. Antes, responder las preguntas abiertas que siguen (DynamoDB vs. MongoDB y la resolución de conflictos) y actualizar los steerings si hace falta. No depende de retomar los proveedores sociales: correo y contraseña basta para probarlo.
 3. Repetir para el spec 4 (`multi-device-sessions`).
-4. Al terminar cada spec, actualizar el estado de la tabla de este documento y `docs/features.md`.
+4. Retomar los proveedores sociales en pausa (pasos en la decisión 0002) cuando convenga; no bloquea los specs 3 y 4.
+5. Al terminar cada spec, actualizar el estado de la tabla de este documento y `docs/features.md`.
 
 ## Preguntas abiertas
 

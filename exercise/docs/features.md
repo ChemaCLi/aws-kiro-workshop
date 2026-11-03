@@ -62,7 +62,7 @@ La landing es una página aparte (`index.html`); la app vive en `app.html`. Deta
 | L1 | Entender qué es Focus Garden antes de usarla | Página con scroll: hero con el texto a la izquierda y la isla 3D a la derecha, y secciones *Cómo funciona*, *Funciones* y *Open source* |
 | L2 | Ver mi jardín según la hora | Cielo, astro y luz cambian en cuatro franjas (mañana, mediodía, tarde y noche); de noche hay luna y estrellas. Muestra mis plantas, o plantas de muestra si aún no tengo |
 | L3 | Entrar con un toque | Botones **Continuar mi jardín** (si ya hay tareas o rondas) o **Empezar mi jardín**; también **Entrar** en la barra superior |
-| L4 | Saber que puedo crear una cuenta cuando quiera | Al entrar sale siempre el aviso "Puedes crear una cuenta desde los ajustes si así lo deseas" (**Entendido**) |
+| L4 | Elegir cómo entrar | Al tocar **Entrar** se pregunta "¿Cómo quieres entrar?": **Iniciar sesión** (va a la página de cuenta) o **Entrar sin cuenta** (va a Tareas y, ya dentro, un aviso explica que la cuenta se puede crear después desde Ajustes) |
 | L5 | Crear una cuenta desde la landing | Botón "Mantén vivo tu jardín, lleva tu progreso contigo": lleva a la página de cuenta (`app.html#/cuenta`) para registrarse o iniciar sesión |
 | L6 | Usar la landing sin 3D o con movimiento reducido | Isla de emojis si Three.js o WebGL fallan; escena, estrellas y chips quietos con `prefers-reduced-motion` |
 | L7 | Saber que es open source | Sección *Open source* con el stack, los comandos para correrlo y el enlace al repositorio |
@@ -89,12 +89,11 @@ La cuenta es **opcional**: sin ella la app funciona igual, con los datos en el d
 |---|-------------|--------------|
 | C1 | Crear una cuenta con mi correo | Página de cuenta: registro con correo y contraseña; llega un código de confirmación que se escribe para activar la cuenta |
 | C2 | Iniciar sesión con correo y contraseña | Formulario de inicio de sesión en la página de cuenta; restaura la sesión en este dispositivo |
-| C3 | Entrar con Google, Meta o mi cuenta de Amazon | Botones de proveedor social; redirigen al inicio de sesión alojado por Cognito (OAuth 2.0 con PKCE) |
-| C4 | Entrar con GitHub | Botón de GitHub; usa el puente OIDC porque Cognito no lo soporta de forma nativa. Si el puente no responde, los demás métodos siguen funcionando |
-| C5 | Poner mi nombre tras registrarme | Tras el registro se pide solo el nombre; luego aparece **Ir a mi Garden** que lleva a Tareas |
-| C6 | Ver mi cuenta y cerrar sesión | Bloque **Mi cuenta** en Ajustes: muestra mi nombre (o correo) y **Cerrar sesión**, que no borra mis datos locales |
-| C7 | Usar la app sin cuenta | Todo sigue funcionando sin registrarse; crear cuenta no toca los datos locales |
-| C8 | Seguir sin cuentas si no hay red o SDK | Sin conexión o sin el SDK de cuentas, los controles de cuenta se muestran deshabilitados con aviso y el resto de la app sigue igual |
+| C3 | Entrar con Google, Meta, mi cuenta de Amazon o GitHub | **En pausa.** Los botones están ocultos mientras se configuran los proveedores reales; ver [decisión 0002](../decisions/0002-pausar-proveedores-sociales.md). Por ahora solo correo y contraseña |
+| C4 | Poner mi nombre tras registrarme | Tras el registro se pide solo el nombre; luego aparece **Ir a mi Garden** que lleva a Tareas |
+| C5 | Ver mi cuenta y cerrar sesión | Bloque **Mi cuenta** en Ajustes: muestra mi nombre (o correo) y **Cerrar sesión**, que no borra mis datos locales |
+| C6 | Usar la app sin cuenta | Todo sigue funcionando sin registrarse; crear cuenta no toca los datos locales |
+| C7 | Seguir sin cuentas si no hay red o SDK | Sin conexión o sin el SDK de cuentas, los controles de cuenta se muestran deshabilitados con aviso y el resto de la app sigue igual |
 
 ### Transversales
 
