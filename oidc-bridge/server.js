@@ -104,13 +104,26 @@ export function createApp() {
 }
 
 /**
- * Arranca el servidor en el puerto de PORT (o el valor por defecto).
+ * Arranca el servidor. Como Lambda Web Function, debe escuchar exactamente en
+ * el host:puerto que Lambda indica en AWS_LAMBDA_HTTP_ENDPOINT (p. ej.
+ * "0.0.0.0:3000"); si escucha en otro lado, el runtime nunca le entrega
+ * tráfico y falla con Application.TimeoutListenError. Fuera de Lambda (local,
+ * pruebas manuales), esa variable no existe y se usa PORT o el valor por
+ * defecto.
  *
  * @returns {import('node:http').Server}
  */
 export function start() {
-  const port = Number(process.env.PORT) || DEFAULT_PORT;
   const app = createApp();
+  const lambdaEndpoint = process.env.AWS_LAMBDA_HTTP_ENDPOINT;
+  if (lambdaEndpoint) {
+    const [host, portStr] = lambdaEndpoint.split(':');
+    const port = Number(portStr);
+    return app.listen(port, host, () => {
+      console.log(`[oidc-bridge] escuchando en ${lambdaEndpoint} (Lambda Web Function)`);
+    });
+  }
+  const port = Number(process.env.PORT) || DEFAULT_PORT;
   return app.listen(port, () => {
     console.log(`[oidc-bridge] escuchando en el puerto ${port}`);
   });
