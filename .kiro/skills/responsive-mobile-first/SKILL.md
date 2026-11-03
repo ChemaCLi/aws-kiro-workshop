@@ -5,7 +5,7 @@ description: Técnicas web para que Focus Garden se vea y funcione bien en telé
 
 # Responsive y mobile first
 
-Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. Los estilos globales están en `src/styles/`: `base.css` (compartido), `app.css` (la app, `app.html`) y `landing.css` (la landing, `index.html`).
+Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. Los estilos globales están en `src/styles/`: `tailwind.css` (tokens de color), `base.css` (compartido), `app.css` (la app, `app.html`/`app.astro`) y `landing.css` (la landing, `index.html`/`index.astro`).
 
 ## Técnicas que ya usa el proyecto (y por qué)
 
@@ -13,8 +13,8 @@ Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. 
 |---------|-------|--------|
 | `viewport-fit=cover` | `<meta viewport>` | Ocupar toda la pantalla en teléfonos con muesca |
 | `env(safe-area-inset-*)` en `--safe-t`/`--safe-b` | `:root`, `.pad-top`, `nav` | No tapar contenido con muesca ni barra de inicio |
-| Shell con `position: fixed; inset: 0` + rejilla | `app-shell` | Evita calcular alturas con `vh`/`dvh`, que se desfasan con las barras del navegador |
-| Fila propia para la navegación (`grid-template-rows: minmax(0,1fr) auto`) | `app-shell` | La barra nunca se encoge ni queda fuera |
+| Shell con `position: fixed; inset: 0` + rejilla | `.app-shell` (contenedor raíz de `app.astro`) | Evita calcular alturas con `vh`/`dvh`, que se desfasan con las barras del navegador |
+| Fila propia para la navegación (`grid-template-rows: minmax(0,1fr) auto`) | `.app-shell` | La barra nunca se encoge ni queda fuera |
 | `min-height: 0` / `min-width: 0` en hijos de la rejilla | `main` | Permite que el contenido haga scroll en vez de empujar el layout |
 | `overscroll-behavior: none` en `html, body` | Global | Sin rebote que mueva toda la app |
 | `touch-action: manipulation` | `body` | Quita el retraso de doble toque para zoom |
@@ -35,7 +35,7 @@ Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. 
 3. **Probar siempre 3 anchos:** 360 (móvil pequeño), 768 (punto de quiebre) y 1280 (escritorio). Y en vertical y horizontal.
 4. **Cuidar los dos lados de la pantalla:** zonas seguras laterales en horizontal (`env(safe-area-inset-left/right)`).
 5. **Gestos con alternativa.** Todo gesto (deslizar para eliminar) tiene que tener un equivalente accesible, o ser reversible (Deshacer).
-6. **Scroll vertical primero.** Un gesto horizontal solo se activa si el movimiento es claramente horizontal (ver `#onMove` en `tasks-view.js`: umbral de 10 px y proporción 1.5).
+6. **Scroll vertical primero.** Un gesto horizontal solo se activa si el movimiento es claramente horizontal (ver `onMove` en `src/views/tasks-view.js`: umbral de 10 px y proporción 1.5).
 7. **No desplazar la página completa.** Cada vista maneja su propio `.scroll`; el `body` no hace scroll.
 8. **Imágenes y canvas:** limitar `devicePixelRatio` a 2.
 9. **Teclado móvil:** al abrir una hoja con input, esperar a que termine la animación antes de `focus()` (ver `add-sheet.js`).
@@ -45,7 +45,7 @@ Se diseña primero para ~390×844 y se amplía con `@media (min-width: 768px)`. 
 
 - Chrome DevTools: modo dispositivo (Ctrl/Cmd+Shift+M), probar iPhone SE, iPhone 14, iPad y escritorio, con la opción de zona segura activada.
 - Con el MCP `chrome-devtools`: `resize_page` a 390×844 y 1280×800 y `take_screenshot`.
-- En un teléfono real por red local (`python3 -m http.server 8080` y `http://IP:8080`): no hay contexto seguro, así que `crypto.randomUUID` y Wake Lock no existen; la app ya tiene respaldos.
+- En un teléfono real por red local (`npm run dev -- --host` y `http://IP:4321`): no hay contexto seguro, así que `crypto.randomUUID` y Wake Lock no existen; la app ya tiene respaldos.
 - Síntomas comunes:
   - *Barra inferior cortada*: alguna altura usa `100vh`; pasar a la rejilla del shell.
   - *Contenido que no hace scroll*: falta `min-height: 0` en un hijo de la rejilla o flex.

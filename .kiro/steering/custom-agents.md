@@ -10,7 +10,7 @@ Los agentes viven en `.kiro/agents/`. Cada uno tiene un alcance fijo; elegir el 
 
 | Quiero... | Agente | Escribe en | No toca |
 |-----------|--------|------------|---------|
-| Implementar, cambiar o corregir la app (componentes, `rules.js`, `store.js`, servicios, escena 3D) | `coder` | `src/`, `index.html`, `melodies/`, y la documentación de lo que cambió | `.kiro/`, `docs/qa-reports/` |
+| Implementar, cambiar o corregir la app (vistas, `rules.js`, `store.js`, servicios, escena 3D, páginas de Astro) | `coder` | `src/`, `public/`, `test/`, y la documentación de lo que cambió | `.kiro/`, `docs/qa-reports/` |
 | Verificar que un módulo hace lo que dice su README | `qa-tester` | solo `docs/qa-reports/` (si se pide) | el código de la app |
 | Poner `docs/` al día con lo que el código hace, o auditar docs contra el código | `documenter` | solo `docs/` | `src/`, `.kiro/`, `docs/qa-reports/` |
 | Instalar o diagnosticar herramientas (Node, Chrome DevTools MCP, servidor local) | `entorno-tools` | `.kiro/settings/mcp.json`, con confirmación | el código de la app |
@@ -56,4 +56,3 @@ flowchart LR
 | "Audita todos los docs contra el código" | `documenter` (modo auditoría) |
 | "Chrome DevTools no conecta" | `entorno-tools` |
 | "Cambié `rules.js` a mano, falta documentarlo" | `documenter`, luego `qa-tester` |
-| "Migra la app a React" | `coder` (skill `migrate-to-react-or-vue`), luego `qa-tester` en todos los módulos |

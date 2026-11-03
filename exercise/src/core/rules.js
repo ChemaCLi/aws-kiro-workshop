@@ -123,14 +123,14 @@ export function islandSizeFor(count) {
   return 2 * Math.max(3, ring + 1) + 1;
 }
 
-// ---------- Landing (index.html) ----------
+// ---------- Franja del día (landing y jardín de la app) ----------
 
 /** Franjas del día según la hora local del dispositivo. */
 export const TIME_PERIODS = ['morning', 'midday', 'afternoon', 'night'];
 
 /**
- * Franja del día para pintar el jardín de bienvenida. Solo mira la hora local:
- * 06-11 morning, 12-15 midday, 16-19 afternoon, 20-05 night. Una fecha inválida
+ * Franja del día para pintar el cielo del jardín (landing y la pestaña Jardín). Solo mira la
+ * hora local: 06-11 morning, 12-15 midday, 16-19 afternoon, 20-05 night. Una fecha inválida
  * devuelve 'midday', el look neutro, para no dejar el hero sin cielo.
  */
 export function timePeriodFor(date) {
@@ -140,6 +140,26 @@ export function timePeriodFor(date) {
   if (hour >= 12 && hour < 16) return 'midday';
   if (hour >= 16 && hour < 20) return 'afternoon';
   return 'night';
+}
+
+const STAR_COUNT_DEFAULT = 70;
+const BRIGHT_STAR_EVERY = 7;
+
+/**
+ * Posiciones y parpadeo de un campo de estrellas, repartidos de forma determinista (no
+ * `Math.random()`): el cielo se ve igual en cada visita y en cada vista (landing y jardín de
+ * la app comparten esta función). Solo se muestran con la franja `night` (ver `.sky-stars` en
+ * los estilos).
+ */
+export function starField(count = STAR_COUNT_DEFAULT) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: (i * 37.7) % 100,
+    y: (i * 23.3 + (i % 5) * 7) % 100,
+    size: 1 + (i % 3),
+    twinkleSeconds: 2.5 + (i % 6) * 0.7,
+    delaySeconds: -((i * 0.9) % 6),
+    bright: i % BRIGHT_STAR_EVERY === 0,
+  }));
 }
 
 /** Hay algo que "continuar": al menos una tarea o una ronda. No muta el estado. */

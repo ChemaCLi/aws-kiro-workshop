@@ -1,8 +1,8 @@
-// <focus-view>: pomodoro de la tarea elegida. El reloj se calcula con `endsAt`,
+// Vista "Foco": pomodoro de la tarea elegida. El reloj se calcula con `endsAt`,
 // así sobrevive a cambiar de pestaña o recargar la página. Música, sonido y modo demo
-// se ajustan en <settings-view>; aquí solo se avisa si el modo demo está activo.
+// se ajustan en la vista de ajustes; aquí solo se avisa si el modo demo está activo.
 import { store } from '../core/store.js';
-import { StoreView } from '../ui/base.js';
+import { mountView } from '../ui/view.js';
 import { DURATIONS, PLANTS, TYPE_BY_ID, durationLabel, plantForRounds } from '../core/rules.js';
 import { haptic, unlockAudio } from '../core/feedback.js';
 import { icon } from '../ui/icons.js';
@@ -14,14 +14,82 @@ const RADIUS = 88;
 const CIRC = 2 * Math.PI * RADIUS;
 const PHASE = { idle: 'Listo para empezar', running: 'Enfocado', paused: 'En pausa', done: '¡Ronda completa!' };
 
-class FocusView extends StoreView {
-  setup() {
-    this.addEventListener('click', (e) => this.#onClick(e));
-    this.paintTimer = setInterval(() => this.#paint(), 250);
-  }
-  teardown() { clearInterval(this.paintTimer); }
+function openPicker() {
+  openSheet({
+    title: 'Elige una tarea',
+    render(body, close) {
+      const pending = store.state.tasks.filter((x) => !x.doneAt).sort((a, b) => b.createdAt - a.createdAt);
+      if (!pending.length) {
+        body.innerHTML = `
+          <p class="text-[15px] text-ink/60">No tienes tareas pendientes.</p>
+          <button data-new class="press mt-4 w-full rounded-2xl bg-moss py-3.5 font-bold text-white">Crear una tarea</button>`;
+        body.querySelector('[data-new]').onclick = () => { close(); setTimeout(openAddTask, 260); };
+        return;
+      }
+      body.innerHTML = `<ul class="space-y-2">${pending.map((x) => {
+        const ty = TYPE_BY_ID[x.type];
+        return `<li><button data-id="${x.id}" class="press flex w-full items-center gap-3 rounded-2xl border border-line bg-cream p-3 text-left">
+          <span class="grid h-10 w-10 place-items-center rounded-xl text-lg" style="background:${ty.color}26">${ty.emoji}</span>
+          <span class="min-w-0 flex-1"><span class="block truncate font-bold">${esc(x.title)}</span>
+          <span class="block text-xs font-medium text-ink/50">${esc(ty.label)} · 🍅 ${store.roundsOf(x.id)}</span></span></button></li>`;
+      }).join('')}</ul>`;
+      body.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-id]');
+        if (!b) return;
+        store.selectTask(b.dataset.id);
+        haptic(10);
+        close();
+      });
+    },
+  });
+}
 
-  update(state) {
+export function mountFocusView(root) {
+  let paintTimer = 0;
+
+  function paint() {
+    if (root.hidden) return;
+    const time = root.querySelector('[data-time]');
+    const ring = root.querySelector('[data-ring]');
+    if (!time || !ring) return;
+    const { status, totalMs } = store.state.timer;
+    const ms = store.remainingMs();
+    time.textContent = formatClock(status === 'done' ? 0 : ms);
+    const fraction = status === 'done' ? 0 : ms / totalMs;
+    ring.style.strokeDashoffset = String(CIRC * (1 - fraction));
+  }
+
+  function onClick(e) {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const t = store.state.timer;
+    const task = store.taskById(t.taskId);
+
+    switch (btn.dataset.act) {
+      case 'pick':
+        if (t.status === 'running' || t.status === 'paused') toast('Termina o reinicia la ronda para cambiar de tarea');
+        else openPicker();
+        break;
+      case 'toggle':
+        if (!task) { openPicker(); break; }
+        unlockAudio();
+        haptic(12);
+        if (t.status === 'running') store.pause(); else store.start();
+        break;
+      case 'again':
+        unlockAudio();
+        store.start();
+        break;
+      case 'cancel': store.cancel(); break;
+      case 'complete': if (task) announceCompletion(store.completeTask(task.id)); break;
+      case 'duration':
+        if (store.setDuration(Number(btn.dataset.min))) haptic(8);
+        break;
+      case 'settings': navigate('settings'); break;
+    }
+  }
+
+  function update(root, state) {
     const t = state.timer;
     const task = store.taskById(t.taskId);
     const type = task ? TYPE_BY_ID[task.type] : null;
@@ -72,8 +140,8 @@ class FocusView extends StoreView {
         class="chip press min-w-0 flex-1 rounded-full py-2 text-sm font-bold">${durationLabel(min)}</button>`;
     }).join('');
 
-    const prevScroll = this.querySelector('.scroll')?.scrollTop ?? 0;
-    this.innerHTML = `
+    const prevScroll = root.querySelector('.scroll')?.scrollTop ?? 0;
+    root.innerHTML = `
       <div class="scroll page absolute inset-0 pb-8">
         <header class="pad-top px-5">
           <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Foco</h1>
@@ -119,81 +187,16 @@ class FocusView extends StoreView {
           <p class="mt-2 text-center text-xs font-medium text-ink/60">${hint}</p>
         </div>
       </div>`;
-    this.querySelector('.scroll').scrollTop = prevScroll;
-    this.#paint();
+    root.querySelector('.scroll').scrollTop = prevScroll;
+    paint();
   }
 
-  #paint() {
-    if (this.hidden) return;
-    const time = this.querySelector('[data-time]');
-    const ring = this.querySelector('[data-ring]');
-    if (!time || !ring) return;
-    const { status, totalMs } = store.state.timer;
-    const ms = store.remainingMs();
-    time.textContent = formatClock(status === 'done' ? 0 : ms);
-    const fraction = status === 'done' ? 0 : ms / totalMs;
-    ring.style.strokeDashoffset = String(CIRC * (1 - fraction));
-  }
-
-  #onClick(e) {
-    const btn = e.target.closest('[data-act]');
-    if (!btn) return;
-    const t = store.state.timer;
-    const task = store.taskById(t.taskId);
-
-    switch (btn.dataset.act) {
-      case 'pick':
-        if (t.status === 'running' || t.status === 'paused') toast('Termina o reinicia la ronda para cambiar de tarea');
-        else this.#openPicker();
-        break;
-      case 'toggle':
-        if (!task) return this.#openPicker();
-        unlockAudio();
-        haptic(12);
-        if (t.status === 'running') store.pause(); else store.start();
-        break;
-      case 'again':
-        unlockAudio();
-        store.start();
-        break;
-      case 'cancel': store.cancel(); break;
-      case 'complete': if (task) announceCompletion(store.completeTask(task.id)); break;
-      case 'duration':
-        if (store.setDuration(Number(btn.dataset.min))) haptic(8);
-        break;
-      case 'settings': navigate('settings'); break;
-    }
-  }
-
-  #openPicker() {
-    openSheet({
-      title: 'Elige una tarea',
-      render(body, close) {
-        const pending = store.state.tasks.filter((x) => !x.doneAt).sort((a, b) => b.createdAt - a.createdAt);
-        if (!pending.length) {
-          body.innerHTML = `
-            <p class="text-[15px] text-ink/60">No tienes tareas pendientes.</p>
-            <button data-new class="press mt-4 w-full rounded-2xl bg-moss py-3.5 font-bold text-white">Crear una tarea</button>`;
-          body.querySelector('[data-new]').onclick = () => { close(); setTimeout(openAddTask, 260); };
-          return;
-        }
-        body.innerHTML = `<ul class="space-y-2">${pending.map((x) => {
-          const ty = TYPE_BY_ID[x.type];
-          return `<li><button data-id="${x.id}" class="press flex w-full items-center gap-3 rounded-2xl border border-line bg-cream p-3 text-left">
-            <span class="grid h-10 w-10 place-items-center rounded-xl text-lg" style="background:${ty.color}26">${ty.emoji}</span>
-            <span class="min-w-0 flex-1"><span class="block truncate font-bold">${esc(x.title)}</span>
-            <span class="block text-xs font-medium text-ink/50">${esc(ty.label)} · 🍅 ${store.roundsOf(x.id)}</span></span></button></li>`;
-        }).join('')}</ul>`;
-        body.addEventListener('click', (e) => {
-          const b = e.target.closest('[data-id]');
-          if (!b) return;
-          store.selectTask(b.dataset.id);
-          haptic(10);
-          close();
-        });
-      },
-    });
-  }
+  return mountView(root, {
+    setup(root) {
+      root.addEventListener('click', onClick);
+      paintTimer = setInterval(paint, 250);
+    },
+    update,
+    teardown() { clearInterval(paintTimer); },
+  });
 }
-
-customElements.define('focus-view', FocusView);

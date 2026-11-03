@@ -23,7 +23,7 @@ Todo diseño debe documentar la estructura y los flujos de forma visual, no solo
 
 2. **Diagramas de Mermaid** para documentar flujos y estructuras. Elegir el tipo según lo que se quiera mostrar, y usar al menos uno:
    - **Flujo** (`flowchart`): recorrido de una acción o decisión del usuario.
-   - **Componentes** (`flowchart` o `graph`): cómo se relacionan vistas, store, servicios y reglas, respetando la dirección de dependencias `components → ui → core`.
+   - **Componentes** (`flowchart` o `graph`): cómo se relacionan vistas, store, servicios y reglas, respetando la dirección de dependencias `views → ui → core`.
    - **Secuencia** (`sequenceDiagram`): interacción en el tiempo entre vista, store, servicios y APIs del navegador (por ejemplo, el pulso del pomodoro con el worker).
 
    Los diagramas van en bloques ` ```mermaid `. Un diseño que toca varios flujos lleva un diagrama por flujo, no uno solo que intente mostrarlo todo.

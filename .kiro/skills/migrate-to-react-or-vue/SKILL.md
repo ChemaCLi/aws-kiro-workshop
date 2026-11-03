@@ -5,6 +5,13 @@ description: Guía para migrar Focus Garden de Web Components nativos a React o 
 
 # Migrar a React o Vue
 
+> **Nota (2026-11-02):** el proyecto ya migró de Web Components a Astro + Vite, sin adoptar
+> React ni Vue (ver `docs/decisions/0001-migrar-a-astro.md`). Esta skill describía cómo migrar
+> **desde Web Components**: ese punto de partida ya no existe (las vistas son módulos JS planos
+> en `src/views/`, montados con `mountView` sobre páginas `.astro`). Si en el futuro se quiere
+> adoptar React o Vue, el punto de partida real es el stack de Astro actual, no el de abajo;
+> esta guía queda como referencia histórica de la migración anterior, no como pasos literales.
+
 La arquitectura actual ya separa lo que **no cambia** (lógica) de lo que **sí cambia** (vistas). La migración consiste en reemplazar solo las vistas.
 
 ## Qué se conserva tal cual

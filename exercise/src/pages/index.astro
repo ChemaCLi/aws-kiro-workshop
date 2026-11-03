@@ -1,35 +1,29 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Focus Garden · Tareas con pomodoro que hacen crecer tu jardín</title>
-  <meta name="description" content="Focus Garden es una app open source: anota tareas, enfócate con rondas pomodoro y mira crecer un jardín 3D por cada tarea terminada. Sin cuenta, gratis." />
-  <meta name="theme-color" content="#fbf6ea" />
-  <meta property="og:title" content="Focus Garden" />
-  <meta property="og:description" content="Cada ronda de enfoque hace crecer tu jardín. Open source y sin cuenta." />
-  <meta property="og:type" content="website" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+---
+// Landing (index.astro). Página aparte de la app: aquí solo se presenta el producto y se
+// invita a entrar. La app vive en app.astro. Lo que es puramente estático (la escalera de
+// plantas, los chips de tipo de tarea, las estrellas, los números del hero) se resuelve aquí
+// en build-time a partir de las reglas de core/rules.js; lo que depende de localStorage o de
+// la hora del visitante sigue siendo un script de cliente (ver abajo).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/landing.css';
+import { PLANTS, TASK_TYPES, starField } from '../core/rules.js';
 
-  <!-- Tailwind por CDN: sin Node, sin build. Los colores viven en src/ui/tailwind-config.js -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="./src/ui/tailwind-config.js"></script>
+const lastPlantIndex = PLANTS.length - 1;
 
-  <!-- Three.js por CDN con import map; hero-garden lo importa de forma dinámica. Si falla, el hero usa emojis. -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-
-  <link rel="stylesheet" href="./src/styles/base.css" />
-  <link rel="stylesheet" href="./src/styles/landing.css" />
-</head>
-<body class="bg-cream text-ink">
+// Estrellas con posición y parpadeo deterministas (ver core/rules.js): la landing y el jardín
+// de la app comparten la misma función, así que el cielo nocturno se ve igual en ambos.
+const stars = starField();
+---
+<BaseLayout
+  title="Focus Garden · Tareas con pomodoro que hacen crecer tu jardín"
+  description="Focus Garden es una app open source: anota tareas, enfócate con rondas pomodoro y mira crecer un jardín 3D por cada tarea terminada. Sin cuenta, gratis."
+  bodyClass="bg-cream text-ink"
+>
+  <Fragment slot="head">
+    <meta property="og:title" content="Focus Garden" />
+    <meta property="og:description" content="Cada ronda de enfoque hace crecer tu jardín. Open source y sin cuenta." />
+    <meta property="og:type" content="website" />
+  </Fragment>
 
   <!-- Barra superior -->
   <header class="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
@@ -49,7 +43,15 @@
   <main>
     <!-- Hero: el texto a la izquierda y el jardín 3D a la derecha -->
     <section id="inicio" class="hero-sky" data-period="midday" aria-labelledby="hero-title">
-      <div class="sky-stars" aria-hidden="true"><span class="shooting-star"></span></div>
+      <div class="sky-stars" aria-hidden="true">
+        <span class="shooting-star"></span>
+        {stars.map((s) => (
+          <i
+            class={s.bright ? 'is-bright' : undefined}
+            style={`--x:${s.x.toFixed(1)}%;--y:${s.y.toFixed(1)}%;--s:${s.size}px;--d:${s.twinkleSeconds.toFixed(1)}s;--delay:${s.delaySeconds.toFixed(1)}s`}
+          ></i>
+        ))}
+      </div>
       <div class="sky-body" aria-hidden="true"></div>
 
       <div class="hero-content mx-auto grid max-w-6xl items-center gap-4 px-5 pb-20 pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-6 lg:pb-28 lg:pt-14">
@@ -69,18 +71,18 @@
               <span data-enter-label>Empezar mi jardín</span>
               <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
-            <a href="#como-funciona" class="btn-ghost">Cómo funciona</a>
+            <a href="#como-funciona" class="btn-primary btn-primary--light">Cómo funciona</a>
           </div>
 
           <dl class="mt-9 flex max-w-md items-start gap-5">
             <div class="flex flex-col-reverse">
               <dt class="hero-muted text-xs font-bold uppercase tracking-wide">Plantas</dt>
-              <dd data-stat="plants" class="text-3xl font-extrabold tabular-nums">6</dd>
+              <dd class="text-3xl font-extrabold tabular-nums">{PLANTS.length}</dd>
             </div>
             <div class="hero-divider h-10 w-px"></div>
             <div class="flex flex-col-reverse">
               <dt class="hero-muted text-xs font-bold uppercase tracking-wide">Tipos de tarea</dt>
-              <dd data-stat="types" class="text-3xl font-extrabold tabular-nums">5</dd>
+              <dd class="text-3xl font-extrabold tabular-nums">{TASK_TYPES.length}</dd>
             </div>
             <div class="hero-divider h-10 w-px"></div>
             <div class="flex flex-col-reverse">
@@ -97,7 +99,7 @@
 
         <!-- Jardín 3D decorativo: a la derecha en escritorio, debajo del texto en el teléfono -->
         <div class="relative">
-          <hero-garden class="h-[340px] sm:h-[440px] lg:h-[600px]"></hero-garden>
+          <div data-hero-garden class="h-[340px] sm:h-[440px] lg:h-[600px]"></div>
           <div class="hud-chip pointer-events-none absolute left-0 top-6 flex items-center gap-2 rounded-2xl border border-line bg-paper/90 px-3.5 py-2 text-xs font-bold text-ink shadow-lg backdrop-blur sm:left-4 sm:text-sm" aria-hidden="true">
             <span class="h-2.5 w-2.5 animate-pulse rounded-full bg-leaf"></span> 🍅 Ronda en curso · 25:00
           </div>
@@ -139,7 +141,15 @@
               <p class="mt-1 max-w-xl text-ink/70">La planta depende solo de las rondas que hiciste en la tarea. Terminar sin rondas no siembra nada.</p>
             </div>
           </div>
-          <ul data-plants class="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6" aria-label="Planta según las rondas de la tarea"></ul>
+          <ul class="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6" aria-label="Planta según las rondas de la tarea">
+            {PLANTS.map((plant, index) => (
+              <li class={`plant-tile rounded-2xl border ${index === lastPlantIndex ? 'border-pink-200 bg-pink-50' : 'border-line bg-cream'} p-3 text-center`}>
+                <p class="text-4xl" aria-hidden="true">{plant.emoji}</p>
+                <p class="mt-2 text-sm font-extrabold">{plant.label}</p>
+                <p class="text-xs font-bold"><span class="text-ink/50">{index === lastPlantIndex ? `${plant.rounds}+` : plant.rounds}</span> 🍅</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
@@ -155,7 +165,13 @@
             <span class="grid h-12 w-12 place-items-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">📝</span>
             <h3 class="mt-4 text-lg font-extrabold">Tareas por tipo</h3>
             <p class="mt-2 leading-relaxed text-ink/70">Completa con un toque, elimina deslizando y deshaz si te equivocaste. Filtra por tipo cuando quieras ver solo una parte de tu día.</p>
-            <div data-types class="mt-4 flex flex-wrap gap-2"></div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              {TASK_TYPES.map((type) => (
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1 text-xs font-bold">
+                  <span class="h-2 w-2 rounded-full" style={`background:${type.color}`}></span>{type.short ?? type.label}
+                </span>
+              ))}
+            </div>
           </article>
 
           <article class="feature-card rounded-3xl border border-line bg-cream p-6">
@@ -201,10 +217,10 @@
             Focus Garden es open source: léelo, pruébalo, cópialo y mejóralo. Nació en el taller «Todos pueden programar con Kiro» del AWS User Group Orizaba, como ejemplo de una app real hecha paso a paso.
           </p>
           <ul class="mt-6 space-y-3 font-medium text-cream/85">
-            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> HTML y JavaScript con módulos ES y Web Components nativos</li>
-            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Tailwind, Tone.js y Three.js por CDN, cada uno con su respaldo si no carga</li>
-            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Sin Node, sin bundler y sin paso de build: se sirve con cualquier hosting estático</li>
-            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Sin cuentas ni servidor: tus datos se quedan en tu dispositivo</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Astro, HTML y JavaScript, sin frameworks de interfaz</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Tailwind integrado al build; Tone.js y Three.js como paquetes, cada uno con su respaldo si falla</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Astro + Vite con un paso de build sencillo: se publica como sitio estático en cualquier hosting</li>
+            <li class="flex gap-3"><span class="text-leaf" aria-hidden="true">✓</span> Sin cuenta obligatoria ni servidor: tus datos pueden quedarse solo en tu dispositivo</li>
           </ul>
           <a href="https://github.com/ChemaCLi/aws-kiro-workshop" target="_blank" rel="noopener noreferrer"
             class="btn-primary btn-primary--light mt-8">Ver el código en GitHub <span aria-hidden="true">↗</span></a>
@@ -217,8 +233,9 @@
           <pre class="overflow-x-auto p-5 text-[13px] leading-7 text-cream/90 sm:text-sm"><code><span class="text-cream/40"># Pruébalo en tu máquina</span>
 <span class="text-leaf">$</span> git clone https://github.com/ChemaCLi/aws-kiro-workshop.git
 <span class="text-leaf">$</span> cd aws-kiro-workshop/exercise
-<span class="text-leaf">$</span> python3 -m http.server 8080
-<span class="text-cream/40"># abre http://localhost:8080</span></code></pre>
+<span class="text-leaf">$</span> npm install
+<span class="text-leaf">$</span> npm run dev
+<span class="text-cream/40"># abre la URL que imprime Astro (http://localhost:4321)</span></code></pre>
           <figcaption class="sr-only">Comandos para ejecutar Focus Garden en tu computadora</figcaption>
         </figure>
       </div>
@@ -244,8 +261,69 @@
     </div>
   </footer>
 
-  <div id="sheet-host"></div>
-  <noscript>Esta página necesita JavaScript.</noscript>
-  <script type="module" src="./src/landing.js"></script>
-</body>
-</html>
+  <script>
+    import { heroPlots, timePeriodFor } from '../core/rules.js';
+    import { store } from '../core/store.js';
+    import { mountHeroGarden } from '../views/hero-garden.js';
+    import { openAccountReminderSheet } from '../views/landing-sheets.js';
+
+    const APP_URL = './app.html';
+
+    /** Cada cuánto se revisa si el día cambió de franja mientras la landing sigue abierta. */
+    const PERIOD_CHECK_MS = 60_000;
+
+    const ENTER_LABEL_WITH_DATA = 'Continuar mi jardín';
+    const ENTER_LABEL_WITHOUT_DATA = 'Empezar mi jardín';
+
+    const hero = document.querySelector('#inicio');
+    const heroGarden = mountHeroGarden(document.querySelector('[data-hero-garden]'));
+    let currentPeriod = null;
+    let isEntering = false; // evita abrir el recordatorio dos veces con toques repetidos
+
+    /** Recalcula la franja con la hora local; solo toca el cielo y la escena si realmente cambió. */
+    function applyPeriod() {
+      const period = timePeriodFor(new Date());
+      if (period === currentPeriod) return;
+      currentPeriod = period;
+      hero.dataset.period = period;
+      heroGarden.setPeriod(period);
+    }
+
+    /** "Continuar" si ya hay tareas o rondas; si no, la invitación a empezar y la nota de datos locales. */
+    function renderEntryState() {
+      const hasData = store.hasLocalData();
+      for (const label of document.querySelectorAll('[data-enter-label]')) {
+        label.textContent = hasData ? ENTER_LABEL_WITH_DATA : ENTER_LABEL_WITHOUT_DATA;
+      }
+      document.querySelector('[data-local-note]').hidden = hasData;
+      heroGarden.setPlots(heroPlots(store.state));
+    }
+
+    /** Entrar siempre pasa por el recordatorio de la cuenta; al cerrarlo se abre la app en otra página. */
+    function enterApp() {
+      if (isEntering) return;
+      isEntering = true;
+      openAccountReminderSheet({ onDone: () => location.assign(APP_URL) });
+    }
+
+    // El Create_Account_Button (data-act="account") es un enlace directo a app.html#/cuenta, así
+    // que solo se intercepta "Entrar" para pasar por el recordatorio antes de abrir la app.
+    document.addEventListener('click', (event) => {
+      if (event.target.closest('[data-enter]')) enterApp();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') applyPeriod();
+    });
+
+    // Al volver con "atrás" desde la app el navegador puede restaurar esta página de su caché con
+    // datos viejos (por ejemplo, sin "Continuar"). Se recarga para leer lo que quedó guardado.
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) location.reload();
+    });
+
+    renderEntryState();
+    applyPeriod();
+    setInterval(applyPeriod, PERIOD_CHECK_MS);
+  </script>
+</BaseLayout>

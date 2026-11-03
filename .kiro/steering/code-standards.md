@@ -31,9 +31,9 @@ Prioridad: **código autoexplicativo y limpio antes que corto**. Quien lo lea en
 - Comentar decisiones no obvias (por qué un worker, por qué `endsAt`, por qué un respaldo). No comentar lo evidente.
 - Un comentario desactualizado es un bug: al cambiar el código, cambia su comentario.
 
-## Estructura de un componente
+## Estructura de una vista
 
-Orden dentro de una clase: campos privados, `setup`, `update`, métodos de pintado (`#row`, `#paint`), manejadores de eventos (`#onClick`), `teardown`. Los métodos privados usan `#`.
+Cada vista es un módulo de `src/views/` que exporta una función `mountX(root)`. Dentro de esa función, en este orden: variables de estado del cierre léxico (lo que antes eran campos privados `#`), funciones de pintado (`row`, `paint`), manejadores de eventos (`onClick`), y al final la llamada a `mountView(root, { setup, update, teardown })` que la monta. `update(root, state)` recibe el contenedor como primer argumento porque ya no hay `this`.
 
 ## HTML generado
 

@@ -1,0 +1,31 @@
+---
+// Cabecera compartida por la landing y la app. Lo que difiere entre ambas (meta propias,
+// hoja de estilos, clase del body) lo decide cada página; aquí solo vive lo común.
+import '../styles/tailwind.css';
+import '../styles/base.css';
+
+interface Props {
+  title: string;
+  description: string;
+  bodyClass?: string;
+}
+const { title, description, bodyClass } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#fbf6ea" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+    <div id="sheet-host"></div>
+    <noscript>Esta app necesita JavaScript.</noscript>
+  </body>
+</html>

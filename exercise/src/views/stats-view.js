@@ -1,6 +1,6 @@
-// <stats-view>: KPIs, distribución por tipo (dona) y tendencia de 7 días (barras apiladas). SVG puro.
+// Vista "Estadísticas": KPIs, distribución por tipo (dona) y tendencia de 7 días (barras apiladas). SVG puro.
 import { TASK_TYPES, computeStats, hasLocalData } from '../core/rules.js';
-import { StoreView } from '../ui/base.js';
+import { mountView } from '../ui/view.js';
 import { esc, navigate } from '../ui/util.js';
 
 /** Sin datos locales no hay nada que contar: invita a cargar los de ejemplo, que viven en Ajustes. */
@@ -84,66 +84,67 @@ function weekChart(days) {
   return `<svg viewBox="0 0 ${W} ${H}" class="w-full" role="img" aria-label="Tareas completadas por día">${grid}${bars}</svg>`;
 }
 
-class StatsView extends StoreView {
-  setup() { this.addEventListener('click', (e) => this.#onClick(e)); }
-
-  update(state) {
-    const s = computeStats(state);
-    const total = s.doneCount;
-    const top = TASK_TYPES.slice().sort((a, b) => s.byType[b.id] - s.byType[a.id])[0];
-    const prevScroll = this.querySelector('.scroll')?.scrollTop ?? 0;
-
-    const rows = TASK_TYPES.map((t) => {
-      const n = s.byType[t.id];
-      const pct = total ? Math.round((n / total) * 100) : 0;
-      return `<li class="flex items-center gap-2 text-sm">
-        <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background:${t.color}"></span>
-        <span class="flex-1 truncate font-semibold">${t.emoji} ${esc(t.short ?? t.label)}</span>
-        <span class="font-bold tabular-nums">${n}</span>
-        <span class="w-9 text-right text-xs font-semibold text-ink/40 tabular-nums">${pct}%</span></li>`;
-    }).join('');
-
-    this.innerHTML = `
-      <div class="scroll page absolute inset-0 pb-8">
-        <header class="pad-top px-5">
-          <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Estadísticas</h1>
-          <p class="text-sm font-medium text-ink/60">Cómo repartes tu energía.</p>
-        </header>
-
-        ${hasLocalData(state) ? '' : emptyState()}
-
-        <div class="mx-5 mt-4 grid grid-cols-2 gap-3">
-          ${kpi('✅', s.doneCount, 'Tareas terminadas')}
-          ${kpi('🍅', s.rounds, 'Rondas de pomodoro')}
-          ${kpi('⏱️', s.focusMinutes, 'Minutos de foco')}
-          ${kpi('🔥', s.streak, s.streak === 1 ? 'Día de racha' : 'Días de racha')}
-        </div>
-
-        <section class="mx-5 mt-4 rounded-3xl border border-line bg-paper p-4">
-          <h2 class="text-base font-extrabold">Por tipo</h2>
-          <div class="mt-3 flex items-center gap-4">
-            ${donut(s.byType, total)}
-            <ul class="min-w-0 flex-1 space-y-2">${rows}</ul>
-          </div>
-          <p class="mt-3 text-xs font-medium text-ink/50">${total ? `Más activo en ${top.emoji} ${esc(top.label)}.` : 'Aún no hay tareas terminadas.'}</p>
-        </section>
-
-        <section class="mx-5 mt-4 rounded-3xl border border-line bg-paper p-4">
-          <h2 class="text-base font-extrabold">Últimos 7 días</h2>
-          <p class="mb-1 text-xs font-medium text-ink/50">Tareas terminadas por día, por tipo.</p>
-          ${weekChart(s.days)}
-          <div class="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">
-            ${TASK_TYPES.map((t) => `<span class="flex items-center gap-1 text-[11px] font-semibold text-ink/60"><i class="h-2 w-2 rounded-full" style="background:${t.color}"></i>${esc(t.label)}</span>`).join('')}
-          </div>
-        </section>
-      </div>`;
-    this.querySelector('.scroll').scrollTop = prevScroll;
-  }
-
-  #onClick(e) {
-    const act = e.target.closest('[data-act]')?.dataset.act;
-    if (act === 'settings') navigate('settings');
-  }
+function onClick(e) {
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'settings') navigate('settings');
 }
 
-customElements.define('stats-view', StatsView);
+function update(root, state) {
+  const s = computeStats(state);
+  const total = s.doneCount;
+  const top = TASK_TYPES.slice().sort((a, b) => s.byType[b.id] - s.byType[a.id])[0];
+  const prevScroll = root.querySelector('.scroll')?.scrollTop ?? 0;
+
+  const rows = TASK_TYPES.map((t) => {
+    const n = s.byType[t.id];
+    const pct = total ? Math.round((n / total) * 100) : 0;
+    return `<li class="flex items-center gap-2 text-sm">
+      <span class="h-2.5 w-2.5 shrink-0 rounded-full" style="background:${t.color}"></span>
+      <span class="flex-1 truncate font-semibold">${t.emoji} ${esc(t.short ?? t.label)}</span>
+      <span class="font-bold tabular-nums">${n}</span>
+      <span class="w-9 text-right text-xs font-semibold text-ink/40 tabular-nums">${pct}%</span></li>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="scroll page absolute inset-0 pb-8">
+      <header class="pad-top px-5">
+        <h1 class="text-[34px] font-extrabold leading-tight tracking-tight">Estadísticas</h1>
+        <p class="text-sm font-medium text-ink/60">Cómo repartes tu energía.</p>
+      </header>
+
+      ${hasLocalData(state) ? '' : emptyState()}
+
+      <div class="mx-5 mt-4 grid grid-cols-2 gap-3">
+        ${kpi('✅', s.doneCount, 'Tareas terminadas')}
+        ${kpi('🍅', s.rounds, 'Rondas de pomodoro')}
+        ${kpi('⏱️', s.focusMinutes, 'Minutos de foco')}
+        ${kpi('🔥', s.streak, s.streak === 1 ? 'Día de racha' : 'Días de racha')}
+      </div>
+
+      <section class="mx-5 mt-4 rounded-3xl border border-line bg-paper p-4">
+        <h2 class="text-base font-extrabold">Por tipo</h2>
+        <div class="mt-3 flex items-center gap-4">
+          ${donut(s.byType, total)}
+          <ul class="min-w-0 flex-1 space-y-2">${rows}</ul>
+        </div>
+        <p class="mt-3 text-xs font-medium text-ink/50">${total ? `Más activo en ${top.emoji} ${esc(top.label)}.` : 'Aún no hay tareas terminadas.'}</p>
+      </section>
+
+      <section class="mx-5 mt-4 rounded-3xl border border-line bg-paper p-4">
+        <h2 class="text-base font-extrabold">Últimos 7 días</h2>
+        <p class="mb-1 text-xs font-medium text-ink/50">Tareas terminadas por día, por tipo.</p>
+        ${weekChart(s.days)}
+        <div class="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">
+          ${TASK_TYPES.map((t) => `<span class="flex items-center gap-1 text-[11px] font-semibold text-ink/60"><i class="h-2 w-2 rounded-full" style="background:${t.color}"></i>${esc(t.label)}</span>`).join('')}
+        </div>
+      </section>
+    </div>`;
+  root.querySelector('.scroll').scrollTop = prevScroll;
+}
+
+export function mountStatsView(root) {
+  return mountView(root, {
+    setup: (root) => root.addEventListener('click', onClick),
+    update,
+  });
+}

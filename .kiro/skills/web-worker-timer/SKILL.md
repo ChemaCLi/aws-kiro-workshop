@@ -54,7 +54,7 @@ El worker solo corre mientras hay una ronda (`running`), para no gastar batería
 3. El worker no importa nada ni conoce el store; solo late.
 4. Cualquier campo nuevo del timer se guarda en `localStorage` y se valida en `load()`.
 5. Mantener la visibilidad del estado: `__ticker` en consola muestra `source` (`worker`, `fallback`), `ticks` y `lastTickAt`.
-6. Con bundler (Vite): `new Worker(new URL('./ticker.worker.js', import.meta.url), { type: 'module' })`.
+6. El proyecto usa Vite (vía Astro): el worker se instancia con `new Worker(new URL('./ticker.worker.js', import.meta.url))`. Es el mismo patrón que ya traía el proyecto antes de migrar a Astro, así que no cambió nada aquí.
 
 ## Límites honestos
 

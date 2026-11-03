@@ -1,39 +1,47 @@
 # Focus Garden
 
-Tareas + pomodoro + jardín 3D + estadísticas. Responsive y mobile first: barra inferior en móvil, riel lateral desde 768 px. Web Components nativos, Tailwind y Three.js por CDN. Sin Node, sin build.
+Tareas + pomodoro + jardín 3D + estadísticas. Responsive y mobile first: barra inferior en móvil, riel lateral desde 768 px. **Astro + Vite**, sin frameworks de UI (ni Web Components ni React/Vue). Ver [`docs/decisions/0001-migrar-a-astro.md`](docs/decisions/0001-migrar-a-astro.md) para el porqué de la migración y qué cambió.
 
 ## Cómo correrlo
 
-### Localmente
-Localmente abre el archivo index.html (la landing) en tu navegador web como Chrome, Edge, Firefox, Brave u Opera. Desde ahí se entra a la app (`app.html`).
-### Con servidor
-Puedes crear un servidor con ExpressJS o con Python para servir esta página html como un servicio.
+```bash
+npm install
+npm run dev
+```
+
+Abre la URL que imprime Astro (por defecto http://localhost:4321). `npm run build` genera el sitio estático en `dist/` (ver skill `deploy-to-aws` para publicarlo); `npm test` corre las pruebas con Vitest.
 
 ## Estructura
 
 ```
-index.html                 landing (página de presentación, sin SPA)
-app.html                   la app (SPA con pestañas por hash)
-src/landing.js             arranque de la landing
-src/main.js                arranque de la app
-src/styles/                base.css (compartido), app.css y landing.css
+astro.config.mjs           output: 'static', build.format: 'file', integración de Tailwind
+package.json               astro, three, tone, vitest
+public/                    icon.svg, manifest.webmanifest, melodies/ (servidos tal cual)
+src/pages/index.astro      landing (página de presentación, sin SPA)
+src/pages/app.astro        la app (SPA con pestañas por hash)
+src/layouts/BaseLayout.astro  <head> compartido entre las dos páginas
+src/views/                 un módulo JS por vista: app-shell, tasks-view, focus-view,
+                            garden-view, stats-view, settings-view, account-view, hero-garden
+src/styles/                tailwind.css (tokens), base.css (compartido), app.css y landing.css
 src/core/rules.js          reglas puras: tipos, plantas por rondas, stats, espiral del jardín
 src/core/store.js          estado + localStorage + acciones del pomodoro
+src/core/auth.js           servicio de autenticación (Cognito, OAuth 2.0 + PKCE)
 src/core/feedback.js       sonido, vibración, pantalla encendida
-src/ui/                    iconos, bottom sheets, utilidades, clase base de vistas
-src/components/            <app-shell>, <tasks-view>, <focus-view>, <garden-view>, <stats-view>
+src/ui/                    iconos, bottom sheets, utilidades, helper de montaje de vistas
 src/three/garden-scene.js  isla 3D (se carga de forma dinámica)
+test/                      pruebas Vitest (core/, views/)
 ```
 
 ## Documentación y configuración de Kiro
 ```
 docs/features.md           casos de uso y roadmap
+docs/decisions/            decisiones de arquitectura (ADR), p. ej. la migración a Astro
 docs/modules/*/README.md   descripción, pruebas para qa-tester y changelog de cada módulo
 ```
 La configuración de Kiro vive en el `.kiro/` de la **raíz del repositorio** (`../.kiro/` desde esta carpeta):
 ```
 ../.kiro/steering/         producto, stack, arquitectura, estándar de código, diseño, dependencias, docs y QA
-../.kiro/skills/           deploy-to-aws, migrate-to-react-or-vue, update-3d-world, responsive-mobile-first, web-worker-timer, add-lofi-melody
+../.kiro/skills/           deploy-to-aws, migrate-to-react-or-vue, update-3d-world, responsive-mobile-first, web-worker-timer, add-lofi-melody, unit-tests
 ../.kiro/agents/           coder, qa-tester, entorno-tools
 ../.kiro/specs/            7 specs incrementales para reconstruir la app (ver ../.kiro/specs/README.md)
 ```

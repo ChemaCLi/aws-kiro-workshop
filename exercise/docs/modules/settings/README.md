@@ -2,7 +2,7 @@
 
 ## Descripción
 
-Módulo de la landing y los ajustes (spec `landing-and-settings`, con la landing rediseñada después). Agrupa dos piezas: la **Landing**, una página aparte (`index.html`), y la pestaña **Ajustes** (`<settings-view>`) de la app (`app.html`). No hay servidor ni cuentas: todo sigue en `localStorage` bajo la clave `jardin-movil:v1`.
+Módulo de la landing y los ajustes (spec `landing-and-settings`, con la landing rediseñada después). Agrupa dos piezas: la **Landing**, una página aparte (`index.astro`), y la pestaña **Ajustes** (`src/views/settings-view.js`) de la app (`app.astro`). Todo sigue en `localStorage` bajo la clave `jardin-movil:v1`.
 
 ### Dos páginas
 
@@ -24,7 +24,7 @@ Entrar y salir son navegaciones reales, así que los botones atrás y adelante d
 - **Degradación elegante**: el texto y los botones se pintan antes de que Three.js termine de cargar (`import()` dinámico, el mismo de `3d-world`). Si Three.js o WebGL fallan, el hero pinta una isla de CSS y emojis (astro de la franja y hasta 12 plantas) y todo lo demás sigue funcionando. Con movimiento reducido (`prefers-reduced-motion: reduce`) la escena no rota ni anima transiciones (`freezeWhenReducedMotion`) y se apagan el parpadeo de las estrellas, la estrella fugaz, los chips flotantes y el desplazamiento suave. Si el navegador restaura la landing desde su caché al volver con "atrás" (`pageshow` con `persisted`), se recarga para leer los datos guardados más recientes.
 - **Salir de la app**: botón con ícono de salida arriba a la derecha en **Tareas** y fila "Salir a la página de inicio" al final de **Ajustes**. Ambos son enlaces a `index.html`; los datos y una ronda en curso se conservan (el reloj usa `endsAt`).
 
-### Ajustes (`<settings-view>`)
+### Ajustes (`src/views/settings-view.js`)
 
 Pestaña **Ajustes** (ícono de engrane `settings`), la última de `TABS` en `app-shell.js`: cinco pestañas en la barra inferior (< 768 px) o en el riel lateral (≥ 768 px), con `aria-label="Ajustes"` y `aria-current="page"` cuando está activa. Se abre también con `app.html#/settings`.
 
@@ -122,7 +122,7 @@ Antes de empezar: servir la carpeta de la app con un servidor estático y abrir 
 4. Abrir `http://localhost:8080/app.html#/settings` y comprobar la vista.
 5. Revisar con el teclado (Tab) que el engrane tiene el nombre accesible "Ajustes".
 
-**Esperado:** hay cinco pestañas en este orden: Tareas, Foco, Jardín, Stats y Ajustes (la última, con ícono de engrane de trazo); en < 768 px caben en la barra inferior sin desplazamiento horizontal (también a 320 px); desde 768 px están en el riel lateral; al tocar Ajustes se muestra `<settings-view>` y la pestaña queda con `aria-current="page"` (las demás con `"false"`); con `app.html#/settings` se abre Ajustes directamente, sin pasar por la landing; el botón tiene `aria-label="Ajustes"`.
+**Esperado:** hay cinco pestañas en este orden: Tareas, Foco, Jardín, Stats y Ajustes (la última, con ícono de engrane de trazo); en < 768 px caben en la barra inferior sin desplazamiento horizontal (también a 320 px); desde 768 px están en el riel lateral; al tocar Ajustes se pinta la vista de ajustes y la pestaña queda con `aria-current="page"` (las demás con `"false"`); con `app.html#/settings` se abre Ajustes directamente, sin pasar por la landing; el botón tiene `aria-label="Ajustes"`.
 
 #### Caso 8 — Música, sonido y modo demo en Ajustes (Requisito 8)
 
@@ -180,55 +180,21 @@ Este caso cubre solo lo que muestra la vista Ajustes. El flujo completo de la cu
 
 **Esperado:** al entrar, la URL cambia de `/` o `/index.html` a `/app.html#/tasks` (otra página, no un cambio dentro de la misma); recargar en la app se queda en la misma pestaña de `app.html` y no muestra la landing; el botón de salida tiene `aria-label="Salir a la página de inicio"`, mide al menos 44×44 px y lleva a `index.html`; "atrás" desde la app regresa a la landing y "adelante" vuelve a la app; la fila de Ajustes lleva a la landing; abrir `app.html#/settings` muestra Ajustes sin pasar por la landing; la ronda en curso sigue contando con el tiempo correcto al volver (se calcula con `endsAt`); `start_url` es `./app.html`.
 
-### Pruebas de propiedades (consola del navegador)
+### Pruebas de propiedades (Vitest)
 
-El proyecto no tiene Node, bundler ni ejecutor de pruebas, y la política de dependencias pide confirmación antes de sumar una librería. Las propiedades de la lógica pura de `core` se ejecutan por eso en la consola del navegador con un arnés de pocas líneas, sin dependencias.
+Desde la migración a Astro (ver `docs/decisions/0001-migrar-a-astro.md`) el proyecto tiene Node, `package.json` y Vitest, así que estas propiedades ya no se pegan en la consola del navegador: son pruebas reales en `exercise/test/`. Ver la skill `unit-tests` para el arnés `forAll` y cómo correrlas (`npm test`).
 
-**Arnés `forAll(runs, generate, check)`:**
+**Dónde viven ahora:**
 
-```js
-// Arnés mínimo: corre `check` con `runs` entradas aleatorias y falla con la primera que no cumpla.
-const forAll = (runs, generate, check) => {
-  for (let i = 0; i < runs; i++) {
-    const input = generate();
-    if (!check(input)) throw new Error(`Falla con: ${JSON.stringify(input)}`);
-  }
-};
-```
+| # | Propiedad | Requisitos | Test |
+|---|-----------|------------|------|
+| 1 | La franja depende solo de la hora local y cubre todo el día | 2.1, 2.3 | `test/core/rules.test.js` |
+| 2 | El hero nunca queda vacío y respeta el jardín real | 2.5, 2.6 | `test/core/rules.test.js` |
+| 3 | `hasLocalData` es exacto y no muta | 4.1, 4.2, 4.3, 12.4 | `test/core/store.test.js` |
+| 4 | `reset` y `seedDemo` conservan los ajustes | 5.8, 9.7 | `test/core/store.test.js` |
+| 5 | Alternar un ajuste dos veces restaura el valor y se persiste | 8.3, 8.4, 8.6, 8.7, 8.9 | `test/core/store.test.js` |
 
-- `runs`: número de iteraciones.
-- `generate()`: devuelve una entrada aleatoria nueva en cada llamada.
-- `check(input)`: devuelve `true` si la propiedad se cumple. Si devuelve `false`, el arnés lanza un error con la entrada que falló, que sirve como contraejemplo.
-
-**Cómo ejecutarlo:**
-
-1. Servir la app con cualquier servidor estático y abrirla en el navegador (por ejemplo `http://localhost:8080`).
-2. Abrir la consola de DevTools, pegar el arnés y después el script de la propiedad (ver la carpeta de abajo). Los módulos se importan con `await import('./src/core/rules.js')`; el estado en vivo está en `__store`.
-3. Correr **al menos 100 iteraciones** con datos aleatorios (`runs >= 100`).
-4. En dominios finitos (por ejemplo, las 24 horas del día para la franja horaria) no se muestrea: se recorre el dominio completo con un bucle y se combina con `forAll` para las variaciones aleatorias.
-
-   ```js
-   // Dominio finito: las 24 horas, todas, sin azar.
-   for (let hour = 0; hour < 24; hour++) {
-     if (!check(hour)) throw new Error(`Falla con la hora: ${hour}`);
-   }
-   ```
-
-5. Las propiedades que tocan el estado guardado (`reset`, `seedDemo`, `setSetting`) deben restaurar el `localStorage` original al terminar, para no dejar datos de prueba.
-
-**Etiqueta de cada propiedad:** `Feature: landing-and-settings, Property N: título`. El script que la comprueba empieza con esa etiqueta como comentario.
-
-**Resultado esperado:** el script termina sin lanzar error. Un `Error: Falla con: ...` indica un contraejemplo y se reporta a `coder` con la entrada que muestra.
-
-**Scripts de las propiedades:** cada propiedad guarda su script en [`properties/`](./properties/), con el nombre `propiedad-N-<tema>.md`.
-
-| # | Propiedad | Requisitos | Script |
-|---|-----------|------------|--------|
-| 1 | La franja depende solo de la hora local y cubre todo el día | 2.1, 2.3 | [propiedad-1-franja-horaria.md](./properties/propiedad-1-franja-horaria.md) |
-| 2 | El hero nunca queda vacío y respeta el jardín real | 2.5, 2.6 | [propiedad-2-hero-plots.md](./properties/propiedad-2-hero-plots.md) |
-| 3 | `hasLocalData` es exacto y no muta | 4.1, 4.2, 4.3, 12.4 | [propiedad-3-has-local-data.md](./properties/propiedad-3-has-local-data.md) |
-| 4 | `reset` y `seedDemo` conservan los ajustes | 5.8, 9.7 | [propiedad-4-reset-seed.md](./properties/propiedad-4-reset-seed.md) |
-| 5 | Alternar un ajuste dos veces restaura el valor y se persiste | 8.3, 8.4, 8.6, 8.7, 8.9 | [propiedad-5-alternar-ajustes.md](./properties/propiedad-5-alternar-ajustes.md) |
+Cada `describe` del archivo de test lleva la misma etiqueta `Feature: landing-and-settings, Property N: título` que antes encabezaba el script. Los documentos en [`properties/`](./properties/) se conservan como el enunciado y razonamiento original de cada propiedad (útiles para entender el "por qué"), pero **ya no son lo que se ejecuta**: el script embebido en cada uno quedó obsoleto en cuanto se escribió el test real, y en dos casos (franja horaria y ruta de cuenta, esta última en `accounts-auth`) convertir el script a un test real encontró ejemplos del documento que no coincidían con la implementación, porque nunca se habían corrido de verdad. Para una propiedad nueva, escribirla directo como test en `exercise/test/`, no como un `.md` con un script.
 
 ## Changelog
 

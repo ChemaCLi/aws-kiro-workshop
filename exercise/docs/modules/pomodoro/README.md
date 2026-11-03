@@ -4,12 +4,12 @@
 
 Rondas de enfoque sobre una tarea. Pantalla `#/focus`.
 
-- **Componente:** `<focus-view>` (`src/components/focus-view.js`).
+- **Vista:** `src/views/focus-view.js`.
 - **Estado y acciones:** `store.state.timer` y `selectTask`, `start`, `pause`, `cancel`, `tick`, `setDuration` en `src/core/store.js`.
 - **Pulso:** `src/core/ticker.js` + `src/core/ticker.worker.js` (Web Worker).
 - **Sonido y sistema:** `src/core/feedback.js` (campanita, vibración, wake lock).
-- **Música:** `src/core/lofi.js` con Tone.js por CDN y melodías JSON en `melodies/` (lofi con `jazzy-amin.json` e hiphop/trap con `trap-oscuro.json`, "Trap en Do menor", 138 bpm). Al encender la música se elige una al azar entre las registradas en `melodies/index.json`.
-- **Ajustes de música, sonido y modo demo:** viven en `<settings-view>` (pestaña **Ajustes**, ver [módulo settings](../settings/README.md)). Foco ya no tiene esos controles; solo respeta lo que se haya elegido allí.
+- **Música:** `src/core/lofi.js` con Tone.js (paquete npm) y melodías JSON en `public/melodies/` (lofi con `jazzy-amin.json` e hiphop/trap con `trap-oscuro.json`, "Trap en Do menor", 138 bpm). Al encender la música se elige una al azar entre las registradas en `public/melodies/index.json`.
+- **Ajustes de música, sonido y modo demo:** viven en `src/views/settings-view.js` (pestaña **Ajustes**, ver [módulo settings](../settings/README.md)). Foco ya no tiene esos controles; solo respeta lo que se haya elegido allí.
 
 ### Modelo del timer
 

@@ -1,6 +1,6 @@
 # Focus Garden: funcionalidades
 
-Tareas + pomodoro + jardín 3D + estadísticas. Mobile first, responsive, solo en español, sin build.
+Tareas + pomodoro + jardín 3D + estadísticas. Mobile first, responsive, solo en español. Astro + Vite (ver `docs/decisions/0001-migrar-a-astro.md`).
 
 ## Casos de uso disponibles
 

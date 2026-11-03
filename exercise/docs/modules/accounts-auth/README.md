@@ -10,7 +10,7 @@ Este módulo contradice el principio de producto 6 ("datos locales, sin cuentas 
 
 ### Qué hace
 
-- **Página de cuenta** (`<account-view>`) en la ruta hash `#/cuenta` de `app.html`, con el estilo de Focus Garden: formulario de registro, formulario de inicio de sesión y los botones de los proveedores sociales y de GitHub. Permite volver a la app sin cuenta.
+- **Página de cuenta** (`src/views/account-view.js`) en la ruta hash `#/cuenta` de `app.html`, con el estilo de Focus Garden: formulario de registro, formulario de inicio de sesión y los botones de los proveedores sociales y de GitHub. Permite volver a la app sin cuenta.
 - **Registro con usuario y contraseña**: Cognito crea el usuario, envía un código de confirmación al correo, se confirma la cuenta y se pasa al Name_Prompt.
 - **Inicio de sesión con usuario y contraseña** contra Cognito, que establece la sesión.
 - **Proveedores sociales**: Google, Meta (Facebook/Instagram) y Login with Amazon, resueltos con el Hosted UI de Cognito mediante OAuth 2.0 con código de autorización, PKCE y un `state` aleatorio.
@@ -31,11 +31,11 @@ El frontend es un **cliente público sin secreto**: usa un App Client de Cognito
 |---------|-----------------|
 | `src/core/auth.js` | Lógica pura y servicio de autenticación: PKCE, `state`, URL de autorización, canje, validación de claims, refresco, round-trip de la sesión, modelo del Account_Slot, mapeo de errores. |
 | `src/core/auth-config.js` | Configuración **pública** (`AUTH_CONFIG`): User Pool, App Client, dominio, redirect URIs, endpoint del puente. Sin secretos. |
-| `src/components/account-view.js` | La página de cuenta (`#/cuenta`): formularios, botones de proveedores y Name_Prompt. |
-| `src/components/app-shell.js` | Ruteo: `routeFromHash` distingue `#/cuenta` de las pestañas. |
-| `src/components/settings-view.js` | Account_Slot que reemplaza el Reserved_Slot "Mi cuenta"; conserva "Mis sesiones" como "Próximamente". |
-| `index.html` y `src/landing.js` | El Create_Account_Button de la landing es un enlace directo (`<a href="./app.html#/cuenta" data-act="account">` en `index.html`) a la página de cuenta; `landing.js` ya no intercepta ese botón para abrir una hoja, solo el botón "Entrar". |
-| `src/components/landing-sheets.js` | Hoja de recordatorio "Antes de empezar" que se muestra al entrar a la app desde la landing ("Puedes crear una cuenta desde los ajustes si así lo deseas"); es informativa y nunca bloquea la entrada. |
+| `src/views/account-view.js` | La página de cuenta (`#/cuenta`): formularios, botones de proveedores y Name_Prompt. |
+| `src/views/app-shell.js` | Ruteo: `routeFromHash` distingue `#/cuenta` de las pestañas. |
+| `src/views/settings-view.js` | Account_Slot que reemplaza el Reserved_Slot "Mi cuenta"; conserva "Mis sesiones" como "Próximamente". |
+| `src/pages/index.astro` | El Create_Account_Button de la landing es un enlace directo (`<a href="./app.html#/cuenta" data-act="account">`) a la página de cuenta; el script de la landing ya no intercepta ese botón para abrir una hoja, solo el botón "Entrar". |
+| `src/views/landing-sheets.js` | Hoja de recordatorio "Antes de empezar" que se muestra al entrar a la app desde la landing ("Puedes crear una cuenta desde los ajustes si así lo deseas"); es informativa y nunca bloquea la entrada. |
 | `oidc-bridge/` | Backend aparte en Node/Express (puente OIDC de GitHub). Tiene su **propio README** con endpoints, variables de entorno y cómo correrlo localmente. |
 
 ## Pruebas para qa-tester
@@ -167,58 +167,30 @@ Antes de empezar: servir la carpeta de la app con un servidor estático y abrir 
 
 **Esperado:** el frontend no contiene ningún secreto; en la pestaña Network **ningún secreto viaja** desde el front en ningún flujo; se usa el flujo de código con PKCE para todos los proveedores y nunca el implícito; el `state` es fresco por intento y los redirect con `state` distinto se rechazan; solo se redirige a las URIs permitidas; **"Cerrar sesión" NO modifica `localStorage['jardin-movil:v1']`** (las tareas, rondas y ajustes quedan idénticos). El secreto de GitHub y las llaves de firma solo en el servidor se verifican en `oidc-bridge/test/`. Sin backend, apóyate en las propiedades 2, 3, 4 y 5.
 
-### Pruebas de propiedades (consola del navegador)
+### Pruebas de propiedades (Vitest)
 
-El proyecto no tiene Node, bundler ni ejecutor de pruebas, y la política de dependencias pide confirmación antes de sumar una librería. Las propiedades de la lógica pura de `core` se ejecutan por eso en la consola del navegador con un arnés de pocas líneas, sin dependencias.
+Desde la migración a Astro (ver `docs/decisions/0001-migrar-a-astro.md`) el proyecto tiene Node, `package.json` y Vitest, así que estas propiedades ya no se pegan en la consola del navegador: son pruebas reales en `exercise/test/core/auth.test.js` (propiedades 2 a 14) y `exercise/test/views/app-shell.test.js` (propiedad 1, porque `routeFromHash` vive ahora en `src/views/app-shell.js`, ya no en un Web Component). Ver la skill `unit-tests` para el arnés `forAll` y cómo correrlas (`npm test`); jsdom da `crypto.subtle`, `location` y `localStorage` reales, así que ya no hacen falta los stubs manuales ni el aviso de contexto seguro que pedían los scripts originales.
 
-**Arnés `forAll(runs, generate, check)`:**
+**Dónde viven ahora:**
 
-```js
-// Arnés mínimo: corre `check` con `runs` entradas aleatorias y falla con la primera que no cumpla.
-const forAll = (runs, generate, check) => {
-  for (let i = 0; i < runs; i++) {
-    const input = generate();
-    if (!check(input)) throw new Error(`Falla con: ${JSON.stringify(input)}`);
-  }
-};
-```
-
-- `runs`: número de iteraciones.
-- `generate()`: devuelve una entrada aleatoria nueva en cada llamada.
-- `check(input)`: devuelve `true` si la propiedad se cumple. Si devuelve `false`, el arnés lanza un error con la entrada que falló, que sirve como contraejemplo.
-
-Algunas propiedades de este módulo (por ejemplo la del desafío PKCE) usan `crypto.subtle`, que es asíncrono; esas traen una variante `async` del arnés que espera cada resultado (`await check(input)`). Cada script lo incluye tal cual.
-
-**Cómo ejecutarlo:**
-
-1. Servir la app con cualquier servidor estático y abrirla en un **contexto seguro** (`http://localhost:8080` o `https://`): `crypto.subtle` solo existe ahí, así que las propiedades de PKCE y de firma no corren por IP de LAN sin HTTPS.
-2. Abrir la consola de DevTools, pegar el script de la propiedad (ver la carpeta de abajo). Cada script es autocontenido: trae el arnés, la etiqueta y, cuando hace falta, un stub de `location` para correr también en Node 20+. Los módulos se importan con `await import('./src/core/auth.js')`.
-3. Correr **al menos 100 iteraciones** con datos aleatorios (`runs >= 100`).
-4. En dominios finitos (por ejemplo todos los proveedores de `AUTH_CONFIG.providers`) no se muestrea: se recorre el dominio completo con un bucle y se combina con `forAll` para las variaciones aleatorias.
-5. Las propiedades que tocan el estado guardado (`saveSession`, `loadSession`) deben restaurar el `localStorage` original al terminar, para no dejar datos de prueba.
-
-**Etiqueta de cada propiedad:** `Feature: accounts-auth, Property N: título`. El script que la comprueba empieza con esa etiqueta como comentario.
-
-**Resultado esperado:** el script termina sin lanzar error. Un `Error: Falla con: ...` indica un contraejemplo y se reporta a `coder` con la entrada que muestra.
-
-**Scripts de las propiedades:** cada propiedad guarda su script en [`properties/`](./properties/), con el nombre `propiedad-N-<tema>.md`.
-
-| # | Propiedad | Requisitos | Script |
-|---|-----------|------------|--------|
-| 1 | La ruta de cuenta se decide solo por el hash | 1.1 | [propiedad-1-ruta-hash.md](./properties/propiedad-1-ruta-hash.md) |
-| 2 | El desafío PKCE deriva del verificador y es verificable | 4.4, 12.1 | [propiedad-2-pkce.md](./properties/propiedad-2-pkce.md) |
-| 3 | La URL de autorización usa code, PKCE, state y una redirect permitida | 4.2, 5.2, 12.1, 12.3 | [propiedad-3-authorize-url.md](./properties/propiedad-3-authorize-url.md) |
-| 4 | El canje valida el state y nunca envía secreto | 4.3, 4.5, 5.4, 9.3, 12.2 | [propiedad-4-canje-state.md](./properties/propiedad-4-canje-state.md) |
-| 5 | El state es fresco y suficientemente aleatorio | 12.2 | [propiedad-5-state-aleatorio.md](./properties/propiedad-5-state-aleatorio.md) |
-| 6 | Auth_Config solo contiene valores públicos | 5.6, 9.1, 9.2, 12.4 | [propiedad-6-auth-config-publico.md](./properties/propiedad-6-auth-config-publico.md) |
-| 7 | El destino tras iniciar sesión depende solo de la Display_Name | 3.5, 4.7, 6.1, 6.5 | [propiedad-7-post-signin-route.md](./properties/propiedad-7-post-signin-route.md) |
-| 9 | Guardar y cargar la sesión es un round-trip | 9.4 | [propiedad-9-sesion-roundtrip.md](./properties/propiedad-9-sesion-roundtrip.md) |
-| 10 | La decisión de refresco cubre todas las expiraciones | 9.5, 9.6 | [propiedad-10-refresco.md](./properties/propiedad-10-refresco.md) |
-| 11 | El ID token se acepta solo con claims correctos | 9.7, 12.5 | [propiedad-11-validar-claims.md](./properties/propiedad-11-validar-claims.md) |
-| 12 | El modelo del Account_Slot refleja disponibilidad y sesión | 7.1, 7.2, 7.3, 10.1, 10.3 | [propiedad-12-account-slot.md](./properties/propiedad-12-account-slot.md) |
-| 13 | Las reglas de contraseña incumplidas son exactas | 2.5 | [propiedad-13-reglas-contrasena.md](./properties/propiedad-13-reglas-contrasena.md) |
-| 14 | Los errores de autenticación mapean a mensajes seguros | 2.4, 3.3 | [propiedad-14-errores-auth.md](./properties/propiedad-14-errores-auth.md) |
+| # | Propiedad | Requisitos | Test |
+|---|-----------|------------|------|
+| 1 | La ruta de cuenta se decide solo por el hash | 1.1 | `test/views/app-shell.test.js` |
+| 2 | El desafío PKCE deriva del verificador y es verificable | 4.4, 12.1 | `test/core/auth.test.js` |
+| 3 | La URL de autorización usa code, PKCE, state y una redirect permitida | 4.2, 5.2, 12.1, 12.3 | `test/core/auth.test.js` |
+| 4 | El canje valida el state y nunca envía secreto | 4.3, 4.5, 5.4, 9.3, 12.2 | `test/core/auth.test.js` |
+| 5 | El state es fresco y suficientemente aleatorio | 12.2 | `test/core/auth.test.js` |
+| 6 | Auth_Config solo contiene valores públicos | 5.6, 9.1, 9.2, 12.4 | `test/core/auth.test.js` |
+| 7 | El destino tras iniciar sesión depende solo de la Display_Name | 3.5, 4.7, 6.1, 6.5 | `test/core/auth.test.js` |
+| 9 | Guardar y cargar la sesión es un round-trip | 9.4 | `test/core/auth.test.js` |
+| 10 | La decisión de refresco cubre todas las expiraciones | 9.5, 9.6 | `test/core/auth.test.js` |
+| 11 | El ID token se acepta solo con claims correctos | 9.7, 12.5 | `test/core/auth.test.js` |
+| 12 | El modelo del Account_Slot refleja disponibilidad y sesión | 7.1, 7.2, 7.3, 10.1, 10.3 | `test/core/auth.test.js` |
+| 13 | Las reglas de contraseña incumplidas son exactas | 2.5 | `test/core/auth.test.js` |
+| 14 | Los errores de autenticación mapean a mensajes seguros | 2.4, 3.3 | `test/core/auth.test.js` |
 | 15 | El puente acepta solo orígenes de la allowlist | 11.5, 12.6 | `oidc-bridge/test/origins.test.js` |
+
+Cada `describe` del archivo de test lleva la misma etiqueta `Feature: accounts-auth, Property N: título` que antes encabezaba el script. Los documentos en [`properties/`](./properties/) se conservan como el enunciado y razonamiento original de cada propiedad, pero **ya no son lo que se ejecuta**. Al convertir la Propiedad 1 (ruta de cuenta) a un test real se encontraron dos ejemplos del documento (`/cuenta` sin `#`, y espacios en distinta posición alrededor del hash) que no coincidían con `routeFromHash`, porque el script original nunca se había corrido de verdad; la corrección queda documentada como comentario en `test/views/app-shell.test.js`. Para una propiedad nueva, escribirla directo como test en `exercise/test/`, no como un `.md` con un script.
 
 **Pruebas del puente OIDC:** el contrato del `oidc-bridge/` (endpoints OIDC, canje con GitHub, orígenes permitidos y secretos solo en el servidor) se verifica con las pruebas de `oidc-bridge/test/`, descritas en el README del puente.
 

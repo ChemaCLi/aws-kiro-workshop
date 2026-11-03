@@ -1,5 +1,11 @@
 /* Estilos compartidos por la landing (index.html) y la app (app.html):
-   tipografía, botones con presión, animaciones comunes y las hojas inferiores (sheet.js). */
+   tipografía, botones con presión, animaciones comunes y las hojas inferiores (sheet.js).
+   Todo va en @layer base: Tailwind v4 envuelve sus propias reglas en @layer (theme, base,
+   components, utilities), y una regla FUERA de cualquier @layer siempre gana sobre cualquier
+   regla QUE SÍ esté en una @layer, sin importar especificidad. Sin este @layer, el `color:
+   inherit` de `button` de abajo ganaba sobre clases de Tailwind como `text-white`/`text-moss`,
+   dejando texto invisible en varios botones. */
+@layer base {
 
 :root { --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px); }
 * { -webkit-tap-highlight-color: transparent; }
@@ -34,3 +40,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .sheet-root { align-items: center; justify-content: center; }
   .sheet { max-width: 560px; border-radius: 28px; max-height: 80%; }
 }
+
+/* Campo de estrellas: lo usan el hero de la landing (.hero-sky) y el jardín de la app
+   (.garden-sky), cualquiera que tenga data-period="night". Las posiciones (--x, --y, --s,
+   --d, --delay) las pone quien las pinta, con la función starField() de core/rules.js. */
+.sky-stars { position: absolute; inset: 0 0 20% 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+[data-period="night"] .sky-stars { opacity: 1; }
+.sky-stars i {
+  position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s);
+  border-radius: 50%; background: #fff; opacity: .85;
+  animation: twinkle var(--d) ease-in-out var(--delay) infinite;
+}
+.sky-stars i.is-bright { box-shadow: 0 0 8px 2px rgba(255, 255, 255, .55); }
+@keyframes twinkle { 0%, 100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.25); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-stars i { animation: none; }
+}
+
+} /* fin @layer base */

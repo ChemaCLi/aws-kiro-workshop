@@ -28,12 +28,12 @@ Si el usuario no indica el modo ni el alcance, pregunta cuál es.
 
    | Archivos | Módulo(s) a revisar |
    |----------|---------------------|
-   | `src/components/tasks-view.js`, `add-sheet.js` | `todo-list` |
-   | `src/components/focus-view.js`, `src/core/ticker*.js`, `feedback.js`, `lofi.js`, `melodies/` | `pomodoro` |
-   | `src/components/garden-view.js`, `src/three/garden-scene.js` | `3d-world` |
-   | `src/components/stats-view.js` | `statistics` |
+   | `src/views/tasks-view.js`, `add-sheet.js` | `todo-list` |
+   | `src/views/focus-view.js`, `src/core/ticker*.js`, `feedback.js`, `lofi.js`, `public/melodies/` | `pomodoro` |
+   | `src/views/garden-view.js`, `src/views/hero-garden.js`, `src/three/garden-scene.js` | `3d-world` |
+   | `src/views/stats-view.js` | `statistics` |
    | `src/core/rules.js`, `src/core/store.js` | Todos los módulos que usen la regla o acción cambiada (buscar con `grep`) |
-   | `src/components/app-shell.js`, `src/main.js`, `index.html`, `manifest.webmanifest`, `src/ui/` | `docs/features.md` > Transversales, y los módulos que lo mencionen |
+   | `src/views/app-shell.js`, `src/pages/*.astro`, `public/manifest.webmanifest`, `src/ui/` | `docs/features.md` > Transversales, y los módulos que lo mencionen |
 
 3. **Leer el código real** de cada archivo afectado, completo en las partes que cambian. Para cada afirmación que vayas a escribir, localiza la línea que la respalda:
    - Valores concretos (90 px de deslizado, 80 caracteres, 4,2 s del toast, 25 min por defecto, mapa rondas → planta, clave `jardin-movil:v1`): léelos de la constante, no de otro doc.
@@ -121,7 +121,7 @@ Documenta siempre **lo que el código hace**. Si eso contradice la spec, el READ
 
 # Reglas
 
-- Solo escribes dentro de `docs/`. No tocas `src/`, `index.html`, `melodies/`, `.kiro/` ni el README de la app; los reportas como pendientes.
+- Solo escribes dentro de `docs/`. No tocas `src/`, `public/`, `.kiro/` ni el README de la app; los reportas como pendientes.
 - No escribas en `docs/qa-reports/`: ese espacio es de `qa-tester`.
 - No inventes comportamiento, valores ni textos. Si no puedes verificar algo en el código, no lo escribas y repórtalo como pregunta.
 - No reescribas secciones que ya son correctas ni cambies el estilo de los docs existentes.

@@ -4,7 +4,7 @@
 
 Lista de tareas con el mínimo de interacciones. Es la pantalla de inicio (`#/tasks`).
 
-- **Componente:** `<tasks-view>` (`src/components/tasks-view.js`) y la hoja `openAddTask` (`src/components/add-sheet.js`).
+- **Vista:** `src/views/tasks-view.js` y la hoja `openAddTask` (`src/views/add-sheet.js`).
 - **Datos:** `store.state.tasks`, cada tarea es `{ id, title, type, createdAt, doneAt|null }`.
 - **Reglas:** `TASK_TYPES`, `TYPE_BY_ID`, `roundsByTask`, `computeStats` en `src/core/rules.js`.
 - **Acciones del store:** `addTask`, `removeTask` + `restore` (deshacer), `completeTask`, `reopenTask`.

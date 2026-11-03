@@ -5,7 +5,7 @@ description: Crear y registrar melodías lofi nuevas para la música de fondo (T
 
 # Agregar una melodía
 
-La música se genera en el navegador con Tone.js (CDN). Cada melodía es un archivo JSON en `melodies/`. No se agregan archivos de audio.
+La música se genera en el navegador con Tone.js (paquete npm). Cada melodía es un archivo JSON en `public/melodies/` (Vite sirve `public/` tal cual desde la raíz del sitio). No se agregan archivos de audio.
 
 ## Formato
 
@@ -34,8 +34,8 @@ La música se genera en el navegador con Tone.js (CDN). Cada melodía es un arch
 
 ## Pasos
 
-1. Crear `melodies/<nombre-en-kebab-case>.json`.
-2. Agregar el nombre del archivo a `melodies/index.json` (el navegador no puede listar carpetas).
+1. Crear `public/melodies/<nombre-en-kebab-case>.json`.
+2. Agregar el nombre del archivo a `public/melodies/index.json` (el navegador no puede listar carpetas).
 3. Probar: activar **Música de fondo** en Foco. Se elige una melodía al azar; recargar hasta que salga la nueva o dejar solo esa en `index.json` temporalmente.
 4. Actualizar el changelog del módulo pomodoro.
 
@@ -50,7 +50,7 @@ La música se genera en el navegador con Tone.js (CDN). Cada melodía es un arch
 ## Validación rápida
 
 ```bash
-node -e "const m=require('./melodies/mi-melodia.json');const ok=m.chords.length===m.bass.length&&m.bass.length===m.melody.length&&m.melody.every(r=>r.length===8);console.log(ok?'OK':'Revisar largos')"
+node -e "const m=require('./public/melodies/mi-melodia.json');const ok=m.chords.length===m.bass.length&&m.bass.length===m.melody.length&&m.melody.every(r=>r.length===8);console.log(ok?'OK':'Revisar largos')"
 ```
 
 Los archivos inválidos se ignoran sin error; si no suena, revisar la consola de red (`index.json` y el archivo deben responder 200) y el formato.

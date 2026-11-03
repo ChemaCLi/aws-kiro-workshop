@@ -1,5 +1,6 @@
 // Isla flotante low-poly con una parcela por tarea terminada.
-// Three.js se importa de forma dinámica: si el CDN falla, la app sigue funcionando (ver garden-view).
+// Three.js se importa de forma dinámica (paquete npm, empaquetado por Vite): si WebGL no
+// está disponible o falla la construcción de la escena, la app sigue funcionando (ver garden-view).
 // La usan garden-view (interactiva) y hero-garden (decorativa, sin controles y con luz según la franja del día).
 import { TYPE_BY_ID, islandSizeFor, spiralCell } from '../core/rules.js';
 import { GARDEN_LOOKS } from './garden-looks.js';
@@ -33,7 +34,7 @@ export async function createGardenScene(
   { onSelect, interactive = true, freezeWhenReducedMotion = false, fitMargin = 1 } = {},
 ) {
   const THREE = await import('three');
-  const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+  const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls.js');
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   // Se decide una sola vez: congela el tiempo de animación, el "pop" de las plantas y el reencuadre interpolado.
   const isMotionFrozen = freezeWhenReducedMotion && reduceMotion;
@@ -195,11 +196,20 @@ export async function createGardenScene(
       }
     },
 
+    // La misma tarea siempre da el mismo árbol: la variante sale de r(), no de Math.random().
     tree(g, r) {
       tufts(g, r, 3, 0.1, 0.2, 0.4);
-      put(g, G.cyl, M.trunk, [0, TOP + 0.3, 0], [0.09, 0.6, 0.09]);
-      [[0.65, 0.5, 0.42], [1.0, 0.42, 0.34], [1.3, 0.34, 0.26]]
-        .forEach(([y, h, rad], i) => put(g, G.cone, i % 2 ? M.leaf : M.leafDark, [0, TOP + y, 0], [rad, h, rad]));
+      if (r() < 0.5) {
+        // Pino: tres conos apilados.
+        put(g, G.cyl, M.trunk, [0, TOP + 0.3, 0], [0.09, 0.6, 0.09]);
+        [[0.65, 0.5, 0.42], [1.0, 0.42, 0.34], [1.3, 0.34, 0.26]]
+          .forEach(([y, h, rad], i) => put(g, G.cone, i % 2 ? M.leaf : M.leafDark, [0, TOP + y, 0], [rad, h, rad]));
+      } else {
+        // Árbol de copa redonda: tronco más alto y un racimo de esferas facetadas.
+        put(g, G.cyl, M.trunk, [0, TOP + 0.4, 0], [0.09, 0.8, 0.09]);
+        [[0, 0.95, 0, 0.42], [-0.17, 0.86, 0.1, 0.3], [0.18, 0.82, -0.09, 0.28], [0.02, 1.08, 0.06, 0.3]]
+          .forEach(([x, y, z, s], i) => put(g, G.ico, i % 2 ? M.leaf : M.leafDark, [x, TOP + y, z], [s, s * 0.85, s]));
+      }
     },
 
     butterfly(g, r, ctx) {

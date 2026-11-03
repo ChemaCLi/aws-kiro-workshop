@@ -1,0 +1,48 @@
+---
+// La app es una SPA: las pestañas cambian con el hash (#/tasks, #/focus...). La landing es index.astro.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/app.css';
+import { TABS } from '../ui/tabs.js';
+import { icon } from '../ui/icons.js';
+---
+<BaseLayout title="Focus Garden" description="Focus Garden: tareas con pomodoro que hacen crecer un jardín 3D.">
+  <Fragment slot="head">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Focus Garden" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  </Fragment>
+
+  <div class="app-shell">
+    <main>
+      <div data-tab="tasks" class="view"></div>
+      <div data-tab="focus" class="view" hidden></div>
+      <div data-tab="garden" class="view" hidden></div>
+      <div data-tab="stats" class="view" hidden></div>
+      <div data-tab="settings" class="view" hidden></div>
+    </main>
+    <nav aria-label="Secciones">
+      {TABS.map((t) => (
+        <button data-tab={t.id} aria-label={t.label}
+          class="press relative flex flex-col items-center gap-0.5 py-1 text-[11px] font-bold text-ink/50">
+          <span data-pill class="grid h-8 w-14 place-items-center rounded-full transition-colors" set:html={icon(t.icon, 'h-[22px] w-[22px]')} />
+          <span>{t.label}</span>
+          {t.id === 'focus' && (
+            <i data-dot class="absolute right-[22%] top-0.5 hidden h-2.5 w-2.5 animate-pulse rounded-full bg-leaf"></i>
+          )}
+        </button>
+      ))}
+    </nav>
+    <div data-view="account" hidden></div>
+    <div id="toasts" aria-live="polite"></div>
+  </div>
+
+  <script>
+    import { store } from '../core/store.js';
+    import { startTicker } from '../core/ticker.js';
+    import { mountAppShell } from '../views/app-shell.js';
+
+    startTicker(store);
+    mountAppShell();
+  </script>
+</BaseLayout>

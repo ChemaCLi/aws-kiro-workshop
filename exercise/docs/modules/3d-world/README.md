@@ -4,8 +4,8 @@
 
 Isla flotante low-poly con una parcela por tarea terminada que tenga al menos una ronda. Pantalla `#/garden`.
 
-- **Componente:** `<garden-view>` (`src/components/garden-view.js`): contenedor, encabezado, leyenda, tarjeta de selección y respaldo 2D.
-- **Escena:** `createGardenScene()` en `src/three/garden-scene.js`. Three.js se carga por CDN con `import()` dinámico.
+- **Vista:** `src/views/garden-view.js`: contenedor, encabezado, leyenda, tarjeta de selección y respaldo 2D.
+- **Escena:** `createGardenScene()` en `src/three/garden-scene.js`. Three.js es un paquete npm, cargado con `import()` dinámico.
 - **Reglas:** `PLANTS`, `plantForRounds`, `gardenPlots`, `spiralCell`, `islandSizeFor` en `src/core/rules.js`.
 
 ### Reglas del mundo
@@ -36,12 +36,12 @@ Isla flotante low-poly con una parcela por tarea terminada que tenga al menos un
 
 ### Nota: opciones de `createGardenScene`
 
-`createGardenScene(container, { onSelect, interactive, freezeWhenReducedMotion, fitMargin })` acepta tres opciones nuevas y devuelve `setLook` en su API. Con los valores por defecto la escena se comporta igual que antes, por lo que `<garden-view>` no cambia.
+`createGardenScene(container, { onSelect, interactive, freezeWhenReducedMotion, fitMargin })` acepta tres opciones nuevas y devuelve `setLook` en su API. Con los valores por defecto la escena se comporta igual que antes, por lo que `garden-view.js` no cambia.
 
 - `interactive` (por defecto `true`): con `false` la escena es decorativa. Desactiva los controles de cámara, no registra `pointerdown`/`pointerup` (no hay selección) y el canvas lleva `pointer-events: none`.
 - `setLook(look)`: cambia de golpe las luces, el sol y el color de las nubes con un objeto de `GARDEN_LOOKS` (`src/three/garden-looks.js`: `morning`, `midday`, `afternoon`, `night`). La escena nace con `GARDEN_LOOKS.midday`, que replica la luz de siempre.
-- `freezeWhenReducedMotion` (por defecto `false`): con `prefers-reduced-motion` deja la escena totalmente quieta (sin flotado, nubes, alas ni pétalos en movimiento, plantas sin "pop" y reencuadre directo). Solo la activa el hero de la landing (`<hero-garden>`, junto con `interactive: false`); `<garden-view>` no la pasa y conserva su movimiento reducido actual.
-- `fitMargin` (por defecto `1`): multiplica la distancia de encuadre para dejar aire alrededor de la isla. El hero usa `1.3` porque su lienzo es más ancho que alto y, al girar, las esquinas de la isla se cortaban en los bordes; `<garden-view>` no lo pasa y se encuadra igual que siempre.
+- `freezeWhenReducedMotion` (por defecto `false`): con `prefers-reduced-motion` deja la escena totalmente quieta (sin flotado, nubes, alas ni pétalos en movimiento, plantas sin "pop" y reencuadre directo). Solo la activa el hero de la landing (`hero-garden.js`, junto con `interactive: false`); `garden-view.js` no la pasa y conserva su movimiento reducido actual.
+- `fitMargin` (por defecto `1`): multiplica la distancia de encuadre para dejar aire alrededor de la isla. El hero usa `1.3` porque su lienzo es más ancho que alto y, al girar, las esquinas de la isla se cortaban en los bordes; `garden-view.js` no lo pasa y se encuadra igual que siempre.
 
 ### Límites conocidos
 

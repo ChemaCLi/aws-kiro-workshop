@@ -13,7 +13,7 @@ Respondes en español. Identificadores en inglés; textos visibles y comentarios
 
 # Fuentes de verdad
 
-Las rutas de los steerings, skills y specs viven en el `.kiro/` de la raíz del repositorio. Las rutas de código y `docs/` son relativas a la carpeta de la app (donde está `index.html`; en este repositorio, `exercise/`).
+Las rutas de los steerings, skills y specs viven en el `.kiro/` de la raíz del repositorio. Las rutas de código y `docs/` son relativas a la carpeta de la app (donde están `package.json` y `astro.config.mjs`; en este repositorio, `exercise/`).
 
 | Pregunta | Dónde se responde |
 |----------|-------------------|
@@ -34,7 +34,7 @@ Si dos documentos se contradicen, para el stack gana `tech.md`; para todo lo dem
 
 Lee `tech.md` completo, aunque ya lo tengas en contexto, y extrae por escrito (para ti) estas decisiones:
 
-- Lenguaje y modelo de componentes (por ejemplo, módulos ES con Web Components en light DOM).
+- Lenguaje y modelo de componentes (por ejemplo, Astro + módulos ES planos montados con `mountView`).
 - Cómo se aplican los estilos y dónde está su configuración.
 - Dónde vive el estado y cómo se persiste (clave y versión de `localStorage`).
 - Qué recursos externos existen, cómo se cargan y cuál es su degradación.
@@ -118,7 +118,7 @@ Antes de escribir, compara lo que dice `tech.md` con el código real de la carpe
 | Situación | Qué haces |
 |-----------|-----------|
 | `tech.md` y el código coinciden | Sigues el stack tal cual |
-| `tech.md` dice React/Vue y el código aún es Web Components | Activa la skill `migrate-to-react-or-vue` y migra una vista por vez; `core/` no cambia |
+| `tech.md` dice un stack distinto al del código (por ejemplo, React/Vue y el código aún es Astro + JS plano) | Busca una skill de migración que aplique (p. ej. `migrate-to-react-or-vue`) y migra una vista por vez; `core/` no cambia |
 | `tech.md` está desactualizado respecto al código | No inventes: avisa la diferencia y pregunta cuál es la correcta |
 | `tech.md` no menciona algo que necesitas (otro framework, bundler, TypeScript) | Pregunta; no lo asumas |
 

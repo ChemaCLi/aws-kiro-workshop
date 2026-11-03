@@ -59,7 +59,7 @@ Clasifica en uno de estos entornos:
 
 No instales el MCP de Chrome DevTools. Dilo claramente desde el principio: el navegador no puede abrirse con pantalla desde ahí. Ofrece estas alternativas, en este orden:
 
-1. **Pruebas manuales guiadas.** Levantar el servidor con `python3 -m http.server 8080` y que el usuario abra `http://localhost:8080` en el navegador de Windows (WSL reenvía `localhost`). El agente `qa-tester` entrega la lista de pasos y el usuario reporta.
+1. **Pruebas manuales guiadas.** Levantar el servidor con `npm run dev` (en `exercise/`, con `npm install` primero si falta `node_modules/`) y que el usuario abra la URL que imprime Astro (por defecto `http://localhost:4321`) en el navegador de Windows (WSL reenvía `localhost`). El agente `qa-tester` entrega la lista de pasos y el usuario reporta.
 2. **Pruebas de lógica en Node.** `src/core/rules.js` es puro y se puede importar con `node` para verificar reglas y estadísticas.
 3. **Si el usuario quiere automatización de todos modos**, sugerir abrir el proyecto en Kiro **desde Windows nativo** (con la extensión de WSL o la carpeta compartida) y ejecutar allí este agente. No improvises soluciones de pantalla virtual (xvfb, VNC) salvo que el usuario lo pida expresamente.
 
@@ -73,9 +73,9 @@ Revisa en este orden y detente en la primera causa encontrada:
 | `npx: command not found` | Node no está en el PATH que ve Kiro | Reinstalar Node o abrir Kiro desde una terminal que lo tenga; en Windows probar `cmd /c npx` |
 | El servidor se conecta pero no abre Chrome | Chrome no instalado o en ruta no estándar | Instalar Chrome estable; indicar su ruta con la opción del paquete si es necesario |
 | Primera ejecución muy lenta | `npx` está descargando el paquete | Esperar y reintentar una vez |
-| `localhost:8080` no carga | El servidor no está corriendo o el puerto está ocupado | `lsof -i :8080` (macOS/Linux) o `netstat -ano \| findstr 8080` (Windows); cambiar de puerto |
-| Los módulos ES fallan con `file://` | El navegador bloquea imports desde `file://` | Servir con `python3 -m http.server` |
-| Tailwind, Tone.js o Three.js no cargan | Sin red o bloqueo de CDN | Verificar conexión; la app tiene degradación, pero Tailwind sin red deja la página sin estilos |
+| `localhost:4321` no carga | El servidor Astro no está corriendo o el puerto está ocupado | `lsof -i :4321` (macOS/Linux) o `netstat -ano \| findstr 4321` (Windows); `npm run dev -- --port <otro>` |
+| `npm run dev` falla al arrancar | Falta `node_modules/` o hay un error de build | `npm install` dentro de `exercise/`; revisar el error que imprime Astro |
+| El jardín 3D o la música no cargan | WebGL no disponible, o un error real en el bundle (ya no son fallas de CDN: Three.js y Tone.js van empaquetados) | Revisar la consola del navegador; la app tiene degradación a vista 2D y a silencio si falla en tiempo de ejecución |
 | Errores de permisos al instalar | Instalación global sin permisos | No usar `sudo` con npm; usar `npx` o un gestor de versiones de Node |
 
 Antes de proponer una solución, consulta la documentación oficial vigente si el error no coincide con la tabla; las herramientas cambian rápido.

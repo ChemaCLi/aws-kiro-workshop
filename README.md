@@ -21,6 +21,8 @@ Las tres piezas del taller están publicadas en AWS (S3 + CloudFront, con HTTPS)
 | Focus Garden (lista de tareas con pomodoro y jardín 3D) | https://dncc4bsnnymsj.cloudfront.net |
 
 > **Nota:** la presentación en línea se retirará en 2 semanas (alrededor del 13 de noviembre de 2026), porque incluye videos que hacen más costoso el alojamiento. Después de esa fecha, el enlace dejará de funcionar. Las diapositivas seguirán disponibles en este repositorio, en `workshop/presentation/presentation.html`.
+>
+> El Focus Garden publicado en línea es de **antes** de la migración a Astro (ver arriba): se desplegó copiando los archivos fuente directamente, como describía la skill `deploy-to-aws`. Para republicar la versión migrada hace falta `npm run build` y subir `dist/`, que esa skill ya actualizó.
 
 ## `.kiro/`: presets para generar apps web
 
@@ -30,7 +32,7 @@ La carpeta `.kiro` es oculta. En macOS se muestra en Finder con `Cmd + Shift + .
 |------------|--------|
 | `steering/` | Reglas que Kiro lee en cada conversación: producto, stack técnico, arquitectura, sistema de diseño, estándar de código, política de dependencias, documentación y formato de specs |
 | `agents/` | Agentes personalizados: `coder`, `documenter`, `entorno-tools` y `qa-tester` |
-| `skills/` | Guías que Kiro activa según la tarea: melodías lofi, despliegue en AWS, migración a React o Vue, diapositivas del taller, diseño responsive, mundo 3D y timer en Web Worker |
+| `skills/` | Guías que Kiro activa según la tarea: melodías lofi, despliegue en AWS, migración a React o Vue, diapositivas del taller, diseño responsive, mundo 3D, timer en Web Worker y pruebas unitarias con Vitest |
 | `sample-specs/` | Siete specs de ejemplo, en orden, para construir la app paso a paso |
 | `specs/` | Specs de trabajo del proyecto |
 | `workflows/` | Workflows reutilizables |
@@ -39,16 +41,17 @@ Para usarlos en tu propia app, copia la carpeta `.kiro` a la raíz de tu proyect
 
 ## `exercise/`: el proyecto de ejemplo
 
-Focus Garden es una app web sin build ni bundler (HTML, JavaScript ES modules, Web Components, Tailwind, Tone.js y Three.js por CDN). Cada tarea terminada con rondas de pomodoro hace crecer una planta en una isla 3D.
+Focus Garden es una app web con **Astro + Vite** (migrada desde Web Components nativos sin build; ver [`exercise/docs/decisions/0001-migrar-a-astro.md`](exercise/docs/decisions/0001-migrar-a-astro.md)). Cada tarea terminada con rondas de pomodoro hace crecer una planta en una isla 3D.
 
-Para probarla, abre `exercise/index.html` o sírvela con cualquier servidor estático:
+Para probarla:
 
 ```bash
 cd exercise
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-Después entra a http://localhost:8000. Hay más detalle en [`exercise/README.md`](exercise/README.md) y en [`exercise/docs/`](exercise/docs/).
+Abre la URL que imprime Astro (por defecto http://localhost:4321). Hay más detalle en [`exercise/README.md`](exercise/README.md) y en [`exercise/docs/`](exercise/docs/).
 
 ## `workshop/`: presentación y material de apoyo
 

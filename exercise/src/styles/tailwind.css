@@ -1,0 +1,11 @@
+/* Tailwind v4 + los mismos tokens de color que antes vivían en src/ui/tailwind-config.js (CDN). */
+@import 'tailwindcss';
+
+@theme {
+  --color-cream: #fbf6ea;
+  --color-paper: #fffdf7;
+  --color-ink: #23312b;
+  --color-moss: #2f6f4e;
+  --color-leaf: #4f9d69;
+  --color-line: #eadfc6;
+}

@@ -5,12 +5,12 @@ description: Cómo modificar el mundo 3D de Focus Garden con seguridad (nuevas p
 
 # Actualizar el mundo 3D
 
-Archivos: `src/three/garden-scene.js` (escena), `src/components/garden-view.js` (UI alrededor), `src/core/rules.js` (reglas). Documentación del módulo: `docs/modules/3d-world/README.md`.
+Archivos: `src/three/garden-scene.js` (escena), `src/views/garden-view.js` y `src/views/hero-garden.js` (UI alrededor), `src/core/rules.js` (reglas). Documentación del módulo: `docs/modules/3d-world/README.md`.
 
 ## Reglas que no se rompen
 
 1. **El jardín se deriva.** La escena recibe `plots` desde `gardenPlots(state)` y solo dibuja. No guarda datos ni cambia el store.
-2. **Three.js sigue por CDN** con `import()` dinámico y degradación a la vista 2D. No agregar otras librerías 3D.
+2. **Three.js es un paquete npm**, importado con `import()` dinámico (`import('three')`, `import('three/examples/jsm/controls/OrbitControls.js')`) y con degradación a la vista 2D si falla en tiempo de ejecución. No agregar otras librerías 3D.
 3. **Estilo low-poly con `flatShading`**, paleta suave, sin texturas de imagen. Usar los materiales `M` ya definidos antes de crear nuevos.
 4. **Determinismo.** Todo aspecto aleatorio de una planta sale de `rng(hash(plot.id))`. La misma tarea siempre luce igual. Nunca usar `Math.random()` para la forma.
 5. **Reutilizar geometrías y materiales** (`G`, `M`, `typeMat`). Crear geometrías por planta degrada el rendimiento.
@@ -45,7 +45,7 @@ Archivos: `src/three/garden-scene.js` (escena), `src/components/garden-view.js` 
 - Datos: Stats > **Cargar datos de ejemplo**; `__store.state` en consola.
 - La escena no expone su `THREE`; para inspeccionar, agregar temporalmente `window.__scene = scene` y quitarlo antes de terminar.
 - Si el canvas queda en blanco: revisar que el contenedor tiene tamaño (`ResizeObserver` llama a `resize(w, h)`), que `WebGL` está disponible y la consola.
-- Sin red: bloquear `unpkg.com/three` y comprobar que aparece la vista 2D.
+- Para forzar el respaldo y comprobar la vista 2D: lanzar un error dentro de `createGardenScene` temporalmente, o simular que falla la inicialización de WebGL.
 
 ## Antes de terminar
 

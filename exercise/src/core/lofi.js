@@ -1,16 +1,18 @@
-// Música lofi hip hop de fondo, generada con Tone.js (cargado por CDN en index.html).
-// Todo es defensivo: si Tone.js no está disponible (sin red), estas funciones no hacen
+// Música lofi hip hop de fondo, generada con Tone.js (paquete npm, empaquetado por Vite).
+// Todo es defensivo: si construir el motor de audio falla, estas funciones no hacen
 // nada y la app sigue funcionando igual, como pasa con Three.js.
 //
 // API: isMusicAvailable() · startMusic() · stopMusic() · setMusicVolume(db) · duckMusic(ms)
+import * as Tone from 'tone';
 
 const DEFAULT_BPM = 72;
 const BASE_VOLUME = -13; // dB del mix de la música cuando suena a volumen normal
 const FADE = 1.4;        // segundos de fade-in / fade-out
 
-// Las melodías viven como archivos JSON en /melodies (ver melodies/README.md).
-// Cada una define bpm, chords, bass y melody; aquí se cargan y se elige una al arrancar.
-const MELODIES_INDEX = new URL('../../melodies/index.json', import.meta.url);
+// Las melodías viven en public/melodies (ver melodies/README.md), que Vite sirve tal cual
+// desde la raíz del sitio. La ruta es absoluta porque, a diferencia del código fuente, un
+// archivo de public/ no tiene una posición estable relativa al módulo ya empaquetado.
+const MELODIES_INDEX = new URL('/melodies/index.json', import.meta.url);
 
 let melodies = null; // lista cargada (se pide una sola vez)
 let song = null;     // melodía activa
@@ -34,7 +36,6 @@ async function loadMelodies() {
   return melodies;
 }
 
-let Tone = null;
 let built = false;
 let playing = false;
 
@@ -43,13 +44,10 @@ let out, filter, reverb, chorus, vinyl;
 let piano, bass, lead, kick, snare, hat;
 let chordPart, bassPart, melodyPart, drumLoop;
 
-function resolveTone() {
-  Tone ??= globalThis.Tone ?? null;
-  return Tone;
-}
-
+// Tone.js ya viene empaquetado (ya no es un <script> de CDN que pueda fallar al cargar);
+// lo que sigue siendo opcional es el Web Audio API del navegador.
 export function isMusicAvailable() {
-  return Boolean(resolveTone());
+  return Boolean(typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
 }
 
 // Ruido de vinilo tenue: da el aire "cálido" característico del lofi.
@@ -65,7 +63,7 @@ function makeVinyl(T) {
 }
 
 function build() {
-  const T = resolveTone();
+  const T = Tone;
   if (!T || built) return built;
 
   // ----- cadena de salida: todo pasa por aquí -----
@@ -150,7 +148,7 @@ function currentBar(T) {
 }
 
 export async function startMusic() {
-  const T = resolveTone();
+  const T = Tone;
   if (!T || playing) return;
   try {
     await T.start();            // requiere gesto del usuario; se llama desde un tap
@@ -168,7 +166,7 @@ export async function startMusic() {
 }
 
 export function stopMusic() {
-  const T = resolveTone();
+  const T = Tone;
   if (!T || !playing || !built) return;
   playing = false;
   // El fade-out corre en el reloj de audio. El setTimeout solo apaga el Transport para
@@ -179,14 +177,14 @@ export function stopMusic() {
 }
 
 export function setMusicVolume(db) {
-  const T = resolveTone();
+  const T = Tone;
   if (!T || !built) return;
   out.volume.rampTo(db, 0.4);
 }
 
 /** Baja el volumen un momento (para que la campanita de fin de ronda se oiga clara). */
 export function duckMusic(durationMs = 1600) {
-  const T = resolveTone();
+  const T = Tone;
   if (!T || !playing || !built) return;
   // Bajada y regreso programados en el reloj de audio (no en setTimeout): si el hilo
   // principal se congela o la pestaña se espacia, el volumen igual se restaura a tiempo.

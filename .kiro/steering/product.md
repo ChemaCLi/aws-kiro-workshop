@@ -17,12 +17,12 @@ Lista de tareas interactiva con técnica pomodoro y recompensas que gamifican el
 
 | Módulo | Qué hace | Vista |
 |--------|----------|-------|
-| `todo-list` | Crear, filtrar, completar y eliminar tareas por tipo | `<tasks-view>` |
-| `pomodoro` | Rondas de enfoque sobre una tarea, con música y sonido | `<focus-view>` |
-| `3d-world` | Isla 3D donde crece una planta por tarea terminada | `<garden-view>` |
-| `statistics` | KPIs, dona por tipo y tendencia de 7 días | `<stats-view>` |
-| `settings` | Ajustes de música, sonido y modo demo, con datos de ejemplo y borrado de datos | `<settings-view>` |
-| `accounts-auth` | Registro e inicio de sesión opcional con Amazon Cognito (usuario/contraseña, Google, Meta, Login with Amazon y GitHub) | `<account-view>` |
+| `todo-list` | Crear, filtrar, completar y eliminar tareas por tipo | `src/views/tasks-view.js` |
+| `pomodoro` | Rondas de enfoque sobre una tarea, con música y sonido | `src/views/focus-view.js` |
+| `3d-world` | Isla 3D donde crece una planta por tarea terminada | `src/views/garden-view.js` |
+| `statistics` | KPIs, dona por tipo y tendencia de 7 días | `src/views/stats-view.js` |
+| `settings` | Ajustes de música, sonido y modo demo, con datos de ejemplo y borrado de datos | `src/views/settings-view.js` |
+| `accounts-auth` | Registro e inicio de sesión opcional con Amazon Cognito (usuario/contraseña, Google, Meta, Login with Amazon y GitHub) | `src/views/account-view.js` |
 
 ## Principios de producto
 

@@ -4,7 +4,7 @@
 
 Panel que responde "¿cómo reparto mi energía y cómo voy?". Pantalla `#/stats`.
 
-- **Componente:** `<stats-view>` (`src/components/stats-view.js`). Gráficas en SVG puro, sin librerías.
+- **Vista:** `src/views/stats-view.js`. Gráficas en SVG puro, sin librerías.
 - **Cálculo:** `computeStats(state)` en `src/core/rules.js` (función pura).
 - **Solo lectura:** la vista no cambia datos. Cargar datos de ejemplo y borrar todo viven en Ajustes (ver `docs/modules/settings/README.md`).
 

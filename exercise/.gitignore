@@ -1,0 +1,10 @@
+# Dependencias instaladas por npm (astro, three, tone, vitest...). Se reinstalan con npm install.
+node_modules/
+
+# Salida del build de Astro (ver skill deploy-to-aws) y su caché local.
+dist/
+.astro/
+
+# Config pública real de Cognito/el puente (sin secretos, pero distinta por entorno). El
+# .env.example sí se versiona.
+.env
