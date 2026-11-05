@@ -18,7 +18,7 @@ export const freshState = (settings = {}) => {
   if (!DURATIONS.includes(s.minutes)) s.minutes = DEFAULT_MINUTES; // datos viejos o corruptos
   const total = roundMs(s);
   return {
-    tasks: [],   // { id, title, type, createdAt, doneAt|null }
+    tasks: [],   // { id, title, note, type, createdAt, doneAt|null }
     rounds: [],  // { id, taskId, at, seconds }
     timer: { taskId: null, status: 'idle', totalMs: total, remainingMs: total, endsAt: null },
     settings: s,
@@ -81,11 +81,25 @@ class Store extends EventTarget {
   }
 
   // ----- tareas -----
-  addTask({ title, type }) {
+  addTask({ title, type, note }) {
     const clean = String(title ?? '').trim().slice(0, 80);
     if (!clean) return null;
-    const task = { id: uid(), title: clean, type, createdAt: Date.now(), doneAt: null };
+    const task = { id: uid(), title: clean, note: String(note ?? '').trim().slice(0, 500), type, createdAt: Date.now(), doneAt: null };
     this.state.tasks.push(task);
+    this.#commit();
+    return task;
+  }
+
+  /** Edita título y/o nota de una tarea existente. Título vacío se rechaza (igual que addTask). */
+  updateTask(id, { title, note }) {
+    const task = this.taskById(id);
+    if (!task) return null;
+    if (title !== undefined) {
+      const clean = String(title).trim().slice(0, 80);
+      if (!clean) return null;
+      task.title = clean;
+    }
+    if (note !== undefined) task.note = String(note).trim().slice(0, 500);
     this.#commit();
     return task;
   }

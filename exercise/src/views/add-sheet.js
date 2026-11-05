@@ -19,6 +19,11 @@ export function openAddTask() {
         <form class="space-y-5" autocomplete="off">
           <input name="title" maxlength="80" placeholder="¿Qué quieres lograr?" enterkeyhint="done"
             class="w-full rounded-2xl border border-line bg-cream px-4 py-3.5 font-medium outline-none focus:border-moss" />
+          <div data-note-wrap>
+            <button type="button" data-act="add-note" class="press text-sm font-bold text-moss">+ Agregar nota</button>
+            <textarea name="note" maxlength="500" rows="3" placeholder="Agrega detalles sobre la tarea..."
+              class="hidden mt-2 w-full rounded-2xl border border-line bg-cream px-4 py-3.5 text-sm font-medium outline-none focus:border-moss"></textarea>
+          </div>
           <div>
             <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink/50">Tipo</p>
             <div class="flex flex-wrap gap-2" role="radiogroup">${chips}</div>
@@ -28,9 +33,16 @@ export function openAddTask() {
 
       const form = body.querySelector('form');
       const input = form.elements.title;
+      const note = form.elements.note;
+      const addNoteBtn = form.querySelector('[data-act=add-note]');
       const submit = form.querySelector('[type=submit]');
 
       input.addEventListener('input', () => { submit.disabled = !input.value.trim(); });
+      addNoteBtn.addEventListener('click', () => {
+        addNoteBtn.classList.add('hidden');
+        note.classList.remove('hidden');
+        note.focus();
+      });
       form.querySelector('[role=radiogroup]').addEventListener('click', (e) => {
         const chip = e.target.closest('[data-type]');
         if (!chip) return;
@@ -44,7 +56,7 @@ export function openAddTask() {
       });
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const task = store.addTask({ title: input.value, type: lastType });
+        const task = store.addTask({ title: input.value, type: lastType, note: note.value });
         if (!task) return;
         haptic(15);
         close();

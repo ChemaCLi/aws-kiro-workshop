@@ -302,6 +302,36 @@ describe('Feature: cloud-sync, Store.replaceState persiste y notifica', () => {
   });
 });
 
+describe('Feature: todo-list, nota y edición de tareas', () => {
+  test('addTask guarda la nota recortada a 500 caracteres y por defecto es cadena vacía', () => {
+    store.reset();
+    const withNote = store.addTask({ title: 'Con nota', type: 'trabajo', note: '  hola  ' });
+    expect(withNote.note).toBe('hola');
+    const withoutNote = store.addTask({ title: 'Sin nota', type: 'trabajo' });
+    expect(withoutNote.note).toBe('');
+    const long = store.addTask({ title: 'Larga', type: 'trabajo', note: 'x'.repeat(600) });
+    expect(long.note).toHaveLength(500);
+  });
+
+  test('updateTask cambia título y/o nota, persiste y rechaza título vacío', () => {
+    store.reset();
+    const task = store.addTask({ title: 'Original', type: 'personal', note: 'nota original' });
+
+    const updated = store.updateTask(task.id, { title: 'Nuevo título', note: 'nota nueva' });
+    expect(updated.title).toBe('Nuevo título');
+    expect(updated.note).toBe('nota nueva');
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)).tasks[0].title).toBe('Nuevo título');
+
+    expect(store.updateTask(task.id, { note: 'solo nota' }).title).toBe('Nuevo título');
+    expect(store.taskById(task.id).note).toBe('solo nota');
+
+    expect(store.updateTask(task.id, { title: '   ' })).toBeNull();
+    expect(store.taskById(task.id).title).toBe('Nuevo título');
+
+    expect(store.updateTask('no-existe', { title: 'x' })).toBeNull();
+  });
+});
+
 describe('Feature: multi-device-sessions, Store.applyRemoteTimer solo toca el timer', () => {
   function seedTask() {
     store.reset();

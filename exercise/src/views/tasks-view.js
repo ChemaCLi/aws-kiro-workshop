@@ -2,11 +2,12 @@
 // desliza a la izquierda para eliminar (con deshacer).
 import { store } from '../core/store.js';
 import { mountView } from '../ui/view.js';
-import { TASK_TYPES, TYPE_BY_ID, computeStats, plantForRounds, roundsByTask } from '../core/rules.js';
+import { TASK_TYPES, TYPE_BY_ID, computeStats, groupTasksByDate, plantForRounds, roundsByTask } from '../core/rules.js';
 import { icon } from '../ui/icons.js';
 import { announceCompletion, esc, navigate, toast } from '../ui/util.js';
 import { haptic } from '../core/feedback.js';
 import { openAddTask } from './add-sheet.js';
+import { openEditTask } from './edit-task-sheet.js';
 
 const SWIPE_DELETE_PX = 90;
 
@@ -19,23 +20,29 @@ function row(seen, task, n) {
       <div class="swipe-bg" aria-hidden="true">${icon('trash', 'h-6 w-6')}</div>
       <div class="swipe-fg flex items-center gap-1 rounded-[18px] border border-line bg-paper py-1.5 pl-1 pr-2">
         <button data-act="toggle" aria-label="${done ? 'Reabrir' : 'Completar'}" class="press grid h-11 w-11 shrink-0 place-items-center">
-          <span class="grid h-[26px] w-[26px] place-items-center rounded-full border-2 text-white"
+          <span class="grid h-[26px] w-[26px] place-items-center rounded-[7px] border-2 text-white"
             style="border-color:${type.color};background:${done ? type.color : 'transparent'}">${done ? icon('check', 'h-4 w-4') : ''}</span>
         </button>
-        <div class="min-w-0 flex-1 px-1">
-          <p class="truncate text-[16px] font-bold ${done ? 'text-ink/40 line-through' : ''}">${esc(task.title)}</p>
+        <button type="button" data-act="edit" aria-label="Editar tarea" class="min-w-0 flex-1 px-1 text-left">
+          <p class="truncate text-[16px] font-bold ${done ? 'text-ink/40 line-through' : ''}">${esc(task.title)}${task.note ? ' 📝' : ''}</p>
           <p class="mt-0.5 flex items-center gap-1.5 truncate text-xs font-medium text-ink/50">
             <span class="inline-block h-2 w-2 shrink-0 rounded-full" style="background:${type.color}"></span>${esc(type.label)}
             <span>·</span><span>🍅 ${n}</span>${done && plant ? `<span>· ${plant.emoji} ${plant.label}</span>` : ''}
           </p>
-        </div>
+        </button>
         ${done ? '' : `<button data-act="focus" aria-label="Enfocar" class="press grid h-10 w-10 shrink-0 place-items-center rounded-full bg-moss/10 text-moss">${icon('play', 'h-4 w-4')}</button>`}
       </div>
     </li>`;
 }
 
+const GROUP_OPTIONS = [
+  { id: 'doneAt', label: 'Completado' },
+  { id: 'createdAt', label: 'Creado' },
+];
+
 export function mountTasksView(root) {
   let filter = 'all';
+  let doneGroupBy = 'doneAt';
   const seen = new Set();
   let drag = null;
   let swipedAt = 0;
@@ -58,6 +65,22 @@ export function mountTasksView(root) {
     const section = (title, list) => list.length ? `
       <h2 class="mb-2 mt-5 px-5 text-xs font-bold uppercase tracking-wide text-ink/50">${title} · ${list.length}</h2>
       <ul class="space-y-2 px-5">${list.map((t) => row(seen, t, rounds.get(t.id) ?? 0)).join('')}</ul>` : '';
+
+    const completedSection = (list) => {
+      if (!list.length) return '';
+      const groupChips = GROUP_OPTIONS.map((o) => `
+        <button data-group="${o.id}" data-on="${doneGroupBy === o.id}" style="--c:#2f6f4e"
+          class="chip rounded-full px-2.5 py-1 text-[11px] font-bold">${esc(o.label)}</button>`).join('');
+      const groups = groupTasksByDate(list, doneGroupBy);
+      const body = groups.map((g) => `
+        <h3 class="mb-1.5 mt-3 px-5 text-[11px] font-bold uppercase tracking-wide text-ink/35">${esc(g.label)}</h3>
+        <ul class="space-y-2 px-5">${g.items.map((t) => row(seen, t, rounds.get(t.id) ?? 0)).join('')}</ul>`).join('');
+      return `
+        <div class="mb-2 mt-5 flex items-center justify-between gap-2 px-5">
+          <h2 class="text-xs font-bold uppercase tracking-wide text-ink/50">Completadas · ${list.length}</h2>
+          <div class="flex shrink-0 gap-1" role="radiogroup" aria-label="Agrupar completadas por">${groupChips}</div>
+        </div>${body}`;
+    };
 
     const empty = !pending.length && !done.length ? `
       <div class="mx-5 mt-10 text-center">
@@ -93,7 +116,7 @@ export function mountTasksView(root) {
         </section>
         <div class="scroll mt-4 flex gap-2 px-5">${filters}</div>
         ${section('Pendientes', pending)}
-        ${section('Completadas', done)}
+        ${completedSection(done)}
         ${empty}
         ${pending.length ? '<p class="mt-6 text-center text-xs text-ink/40">Desliza a la izquierda para eliminar</p>' : ''}
       </div>
@@ -112,11 +135,15 @@ export function mountTasksView(root) {
     const filterBtn = e.target.closest('[data-filter]');
     if (filterBtn) { filter = filterBtn.dataset.filter; render(store.state); return; }
 
+    const groupBtn = e.target.closest('[data-group]');
+    if (groupBtn) { doneGroupBy = groupBtn.dataset.group; render(store.state); return; }
+
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
     const id = btn.closest('[data-id]')?.dataset.id;
 
     if (btn.dataset.act === 'add') return openAddTask();
+    if (btn.dataset.act === 'edit') return openEditTask(store.taskById(id));
     if (btn.dataset.act === 'toggle') {
       const task = store.taskById(id);
       if (task?.doneAt) { store.reopenTask(id); haptic(8); }

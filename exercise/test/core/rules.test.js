@@ -2,7 +2,7 @@
 // propiedad-2-hero-plots.md (antes scripts para pegar en la consola del navegador).
 import { describe, expect, test } from 'vitest';
 import { forAll, randomInt } from '../support/forAll.js';
-import { timePeriodFor, TIME_PERIODS, heroPlots, gardenPlots, LANDING_STARTER_PLOTS, TASK_TYPES } from '../../src/core/rules.js';
+import { timePeriodFor, TIME_PERIODS, heroPlots, gardenPlots, groupTasksByDate, LANDING_STARTER_PLOTS, TASK_TYPES } from '../../src/core/rules.js';
 
 describe('Feature: landing-and-settings, Property 1: La franja depende solo de la hora local y cubre todo el día', () => {
   // Validates: Requirements 2.1, 2.3
@@ -128,5 +128,43 @@ describe('Feature: landing-and-settings, Property 2: El hero nunca queda vacío 
 
   test('300 estados aleatorios cumplen la propiedad', () => {
     forAll(300, generateState, check);
+  });
+});
+
+describe('Feature: todo-list, groupTasksByDate agrupa por día y ordena', () => {
+  const DAY = 86_400_000;
+  const now = 1_700_000_000_000;
+
+  test('agrupa por día descendente y ordena cada grupo por el campo elegido', () => {
+    const tasks = [
+      { id: 'a', doneAt: now, createdAt: now - 5 * DAY },
+      { id: 'b', doneAt: now - 10_000, createdAt: now - 5 * DAY }, // mismo día que 'a', más viejo
+      { id: 'c', doneAt: now - DAY, createdAt: now - DAY },
+      { id: 'd', doneAt: now - 2 * DAY, createdAt: now - 2 * DAY },
+    ];
+    const groups = groupTasksByDate(tasks, 'doneAt', now);
+    expect(groups.map((g) => g.label)).toEqual(['hoy', 'ayer', 'hace 2 días']);
+    expect(groups[0].items.map((t) => t.id)).toEqual(['a', 'b']); // más reciente primero dentro del día
+  });
+
+  test('omite tareas sin la fecha pedida (p. ej. doneAt null) y no muta la lista de entrada', () => {
+    const tasks = [
+      { id: 'a', doneAt: now, createdAt: now },
+      { id: 'b', doneAt: null, createdAt: now },
+    ];
+    const before = JSON.stringify(tasks);
+    const groups = groupTasksByDate(tasks, 'doneAt', now);
+    expect(groups.flatMap((g) => g.items.map((t) => t.id))).toEqual(['a']);
+    expect(JSON.stringify(tasks)).toBe(before);
+  });
+
+  test('agrupar por createdAt en vez de doneAt cambia el día de cada tarea', () => {
+    const tasks = [{ id: 'a', doneAt: now, createdAt: now - 3 * DAY }];
+    expect(groupTasksByDate(tasks, 'doneAt', now)[0].label).toBe('hoy');
+    expect(groupTasksByDate(tasks, 'createdAt', now)[0].label).toBe('hace 3 días');
+  });
+
+  test('sin tareas con esa fecha, no hay grupos', () => {
+    expect(groupTasksByDate([], 'doneAt', now)).toEqual([]);
   });
 });

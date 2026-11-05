@@ -60,6 +60,24 @@ export function relativeDay(ts, now = Date.now()) {
   return `hace ${diff} días`;
 }
 
+/**
+ * Agrupa tareas por día según `field` (`createdAt` o `doneAt`), de más reciente a más vieja.
+ * Tareas sin esa fecha (p. ej. `doneAt: null`) se omiten. Usado por la sección Completadas.
+ */
+export function groupTasksByDate(tasks, field, now = Date.now()) {
+  const groups = new Map();
+  for (const t of tasks) {
+    const ts = t[field];
+    if (!ts) continue;
+    const key = dayStart(ts);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(t);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .map(([start, items]) => ({ start, label: relativeDay(start, now), items: items.slice().sort((a, b) => b[field] - a[field]) }));
+}
+
 export function lastDays(count, now = Date.now()) {
   const today = dayStart(now);
   const fmt = new Intl.DateTimeFormat('es-MX', { weekday: 'narrow' });
