@@ -2,7 +2,7 @@
 // propiedad-2-hero-plots.md (antes scripts para pegar en la consola del navegador).
 import { describe, expect, test } from 'vitest';
 import { forAll, randomInt } from '../support/forAll.js';
-import { timePeriodFor, TIME_PERIODS, heroPlots, gardenPlots, groupTasksByDate, LANDING_STARTER_PLOTS, TASK_TYPES } from '../../src/core/rules.js';
+import { timePeriodFor, TIME_PERIODS, heroPlots, gardenPlots, groupTasksByDate, plantForTask, LANDING_STARTER_PLOTS, TASK_TYPES } from '../../src/core/rules.js';
 
 describe('Feature: landing-and-settings, Property 1: La franja depende solo de la hora local y cubre todo el día', () => {
   // Validates: Requirements 2.1, 2.3
@@ -83,10 +83,8 @@ describe('Feature: landing-and-settings, Property 2: El hero nunca queda vacío 
     return { tasks, rounds };
   };
 
-  const expectedPlotCount = (state) => {
-    const roundsOf = (taskId) => state.rounds.filter((round) => round.taskId === taskId).length;
-    return state.tasks.filter((task) => task.doneAt && roundsOf(task.id) > 0).length;
-  };
+  // Toda tarea terminada cuenta, tenga rondas o no: una tarea sin rondas brota 🌱 Pasto igual.
+  const expectedPlotCount = (state) => state.tasks.filter((task) => task.doneAt).length;
 
   const sameJson = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -101,13 +99,13 @@ describe('Feature: landing-and-settings, Property 2: El hero nunca queda vacío 
     return expectedPlotCount(state) === 0 && sameJson(hero, LANDING_STARTER_PLOTS);
   };
 
-  test('bordes fijos caen en las plantas de inicio', () => {
+  test('bordes fijos (sin ninguna tarea REALMENTE terminada) caen en las plantas de inicio', () => {
+    // doneAt: 0 es el centinela de "nunca completada" (igual que una tarea recién creada).
     const doneAt = 1_700_000_000_000;
     const edgeStates = [
       { tasks: [], rounds: [] },
       { tasks: [{ id: 'a', title: 'A', type: 'trabajo', doneAt: 0 }], rounds: [] },
       { tasks: [{ id: 'a', title: 'A', type: 'trabajo', doneAt: 0 }], rounds: [{ taskId: 'a', at: doneAt, seconds: 1500 }] },
-      { tasks: [{ id: 'a', title: 'A', type: 'salud', doneAt }], rounds: [] },
       { tasks: [], rounds: [{ taskId: 'nadie', at: doneAt, seconds: 1500 }] },
     ];
     for (const state of edgeStates) {
@@ -116,18 +114,42 @@ describe('Feature: landing-and-settings, Property 2: El hero nunca queda vacío 
     }
   });
 
-  test('un jardín real mínimo no se mezcla con las plantas de inicio', () => {
+  test('un jardín real mínimo no se mezcla con las plantas de inicio, tenga rondas o no', () => {
     const doneAt = 1_700_000_000_000;
-    const oneGarden = {
+    const oneGardenNoRounds = { tasks: [{ id: 'a', title: 'A', type: 'salud', doneAt }], rounds: [] };
+    expect(check(oneGardenNoRounds)).toBe(true);
+    expect(heroPlots(oneGardenNoRounds).length).toBe(1);
+    expect(heroPlots(oneGardenNoRounds)[0].plant.kind).toBe('grass');
+
+    const oneGardenWithRounds = {
       tasks: [{ id: 'a', title: 'A', type: 'salud', doneAt }],
       rounds: [{ taskId: 'a', at: doneAt, seconds: 1500 }],
     };
-    expect(check(oneGarden)).toBe(true);
-    expect(heroPlots(oneGarden).length).toBe(1);
+    expect(check(oneGardenWithRounds)).toBe(true);
+    expect(heroPlots(oneGardenWithRounds).length).toBe(1);
   });
 
   test('300 estados aleatorios cumplen la propiedad', () => {
     forAll(300, generateState, check);
+  });
+});
+
+describe('Feature: todo-list, toda tarea terminada brota al menos pasto', () => {
+  test('plantForTask trata 0 rondas como 1: siempre da 🌱 Pasto como mínimo', () => {
+    expect(plantForTask(0)).toEqual({ kind: 'grass', rounds: 1, emoji: '🌱', label: 'Pasto' });
+    expect(plantForTask(1)).toEqual(plantForTask(0)); // 0 y 1 ronda dan la misma planta mínima
+    expect(plantForTask(2).kind).toBe('flower');
+  });
+
+  test('gardenPlots incluye tareas terminadas sin ninguna ronda', () => {
+    const doneAt = 1_700_000_000_000;
+    const state = {
+      tasks: [{ id: 'a', title: 'Sin rondas', type: 'trabajo', doneAt }],
+      rounds: [],
+    };
+    const plots = gardenPlots(state);
+    expect(plots).toHaveLength(1);
+    expect(plots[0]).toMatchObject({ id: 'a', rounds: 0, plant: { kind: 'grass' } });
   });
 });
 

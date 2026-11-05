@@ -12,19 +12,19 @@ Para cualquier estado del store:
 2. Si `gardenPlots(state)` tiene plantas, `heroPlots(state)` devuelve exactamente esas parcelas (las mismas que dibuja `3d-world`).
 3. Si `gardenPlots(state)` está vacío, `heroPlots(state)` devuelve `LANDING_STARTER_PLOTS`.
 
-Como comprobación independiente, el script calcula cuántas parcelas debe tener el jardín (tareas terminadas con al menos una ronda) sin usar `gardenPlots`, y verifica que `heroPlots` coincida con ese número cuando no es cero.
+Como comprobación independiente, el script calcula cuántas parcelas debe tener el jardín (tareas terminadas, con rondas o sin ellas) sin usar `gardenPlots`, y verifica que `heroPlots` coincida con ese número cuando no es cero.
 
 ## Estados aleatorios que genera
 
 Cada estado mezcla, con cantidades al azar (también cero):
 
-- Tareas terminadas con rondas (dan planta).
-- Tareas terminadas sin rondas (no dan planta).
+- Tareas terminadas con rondas (dan una planta más grande que pasto).
+- Tareas terminadas sin rondas (dan 🌱 Pasto igual).
 - Tareas pendientes, con y sin rondas (no dan planta).
 - Rondas huérfanas: su `taskId` no corresponde a ninguna tarea.
 - `doneAt` repetidos entre tareas, para ejercitar el desempate por `id`.
 
-Además se prueban a mano cuatro bordes que el azar podría tardar en producir: estado vacío, solo tareas pendientes, solo tareas terminadas sin rondas y solo rondas huérfanas. En los cuatro el resultado debe ser `LANDING_STARTER_PLOTS`.
+Además se prueban a mano cuatro bordes que el azar podría tardar en producir: estado vacío, solo tareas pendientes (con `doneAt: 0`, que cuenta como no terminada) y solo rondas huérfanas. En esos el resultado debe ser `LANDING_STARTER_PLOTS`; una tarea terminada sin rondas ya cuenta como jardín real (da pasto) y no cae en ese grupo.
 
 ## Script
 
@@ -79,11 +79,8 @@ Se ejecuta con 300 iteraciones (mínimo exigido: 100). Es autocontenido: incluye
     return { tasks, rounds };
   };
 
-  // Parcelas esperadas calculadas sin gardenPlots: hecha y con al menos una ronda.
-  const expectedPlotCount = (state) => {
-    const roundsOf = (taskId) => state.rounds.filter((round) => round.taskId === taskId).length;
-    return state.tasks.filter((task) => task.doneAt && roundsOf(task.id) > 0).length;
-  };
+  // Parcelas esperadas calculadas sin gardenPlots: toda tarea terminada, con rondas o sin ellas.
+  const expectedPlotCount = (state) => state.tasks.filter((task) => task.doneAt).length;
 
   const sameJson = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -100,13 +97,13 @@ Se ejecuta con 300 iteraciones (mínimo exigido: 100). Es autocontenido: incluye
     return expectedPlotCount(state) === 0 && sameJson(hero, LANDING_STARTER_PLOTS);
   };
 
-  // Bordes fijos que deben caer en las plantas de inicio.
+  // Bordes fijos que deben caer en las plantas de inicio: sin ninguna tarea REALMENTE terminada
+  // (`doneAt: 0` es el centinela de "nunca completada", igual que una tarea recién creada).
   const doneAt = 1_700_000_000_000;
   const edgeStates = [
     { tasks: [], rounds: [] },
     { tasks: [{ id: 'a', title: 'A', type: 'trabajo', doneAt: 0 }], rounds: [] },
     { tasks: [{ id: 'a', title: 'A', type: 'trabajo', doneAt: 0 }], rounds: [{ taskId: 'a', at: doneAt, seconds: 1500 }] },
-    { tasks: [{ id: 'a', title: 'A', type: 'salud', doneAt }], rounds: [] },
     { tasks: [], rounds: [{ taskId: 'nadie', at: doneAt, seconds: 1500 }] },
   ];
   for (const state of edgeStates) {
@@ -116,12 +113,19 @@ Se ejecuta con 300 iteraciones (mínimo exigido: 100). Es autocontenido: incluye
     }
   }
 
-  // Un jardín real mínimo (una tarea hecha con 1 ronda) no debe mezclarse con las de inicio.
-  const oneGarden = {
+  // Un jardín real mínimo ya no se mezcla con las de inicio, tenga rondas o no: una tarea
+  // terminada sin rondas da 🌱 Pasto igual.
+  const oneGardenNoRounds = { tasks: [{ id: 'a', title: 'A', type: 'salud', doneAt }], rounds: [] };
+  if (!check(oneGardenNoRounds) || heroPlots(oneGardenNoRounds).length !== 1) {
+    throw new Error('Falla con un jardín de 1 planta sin rondas');
+  }
+  const oneGardenWithRounds = {
     tasks: [{ id: 'a', title: 'A', type: 'salud', doneAt }],
     rounds: [{ taskId: 'a', at: doneAt, seconds: 1500 }],
   };
-  if (!check(oneGarden) || heroPlots(oneGarden).length !== 1) throw new Error('Falla con un jardín de 1 planta');
+  if (!check(oneGardenWithRounds) || heroPlots(oneGardenWithRounds).length !== 1) {
+    throw new Error('Falla con un jardín de 1 planta con rondas');
+  }
 
   forAll(300, generateState, check);
   console.log('Propiedad 2: OK (300 estados aleatorios + 6 bordes)');

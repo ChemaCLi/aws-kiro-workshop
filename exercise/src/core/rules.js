@@ -27,6 +27,9 @@ export const durationLabel = (min) => (min === 60 ? '1 h' : String(min));
 export const plantForRounds = (rounds) =>
   rounds >= 1 ? PLANTS[Math.min(rounds, PLANTS.length) - 1] : null;
 
+/** Planta de una tarea YA completada: toda tarea terminada brota al menos 🌱 Pasto, aunque no tenga rondas. */
+export const plantForTask = (rounds) => plantForRounds(Math.max(rounds, 1));
+
 // ---------- Selectores sobre el estado ----------
 
 export function roundsByTask(state) {
@@ -35,15 +38,15 @@ export function roundsByTask(state) {
   return map;
 }
 
-/** El jardín se deriva del estado: una parcela por tarea terminada con al menos 1 ronda. */
+/** El jardín se deriva del estado: una parcela por tarea terminada, con rondas o sin ellas. */
 export function gardenPlots(state) {
   const rounds = roundsByTask(state);
   return state.tasks
-    .filter((t) => t.doneAt && (rounds.get(t.id) ?? 0) > 0)
+    .filter((t) => t.doneAt)
     .sort((a, b) => a.doneAt - b.doneAt || a.id.localeCompare(b.id))
     .map((t) => {
-      const n = rounds.get(t.id);
-      return { id: t.id, title: t.title, type: t.type, doneAt: t.doneAt, rounds: n, plant: plantForRounds(n) };
+      const n = rounds.get(t.id) ?? 0;
+      return { id: t.id, title: t.title, type: t.type, doneAt: t.doneAt, rounds: n, plant: plantForTask(n) };
     });
 }
 

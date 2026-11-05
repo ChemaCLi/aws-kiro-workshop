@@ -58,8 +58,8 @@ Los datos siguen guardándose en `localStorage`. No hay backend en este spec.
 2. THE Hero_Garden SHALL provide a distinct look for each of the four Time_Period values: `morning`, `midday`, `afternoon` and `night`.
 3. THE Time_Period computation SHALL be a pure function in `src/core/rules.js` that receives a `Date` and returns one of the four Time_Period values.
 4. WHILE the Landing remains open, THE Landing SHALL recompute the Time_Period at intervals of 60 seconds and when the page becomes visible again, and update the sky and the Hero_Garden when the Time_Period changes.
-5. WHEN the Landing is displayed, THE Hero_Garden SHALL show the plants of the completed tasks that have at least one round, using the same rules as the module `3d-world`.
-6. WHERE no completed task has a round, THE Hero_Garden SHALL show the island with the starter plants defined for the Landing.
+5. WHEN the Landing is displayed, THE Hero_Garden SHALL show the plants of the completed tasks (at least 🌱 Pasto with zero rounds, bigger with more), using the same rules as the module `3d-world`.
+6. WHERE no task is completed, THE Hero_Garden SHALL show the island with the starter plants defined for the Landing.
 7. THE Hero SHALL show a sky gradient and a celestial body for each Time_Period: a sun in `morning`, `midday` and `afternoon`, and a moon in `night`.
 8. WHILE the Time_Period is `night`, THE Hero SHALL show twinkling stars and use light text colors with enough contrast over the dark sky.
 9. WHILE the viewport width is below 1024 px, THE Hero SHALL place the celestial body in a corner so that it does not cover the title.
@@ -233,7 +233,7 @@ Los datos siguen guardándose en `localStorage`. No hay backend en este spec.
 #### Acceptance Criteria
 
 1. THE Landing SHALL display a top bar fixed to the top with the name of the app, links to the sections "Cómo funciona", "Funciones" and "Open source" (from 768 px of width) and an "Entrar" button.
-2. THE Landing SHALL display a section "Cómo funciona" with three steps and a ladder with the six plants and the rounds each one needs, built from `PLANTS` of `src/core/rules.js`, and the sentence that finishing a task without rounds plants nothing.
+2. THE Landing SHALL display a section "Cómo funciona" with three steps and a ladder with the six plants and the rounds each one needs, built from `PLANTS` of `src/core/rules.js`, and the sentence that every finished task plants at least 🌱 Pasto, bigger with more rounds.
 3. THE Landing SHALL display a section "Funciones" with six cards: tareas por tipo, pomodoro, jardín 3D, estadísticas, música lofi y pensada para el celular. The type chips SHALL be built from `TASK_TYPES`.
 4. THE Landing SHALL display a section "Open source" that states that the code is open, lists the stack (HTML y JavaScript con módulos ES, Web Components, CDN, sin build), shows the commands to run it locally and links to the repository on GitHub in a new tab with `rel="noopener noreferrer"`.
 5. THE Landing SHALL display a final call to action with an Enter_Button and a footer with a link to the repository.

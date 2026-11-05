@@ -18,7 +18,7 @@ Lista de tareas con el mínimo de interacciones. Es la pantalla de inicio (`#/ta
 - **+** (FAB) abre la hoja "Nueva tarea": título (máx. 80 caracteres), enlace **+ Agregar nota** que revela un textarea opcional (máx. 500 caracteres), tipo (recuerda el último usado), botón deshabilitado si el título está vacío.
 - Tocar el título de una tarea abre la hoja "Editar tarea": permite cambiar título y nota; **Guardar cambios** deshabilitado si el título queda vacío.
 - Deslizar a la izquierda más de 90 px elimina la tarea y muestra "Deshacer" por 4,2 s. Eliminar también quita sus rondas; deshacer las devuelve.
-- Completar una tarea con rondas muestra un aviso con su planta y un botón **Ver** al jardín. Sin rondas avisa que no brota nada (no se crea ninguna planta).
+- Completar una tarea muestra un aviso con su planta y un botón **Ver** al jardín. Toda tarea terminada brota al menos 🌱 Pasto, tenga rondas o no; más rondas dan una planta más grande.
 - Estado vacío: "Tu jardín empieza aquí" o "Nada en este filtro".
 - Si la tarea está seleccionada en el timer y se completa o elimina, el timer se reinicia.
 
@@ -39,7 +39,7 @@ Precondición general: abrir la app, Stats > **Borrar todos los datos** para ini
 | TL-04 | Límite de título | Pegar 120 caracteres en el título | El campo acepta como máximo 80 |
 | TL-05 | Recordar tipo | Crear una tarea tipo Salud; abrir la hoja otra vez | El chip Salud aparece seleccionado |
 | TL-06 | Escape de HTML | Crear una tarea con título `<b>hola</b>` | Se muestra el texto literal, sin negritas ni errores |
-| TL-07 | Completar sin rondas | Tocar el checkbox de una tarea sin rondas | Pasa a Completadas con tachado; toast dice que no brota nada (sin planta); progreso "1 de 1" |
+| TL-07 | Completar sin rondas | Tocar el checkbox de una tarea sin rondas | Pasa a Completadas con tachado; toast "¡Creció pasto en tu jardín!" con botón **Ver**; progreso "1 de 1" |
 | TL-08 | Reabrir | Tocar el checkbox de una tarea completada | Vuelve a Pendientes y el progreso baja |
 | TL-09 | Completar con rondas | Con datos de ejemplo, completar "Ensayar la presentación" (2 rondas) | Toast "¡Creció flor en tu jardín!" con botón **Ver** que lleva a `#/garden` |
 | TL-10 | Eliminar y deshacer | Deslizar una fila a la izquierda más de 90 px; tocar **Deshacer** | La fila desaparece y regresa con sus rondas |
@@ -61,5 +61,5 @@ Precondición general: abrir la app, Stats > **Borrar todos los datos** para ini
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
-| 1.1.0 | 2026-11-05 | Nota opcional por tarea, edición de título/nota desde un modal, checkbox cuadrado y agrupado de Completadas por fecha de creación o de completitud. |
+| 1.1.0 | 2026-11-05 | Nota opcional por tarea, edición de título/nota desde un modal, checkbox cuadrado, agrupado de Completadas por fecha de creación o de completitud, y toda tarea terminada brota al menos 🌱 Pasto (antes se requería 1+ ronda). |
 | 1.0.0 | 2026-10-29 | Versión inicial documentada: crear, filtrar, completar, reabrir, eliminar con deshacer, progreso del día. |

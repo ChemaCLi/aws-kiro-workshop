@@ -2,17 +2,17 @@
 
 ## Descripción
 
-Isla flotante low-poly con una parcela por tarea terminada que tenga al menos una ronda. Pantalla `#/garden`.
+Isla flotante low-poly con una parcela por cada tarea terminada, tenga rondas o no. Pantalla `#/garden`.
 
 - **Vista:** `src/views/garden-view.js`: contenedor, encabezado, leyenda, tarjeta de selección y respaldo 2D.
 - **Escena:** `createGardenScene()` en `src/three/garden-scene.js`. Three.js es un paquete npm, cargado con `import()` dinámico.
-- **Reglas:** `PLANTS`, `plantForRounds`, `gardenPlots`, `spiralCell`, `islandSizeFor` en `src/core/rules.js`.
+- **Reglas:** `PLANTS`, `plantForRounds`, `plantForTask`, `gardenPlots`, `spiralCell`, `islandSizeFor` en `src/core/rules.js`.
 
 ### Reglas del mundo
 
 | Rondas de la tarea | Planta |
 |--------------------|--------|
-| 1 | 🌱 Pasto |
+| 0 o 1 | 🌱 Pasto |
 | 2 | 🌼 Flor |
 | 3 | 🌿 Arbusto |
 | 4 | 🌳 Árbol |
@@ -57,12 +57,12 @@ Precondición: cargar **datos de ejemplo** en Stats salvo que la prueba indique 
 | W3-01 | Isla vacía | Sin datos, abrir `#/garden` | Se ve la isla vacía, tarjeta "Tu isla está vacía" con **Ir a Foco**, subtítulo "Aún sin plantas" |
 | W3-02 | Ir a Foco | Tocar **Ir a Foco** en la tarjeta vacía | Navega a `#/focus` |
 | W3-03 | Datos de ejemplo | Cargar datos de ejemplo y abrir el jardín | Aparecen 14 plantas de varios tipos; subtítulo "14 plantas · 🍅 N rondas"; la tarjeta vacía se oculta |
-| W3-04 | Planta por rondas | Comparar plantas con las rondas de sus tareas | 1 pasto, 2 flor, 3 arbusto, 4 árbol, 5 mariposa con alas animadas, 6+ sakura con pétalos cayendo |
+| W3-04 | Planta por rondas | Comparar plantas con las rondas de sus tareas | 0 o 1 pasto, 2 flor, 3 arbusto, 4 árbol, 5 mariposa con alas animadas, 6+ sakura con pétalos cayendo |
 | W3-05 | Seleccionar | Tocar una planta | Anillo pulsante, salto breve y tarjeta con título, tipo, 🍅, planta y "hoy/ayer/hace N días" |
 | W3-06 | Deseleccionar | Tocar la **X** de la tarjeta y tocar un espacio vacío | La tarjeta se cierra y el anillo desaparece |
 | W3-07 | Rotar y acercar | Arrastrar un dedo/ratón; pellizcar o usar la rueda | La cámara orbita y hace zoom dentro de los límites; el giro automático se detiene |
 | W3-08 | Giro automático | Soltar la cámara y esperar 5 s | El giro automático se reanuda |
-| W3-09 | Crecimiento reactivo | Completar una tarea con rondas desde Tareas y abrir el jardín | La nueva planta aparece con animación y la isla se agranda si hace falta |
+| W3-09 | Crecimiento reactivo | Completar una tarea (con o sin rondas) desde Tareas y abrir el jardín | La nueva planta aparece con animación (al menos 🌱 Pasto) y la isla se agranda si hace falta |
 | W3-10 | Eliminar tarea | Eliminar una tarea completada con rondas | Su planta desaparece y, si estaba seleccionada, la tarjeta se cierra |
 | W3-11 | Planta que cambia | Reabrir una tarea completada | La parcela desaparece (solo cuentan las terminadas) |
 | W3-12 | Respuesta al tamaño | Cambiar el tamaño de la ventana entre 390 y 1280 px | El canvas se ajusta sin deformarse; el encuadre sigue mostrando toda la isla |
@@ -78,3 +78,4 @@ Precondición: cargar **datos de ejemplo** en Stats salvo que la prueba indique 
 | 1.0.0 | 2026-10-29 | Versión inicial documentada: isla low-poly con seis tipos de planta, espiral, selección, nubes, respaldo 2D. |
 | 1.0.1 | 2026-10-31 | La escena acepta `interactive`, `freezeWhenReducedMotion` (por defecto `false`, solo la usa el hero de la landing) y expone `setLook`. Sin cambio de comportamiento en `<garden-view>`. |
 | 1.0.2 | 2026-10-31 | La escena acepta `fitMargin` (por defecto `1`) para alejar la cámara; el hero de la landing lo usa con `1.3` para que la isla no se corte al girar en un lienzo ancho. La luz de la franja `night` (`GARDEN_LOOKS`) es más clara para que la isla no se vea apagada. Sin cambio en `<garden-view>`. |
+| 1.1.0 | 2026-11-05 | Toda tarea terminada da una parcela, tenga rondas o no (antes se exigía al menos 1 ronda): 0 o 1 ronda ahora dan 🌱 Pasto por igual (`plantForTask` en `src/core/rules.js`). |

@@ -13,16 +13,12 @@ export function formatClock(ms) {
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
-/** Mensaje común al terminar una tarea (desde la lista o desde Foco). */
+/** Mensaje común al terminar una tarea (desde la lista o desde Foco): siempre brota al menos 🌱 Pasto. */
 export function announceCompletion(result) {
   if (!result) return;
   haptic(20);
-  if (result.plant) {
-    toast(`${result.plant.emoji} ¡Creció ${result.plant.label.toLowerCase()} en tu jardín!`, {
-      action: { label: 'Ver', run: () => navigate('garden') },
-      duration: 4200,
-    });
-  } else {
-    toast('Terminada sin pomodoros: no brota nada. Prueba ▶ la próxima 🌱');
-  }
+  toast(`${result.plant.emoji} ¡Creció ${result.plant.label.toLowerCase()} en tu jardín!`, {
+    action: { label: 'Ver', run: () => navigate('garden') },
+    duration: 4200,
+  });
 }

@@ -75,7 +75,7 @@ export function mountGardenView(root) {
         <div data-empty class="pop absolute inset-x-5 mx-auto hidden max-w-md rounded-3xl bg-paper/90 p-4 text-center shadow-lg backdrop-blur" style="bottom:6.2rem">
           <p class="text-3xl">🏝️</p>
           <p class="mt-1 font-extrabold">Tu isla está vacía</p>
-          <p class="mt-0.5 text-sm text-ink/60">Termina una tarea con al menos una ronda 🍅 y brotará algo.</p>
+          <p class="mt-0.5 text-sm text-ink/60">Termina una tarea y brotará algo.</p>
           <button data-act="focus" class="press mt-3 rounded-2xl bg-moss px-5 py-2.5 font-bold text-white">Ir a Foco</button>
         </div>
         <div data-info class="absolute inset-x-4 mx-auto max-w-md" style="bottom:5.6rem"></div>

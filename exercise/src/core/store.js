@@ -1,6 +1,6 @@
 // Estado único de la app. Se persiste en localStorage y notifica cambios por evento.
 // Guardamos hechos (tareas, rondas terminadas); el jardín y las estadísticas se derivan.
-import { DEFAULT_MINUTES, DURATIONS, hasLocalData as stateHasLocalData, plantForRounds } from './rules.js';
+import { DEFAULT_MINUTES, DURATIONS, hasLocalData as stateHasLocalData, plantForTask } from './rules.js';
 
 const KEY = 'jardin-movil:v1';
 export const DEMO_MS = 10 * 1000;
@@ -130,7 +130,7 @@ class Store extends EventTarget {
     if (this.state.timer.taskId === id) this.#resetTimer(false);
     this.#commit();
     const rounds = this.roundsOf(id);
-    return { task, rounds, plant: plantForRounds(rounds) };
+    return { task, rounds, plant: plantForTask(rounds) };
   }
 
   reopenTask(id) {

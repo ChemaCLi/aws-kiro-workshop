@@ -2,7 +2,7 @@
 // desliza a la izquierda para eliminar (con deshacer).
 import { store } from '../core/store.js';
 import { mountView } from '../ui/view.js';
-import { TASK_TYPES, TYPE_BY_ID, computeStats, groupTasksByDate, plantForRounds, roundsByTask } from '../core/rules.js';
+import { TASK_TYPES, TYPE_BY_ID, computeStats, groupTasksByDate, plantForTask, roundsByTask } from '../core/rules.js';
 import { icon } from '../ui/icons.js';
 import { announceCompletion, esc, navigate, toast } from '../ui/util.js';
 import { haptic } from '../core/feedback.js';
@@ -14,7 +14,7 @@ const SWIPE_DELETE_PX = 90;
 function row(seen, task, n) {
   const type = TYPE_BY_ID[task.type] ?? TASK_TYPES[0];
   const done = Boolean(task.doneAt);
-  const plant = plantForRounds(n);
+  const plant = done ? plantForTask(n) : null;
   return `
     <li class="swipe ${seen.has(task.id) ? '' : 'pop'}" data-id="${task.id}">
       <div class="swipe-bg" aria-hidden="true">${icon('trash', 'h-6 w-6')}</div>

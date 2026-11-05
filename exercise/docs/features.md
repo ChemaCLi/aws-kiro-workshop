@@ -12,7 +12,7 @@ Tareas + pomodoro + jardín 3D + estadísticas. Mobile first, responsive, solo e
 | T2 | Clasificar mis tareas | Cinco tipos con color y emoji: Trabajo, Personal, Salud, Social, Entretenimiento |
 | T3 | Ver cuánto llevo | Tarjeta de progreso: "N de M" terminadas, barra y rondas del día |
 | T4 | Enfocarme en una tarea | Botón ▶ de la fila: elige la tarea y abre Foco |
-| T5 | Marcar una tarea como hecha | Tocar el círculo; si tiene rondas, aparece un aviso con su planta |
+| T5 | Marcar una tarea como hecha | Tocar el checkbox cuadrado; aparece un aviso con su planta (al menos 🌱 Pasto) |
 | T6 | Deshacer un error al completar | Tocar de nuevo el círculo de una tarea completada |
 | T7 | Eliminar una tarea | Deslizar a la izquierda; toast con **Deshacer** |
 | T8 | Filtrar por tipo | Chips bajo la tarjeta de progreso |
@@ -36,8 +36,8 @@ Tareas + pomodoro + jardín 3D + estadísticas. Mobile first, responsive, solo e
 
 | # | Caso de uso | Cómo se hace |
 |---|-------------|--------------|
-| W1 | Ver el resultado de mi esfuerzo | Isla flotante con una parcela por tarea terminada con al menos una ronda |
-| W2 | Entender qué significa cada planta | Leyenda inferior: 1 pasto, 2 flor, 3 arbusto, 4 árbol, 5 mariposa, 6+ sakura |
+| W1 | Ver el resultado de mi esfuerzo | Isla flotante con una parcela por cada tarea terminada, tenga rondas o no |
+| W2 | Entender qué significa cada planta | Leyenda inferior: 0-1 pasto, 2 flor, 3 arbusto, 4 árbol, 5 mariposa, 6+ sakura |
 | W3 | Recordar qué logré | Tocar una planta: tarjeta con título, tipo, rondas y cuándo se terminó |
 | W4 | Explorar | Arrastrar para rotar, pellizcar o rueda para acercar; giro automático |
 | W5 | Ver crecer la isla | La isla se agranda cuando hacen falta más parcelas |

@@ -302,6 +302,16 @@ describe('Feature: cloud-sync, Store.replaceState persiste y notifica', () => {
   });
 });
 
+describe('Feature: todo-list, completar una tarea sin rondas igual hace crecer pasto', () => {
+  test('completeTask devuelve plant: grass aunque la tarea no tenga ninguna ronda', () => {
+    store.reset();
+    const task = store.addTask({ title: 'Sin pomodoro', type: 'ocio' });
+    const result = store.completeTask(task.id);
+    expect(result.rounds).toBe(0);
+    expect(result.plant.kind).toBe('grass');
+  });
+});
+
 describe('Feature: todo-list, nota y edición de tareas', () => {
   test('addTask guarda la nota recortada a 500 caracteres y por defecto es cadena vacía', () => {
     store.reset();
